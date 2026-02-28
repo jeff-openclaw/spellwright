@@ -1,0 +1,412 @@
+{
+  "words": {
+    "elephant": {
+      "category": "animals",
+      "clues": [
+        "A gentle giant whose memory is the stuff of legend",
+        "This grey creature has a long trunk and enormous fan-like ears",
+        "The largest land animal on Earth, native to Africa and Asia"
+      ]
+    },
+    "castle": {
+      "category": "structures",
+      "clues": [
+        "A stronghold where power once sat behind thick walls",
+        "This fortified structure features towers, battlements, and a moat",
+        "A medieval fortress where kings and queens held court"
+      ]
+    },
+    "guitar": {
+      "category": "objects",
+      "clues": [
+        "Six voices sing when fingers dance across its neck",
+        "A stringed instrument with a hollow body and a long fretted neck",
+        "The most popular instrument in rock and folk music, strummed or picked"
+      ]
+    },
+    "ocean": {
+      "category": "nature",
+      "clues": [
+        "A vast expanse that covers most of our world in blue",
+        "This enormous body of salt water is home to whales and coral reefs",
+        "The Atlantic, Pacific, Indian, and Arctic are all examples of this"
+      ]
+    },
+    "candle": {
+      "category": "objects",
+      "clues": [
+        "A quiet sentinel that sacrifices itself to banish darkness",
+        "Made of wax with a central wick, it provides a flickering flame",
+        "You light it for ambiance, blow it out on birthday cakes"
+      ]
+    },
+    "piano": {
+      "category": "objects",
+      "clues": [
+        "Eighty-eight teeth that sing when struck in the right order",
+        "A large keyboard instrument with black and white keys",
+        "A musical instrument with hammers that strike strings inside a wooden case"
+      ]
+    },
+    "bridge": {
+      "category": "structures",
+      "clues": [
+        "A promise made between two shores that the gap shall not divide them",
+        "A structure built to span a river, valley, or road",
+        "You drive or walk across this to get over water or a chasm"
+      ]
+    },
+    "spider": {
+      "category": "animals",
+      "clues": [
+        "An eight-legged architect that weaves its home from silk",
+        "This arachnid spins webs to catch flies and other insects",
+        "A small creature with eight legs that makes webs, not an insect"
+      ]
+    },
+    "mountain": {
+      "category": "nature",
+      "clues": [
+        "It pierces the sky and challenges those who would stand at its peak",
+        "A massive landform rising high above the surrounding terrain",
+        "Everest, Kilimanjaro, and Denali are famous examples of this"
+      ]
+    },
+    "umbrella": {
+      "category": "objects",
+      "clues": [
+        "A portable shield against the sky's tears",
+        "This collapsible device opens into a canopy to keep you dry",
+        "You carry it on rainy days — it has a handle and a fabric dome"
+      ]
+    },
+    "diamond": {
+      "category": "objects",
+      "clues": [
+        "Born under tremendous pressure, it emerges as the hardest beauty",
+        "This precious gemstone is made of pure carbon and sparkles brilliantly",
+        "The hardest natural substance, often set in engagement rings"
+      ]
+    },
+    "volcano": {
+      "category": "nature",
+      "clues": [
+        "A sleeping giant whose anger reshapes the land in fire",
+        "This geological formation erupts with lava, ash, and gases",
+        "A mountain with an opening that spews molten rock when it erupts"
+      ]
+    },
+    "compass": {
+      "category": "objects",
+      "clues": [
+        "A faithful needle that always knows where home lies",
+        "This navigational instrument uses magnetism to point toward a pole",
+        "A device with a magnetic needle that always points north"
+      ]
+    },
+    "library": {
+      "category": "places",
+      "clues": [
+        "A cathedral of silence where knowledge lives on shelves",
+        "This public building houses thousands of books for borrowing",
+        "A place filled with books where you can read or study quietly"
+      ]
+    },
+    "butterfly": {
+      "category": "animals",
+      "clues": [
+        "It begins as a crawler and ends as a painter of the air",
+        "This insect undergoes metamorphosis from caterpillar to winged beauty",
+        "A colorful flying insect with large patterned wings, once a caterpillar"
+      ]
+    },
+    "thunder": {
+      "category": "nature",
+      "clues": [
+        "The sky's voice, arriving after its bright companion has already spoken",
+        "This loud rumbling sound follows a flash during a storm",
+        "The booming noise caused by lightning heating the air rapidly"
+      ]
+    },
+    "mirror": {
+      "category": "objects",
+      "clues": [
+        "It shows you a world that exists only when you stand before it",
+        "A flat reflective surface made of glass coated with metal",
+        "You look into this every morning to see your own reflection"
+      ]
+    },
+    "forest": {
+      "category": "nature",
+      "clues": [
+        "A green kingdom where the canopy hides the sky from the earth",
+        "A large area densely covered with trees and undergrowth",
+        "The Amazon and Black are famous examples of this tree-filled biome"
+      ]
+    },
+    "anchor": {
+      "category": "objects",
+      "clues": [
+        "It finds peace at the bottom so that others may rest above",
+        "This heavy metal device is lowered to the seabed to hold a vessel steady",
+        "A ship drops this heavy hooked object to stop drifting"
+      ]
+    },
+    "lantern": {
+      "category": "objects",
+      "clues": [
+        "A caged star you can carry through the darkest night",
+        "This portable light source encloses a flame behind glass panels",
+        "A lamp with a protective case, often carried by a handle"
+      ]
+    },
+    "penguin": {
+      "category": "animals",
+      "clues": [
+        "A formal dresser who traded flight for the art of swimming",
+        "This black-and-white bird waddles on ice and swims expertly",
+        "A flightless bird that lives in Antarctica and looks like it wears a tuxedo"
+      ]
+    },
+    "telescope": {
+      "category": "objects",
+      "clues": [
+        "It brings the unreachable close enough to study in silence",
+        "This optical instrument uses lenses or mirrors to magnify distant objects",
+        "Galileo used one to observe the moons of Jupiter"
+      ]
+    },
+    "garden": {
+      "category": "places",
+      "clues": [
+        "A tamed patch of earth where patience blooms into color",
+        "An enclosed area of land used for growing flowers, vegetables, or herbs",
+        "A plot of cultivated ground where you plant seeds and pull weeds"
+      ]
+    },
+    "shadow": {
+      "category": "concepts",
+      "clues": [
+        "An inseparable companion that vanishes when the light does",
+        "This dark silhouette appears when an object blocks a light source",
+        "The dark shape cast on the ground when you stand in sunlight"
+      ]
+    },
+    "helmet": {
+      "category": "objects",
+      "clues": [
+        "A guardian that sits atop the most vital tower of the body",
+        "This protective headgear absorbs impact to shield the skull",
+        "Worn on the head for safety when biking, building, or fighting"
+      ]
+    },
+    "river": {
+      "category": "nature",
+      "clues": [
+        "A restless traveler that carves its own path to the sea",
+        "A natural flowing watercourse that moves toward a lake or ocean",
+        "The Nile, Amazon, and Mississippi are famous examples of this"
+      ]
+    },
+    "clock": {
+      "category": "objects",
+      "clues": [
+        "A patient counter that never stops measuring what cannot be saved",
+        "This device displays hours and minutes using hands or digits",
+        "It hangs on a wall or sits on a desk and tells you the time"
+      ]
+    },
+    "dragon": {
+      "category": "mythology",
+      "clues": [
+        "A winged terror of legend whose breath is destruction itself",
+        "This mythical reptilian creature flies and breathes fire",
+        "A legendary fire-breathing beast with wings, scales, and a tail"
+      ]
+    },
+    "island": {
+      "category": "nature",
+      "clues": [
+        "A piece of the world that chose solitude, surrounded on all sides",
+        "A body of land entirely surrounded by water, smaller than a continent",
+        "Hawaii, Madagascar, and Iceland are all examples of this landform"
+      ]
+    },
+    "ladder": {
+      "category": "objects",
+      "clues": [
+        "A spine of rungs that offers ascent where stairs dare not go",
+        "This portable climbing device has two vertical rails connected by horizontal steps",
+        "You lean it against a wall and climb it rung by rung"
+      ]
+    },
+    "whistle": {
+      "category": "objects",
+      "clues": [
+        "A tiny instrument powered by breath that commands attention",
+        "This small device produces a high-pitched sound when air passes through it",
+        "Referees blow this to stop play, and you can do it with your lips"
+      ]
+    },
+    "treasure": {
+      "category": "concepts",
+      "clues": [
+        "That which is sought by those who follow old maps and older dreams",
+        "A collection of valuable items — gold, jewels, coins — often hidden away",
+        "Pirates buried this, and X marks the spot on the map"
+      ]
+    },
+    "feather": {
+      "category": "nature",
+      "clues": [
+        "Lighter than thought, yet it once carried its owner through the sky",
+        "This lightweight structure grows from a bird's skin and enables flight",
+        "A soft, flat growth from a bird, once used as a quill pen"
+      ]
+    },
+    "puzzle": {
+      "category": "objects",
+      "clues": [
+        "A challenge that exists in pieces, demanding patience to become whole",
+        "A game or problem designed to test ingenuity and knowledge",
+        "A jigsaw type has interlocking pieces that form a picture"
+      ]
+    },
+    "crystal": {
+      "category": "nature",
+      "clues": [
+        "Born from patience and pressure, its geometry is perfection itself",
+        "A solid material whose atoms are arranged in a highly ordered structure",
+        "Quartz, amethyst, and salt are common examples of this mineral form"
+      ]
+    },
+    "sunset": {
+      "category": "nature",
+      "clues": [
+        "The day's final masterpiece, painted in fire across the horizon",
+        "This daily event colors the sky orange and red as the sun descends",
+        "The moment each evening when the sun disappears below the horizon"
+      ]
+    },
+    "shield": {
+      "category": "objects",
+      "clues": [
+        "A wall you can carry, standing between danger and the one who holds it",
+        "This defensive equipment is held on the arm to block attacks",
+        "A broad piece of armor carried by warriors like knights and Vikings"
+      ]
+    },
+    "tornado": {
+      "category": "nature",
+      "clues": [
+        "A furious column that connects wrath above to destruction below",
+        "This violent rotating column of air extends from a thunderstorm to the ground",
+        "A twisting funnel of wind that destroys buildings, common in the American Midwest"
+      ]
+    },
+    "mushroom": {
+      "category": "nature",
+      "clues": [
+        "Neither plant nor animal, it thrives where others have fallen",
+        "This fleshy organism grows from soil or decaying matter and has a cap and stem",
+        "A fungus with a stem and umbrella-shaped cap, found in forests and on pizza"
+      ]
+    },
+    "trophy": {
+      "category": "objects",
+      "clues": [
+        "A frozen moment of triumph, displayed so victory is never forgotten",
+        "This decorative item is awarded as a prize for winning a competition",
+        "A cup or figurine on a pedestal given to the winner of a contest"
+      ]
+    },
+    "sandal": {
+      "category": "objects",
+      "clues": [
+        "An open embrace for the foot, favored when warmth invites freedom",
+        "This light shoe has straps that expose most of the foot",
+        "An open-toed summer shoe held on by straps, like flip-flops"
+      ]
+    },
+    "rainbow": {
+      "category": "nature",
+      "clues": [
+        "A bridge of color that appears when tears and light make peace",
+        "This arc of spectral colors appears when sunlight refracts through rain",
+        "A multicolored arc in the sky after rain — red, orange, yellow, green, blue, indigo, violet"
+      ]
+    },
+    "window": {
+      "category": "structures",
+      "clues": [
+        "A wall's eye, letting light enter without letting the world in",
+        "This opening in a building is filled with glass to admit light and air",
+        "A glass-paned opening in a wall that you look through or open for fresh air"
+      ]
+    },
+    "camera": {
+      "category": "objects",
+      "clues": [
+        "A box that steals moments and keeps them perfectly still forever",
+        "This device uses a lens to capture light and record images",
+        "You point it at something and press a button to take a photograph"
+      ]
+    },
+    "cactus": {
+      "category": "nature",
+      "clues": [
+        "A patient survivor that wears a coat of needles in the driest lands",
+        "This desert plant stores water in its thick stem and is covered in spines",
+        "A spiny green plant that grows in deserts and needs very little water"
+      ]
+    },
+    "sword": {
+      "category": "objects",
+      "clues": [
+        "A line of steel drawn between one fate and another",
+        "This bladed weapon has a long metal edge, a hilt, and a crossguard",
+        "A sharp metal weapon swung by knights, samurai, and fantasy heroes"
+      ]
+    },
+    "helmet": {
+      "category": "objects",
+      "clues": [
+        "A guardian that sits atop the most vital tower of the body",
+        "This protective headgear absorbs impact to shield the skull",
+        "Worn on the head for safety when biking, building, or fighting"
+      ]
+    },
+    "lighthouse": {
+      "category": "structures",
+      "clues": [
+        "A tall sentinel on the shore whose eye warns travelers of danger",
+        "This tower emits a powerful beam of light to guide ships at night",
+        "A tall coastal tower with a bright rotating light that warns ships of rocks"
+      ]
+    },
+    "wallet": {
+      "category": "objects",
+      "clues": [
+        "A small keeper of value that rides in your pocket through every journey",
+        "This folding case holds cash, cards, and identification documents",
+        "A small flat case you carry in your pocket for money and credit cards"
+      ]
+    },
+    "globe": {
+      "category": "objects",
+      "clues": [
+        "The whole world made small enough to spin beneath your fingertips",
+        "This spherical model represents the Earth's surface with continents and oceans",
+        "A round map of the world that sits on a stand and can be rotated"
+      ]
+    },
+    "wisdom": {
+      "category": "concepts",
+      "clues": [
+        "Not knowledge itself, but the quiet art of knowing when to use it",
+        "This quality combines experience, knowledge, and good judgment",
+        "The ability to make sound decisions — what comes with age and experience"
+      ]
+    }
+  }
+}
