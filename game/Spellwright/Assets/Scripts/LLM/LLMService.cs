@@ -147,6 +147,9 @@ namespace Spellwright.LLM
 
                 await Task.Run(async () =>
                 {
+                    // Clear KV cache from previous inference to avoid InvalidInputBatch
+                    _context.NativeHandle.MemoryClear(true);
+
                     var executor = new InteractiveExecutor(_context);
                     var session = new ChatSession(executor);
                     var history = new ChatHistory();

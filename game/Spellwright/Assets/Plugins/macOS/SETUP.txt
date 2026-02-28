@@ -1,0 +1,32 @@
+LLamaSharp Native Library Setup (macOS)
+========================================
+
+LLamaSharp requires native libraries to function. These are git-ignored
+because they're binary files. Extract them manually with the steps below.
+
+Steps:
+1. Download LLamaSharp.Backend.Cpu v0.26.0 from NuGet:
+   https://www.nuget.org/packages/LLamaSharp.Backend.Cpu/0.26.0
+
+2. Rename the .nupkg to .zip and extract it.
+
+3. Copy ALL files from the appropriate native folder into this directory:
+   LLamaSharpRuntimes/osx-arm64/native/*  (Apple Silicon — M1/M2/M3/M4)
+   LLamaSharpRuntimes/osx-x64/native/*    (Intel Mac)
+
+   Required files (arm64 example):
+   - libllama.dylib        (main inference library)
+   - libggml.dylib         (GGML core)
+   - libggml-base.dylib    (GGML base ops)
+   - libggml-cpu.dylib     (CPU backend)
+   - libggml-blas.dylib    (BLAS acceleration)
+   - libggml-metal.dylib   (Metal GPU backend)
+   - libmtmd.dylib         (multimodal support)
+   - ggml-metal.metal      (Metal shader source)
+
+4. In Unity, select each .dylib and verify import settings:
+   - Platform: Editor + Standalone
+   - OS: macOS
+   - CPU: AnyCPU (or match your architecture)
+
+All .dylib and .metal files are git-ignored via the project .gitignore.

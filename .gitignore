@@ -53,6 +53,12 @@ crashlytics-build.properties
 # Large model files (download separately)
 *.gguf
 
+# Native libraries for LLamaSharp (download/extract separately)
+**/[Aa]ssets/[Pp]lugins/**/*.dylib
+**/[Aa]ssets/[Pp]lugins/**/*.so
+**/[Aa]ssets/[Pp]lugins/**/*.dll
+**/[Aa]ssets/[Pp]lugins/**/*.metal
+
 # NuGet packages (restored automatically)
 **/[Aa]ssets/[Pp]ackages/
 
