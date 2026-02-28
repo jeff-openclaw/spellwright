@@ -226,30 +226,31 @@ public class OllamaClient : MonoBehaviour
 
 *VRAM estimates include KV cache overhead for ~2K context. Larger contexts consume more.*
 
-### AMD RX 6600 XT + ROCm Compatibility
+### Development Platform: MacBook M1 Pro
 
-The RX 6600 XT uses the **Navi 23 (gfx1032)** GPU die.
+**Updated:** Development will be on MacBook M1 Pro (Apple Silicon), not AMD RX 6600 XT.
 
-**Current status (as of early 2026):**
-- **ROCm 6.x** officially supports gfx1030 (RX 6800/6900 series) but **not gfx1032 natively**
-- **Community workaround:** Set `HSA_OVERRIDE_GFX_VERSION=10.3.0` to trick ROCm into treating the 6600 XT as a 6800
-- **Ollama support:** Ollama bundles ROCm support and many users report the 6600 XT working with the override env var
-- **Performance:** ~70-80% of theoretical throughput compared to officially supported GPUs; some users report occasional stability issues with large models
+**Ollama on Apple Silicon:**
+- Runs **natively via Metal** — no ROCm, no CUDA, no workarounds needed
+- Install: `brew install ollama`
+- M1 Pro with 16GB unified memory comfortably runs 7B models
+- Performance: excellent inference speed (~20-30 tok/s for 7B Q4_K_M)
 
 **Setup:**
 ```bash
-# Set before running Ollama
-export HSA_OVERRIDE_GFX_VERSION=10.3.0
-ollama serve
+brew install ollama
+ollama pull qwen2.5:7b    # Primary model (~5GB)
+ollama pull llama3.2:3b    # Fallback model (~2GB)
+ollama serve               # Start server
 ```
 
-Or in systemd service file:
-```ini
-[Service]
-Environment="HSA_OVERRIDE_GFX_VERSION=10.3.0"
-```
+**Note:** The original AMD RX 6600 XT research (ROCm + `HSA_OVERRIDE_GFX_VERSION=10.3.0`) is retained below for reference, as the game should support both platforms at release.
 
-**Fallback:** If ROCm is unstable, Ollama falls back to **CPU inference** via llama.cpp. The 3B models run acceptably on CPU (~10-15 tok/s on modern CPUs).
+<details>
+<summary>AMD RX 6600 XT + ROCm (reference)</summary>
+
+The RX 6600 XT uses the Navi 23 (gfx1032) GPU die. ROCm 6.x officially supports gfx1030 but not gfx1032 natively. Community workaround: `HSA_OVERRIDE_GFX_VERSION=10.3.0`. Performance ~70-80% of theoretical. Fallback: CPU inference via llama.cpp (~10-15 tok/s for 3B models).
+</details>
 
 ### Multilingual Quality
 
