@@ -156,7 +156,6 @@ namespace Spellwright.LLM
                     var inferenceParams = new InferenceParams
                     {
                         MaxTokens = MaxTokens,
-                        Temperature = Temperature,
                         AntiPrompts = new[] { "User:", "\n\nUser:", "<|eot_id|>" }
                     };
 
