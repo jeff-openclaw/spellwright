@@ -82,6 +82,8 @@ namespace Spellwright.Encounter
                 NPC = _npcData
             });
 
+            Debug.Log($"[EncounterManager] Encounter started: \"{_targetWord.Word}\" ({_targetWord.Category}, difficulty {_targetWord.Difficulty})");
+
             await RequestNextClue();
         }
 
