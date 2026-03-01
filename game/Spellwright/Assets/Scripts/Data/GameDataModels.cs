@@ -168,4 +168,23 @@ namespace Spellwright.Data
         public int OldGold { get; set; }
         public int NewGold { get; set; }
     }
+
+    /// <summary>Fired when a new run begins.</summary>
+    public class RunStartedEvent
+    {
+        public RunState State { get; set; }
+    }
+
+    /// <summary>Fired when a run ends (win, loss, or HP depletion).</summary>
+    public class RunEndedEvent
+    {
+        public int FinalScore { get; set; }
+        public bool Won { get; set; }
+    }
+
+    /// <summary>Fired when run-level state changes (score, gold, node progression).</summary>
+    public class RunStateChangedEvent
+    {
+        public RunState State { get; set; }
+    }
 }

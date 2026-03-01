@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Spellwright.Core;
 using Spellwright.Data;
+using Spellwright.Run;
 using Spellwright.ScriptableObjects;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,7 +33,6 @@ namespace Spellwright.Encounter
         [SerializeField] private Text logText;
 
         private EncounterManager _encounter;
-        private List<string> _usedWords = new List<string>();
         private bool _isProcessing;
 
         private void Start()
@@ -53,6 +53,7 @@ namespace Spellwright.Encounter
             EventBus.Instance.Subscribe<GuessSubmittedEvent>(OnGuessSubmitted);
             EventBus.Instance.Subscribe<EncounterEndedEvent>(OnEncounterEnded);
             EventBus.Instance.Subscribe<HPChangedEvent>(OnHPChanged);
+            EventBus.Instance.Subscribe<RunEndedEvent>(OnRunEnded);
 
             // Initial state
             blanksText.text = "";
@@ -69,6 +70,7 @@ namespace Spellwright.Encounter
             EventBus.Instance.Unsubscribe<GuessSubmittedEvent>(OnGuessSubmitted);
             EventBus.Instance.Unsubscribe<EncounterEndedEvent>(OnEncounterEnded);
             EventBus.Instance.Unsubscribe<HPChangedEvent>(OnHPChanged);
+            EventBus.Instance.Unsubscribe<RunEndedEvent>(OnRunEnded);
         }
 
         // ── Setup ────────────────────────────────────────────
@@ -117,8 +119,12 @@ namespace Spellwright.Encounter
                 return;
             }
 
-            // Reset HP for fresh encounter
-            _encounter.ResetHP();
+            // Ensure a run is active via RunManager
+            if (RunManager.Instance != null && !RunManager.Instance.IsRunActive)
+            {
+                RunManager.Instance.StartRun();
+                AppendLog("New run started.");
+            }
 
             // Select a random pool
             var pool = wordPools[Random.Range(0, wordPools.Length)];
@@ -126,11 +132,16 @@ namespace Spellwright.Encounter
             var npc = npcAssets[Mathf.Clamp(npcIndex, 0, npcAssets.Length - 1)];
             int difficulty = (difficultyDropdown != null ? difficultyDropdown.value : 0) + 1;
 
+            // Get used words from RunManager
+            var usedWords = RunManager.Instance != null
+                ? new List<string>(RunManager.Instance.UsedWords)
+                : new List<string>();
+
             logText.text = "";
             clueText.text = "Generating first clue...";
             AppendLog($"Starting encounter — Pool: {pool.category}, NPC: {npc.displayName}, Difficulty: {difficulty}");
 
-            _encounter.StartEncounter(pool, npc, _usedWords, difficulty);
+            _encounter.StartEncounter(pool, npc, usedWords, difficulty);
         }
 
         private async void OnSubmitClicked()
@@ -203,6 +214,14 @@ namespace Spellwright.Encounter
             UpdateStatus();
         }
 
+        private void OnRunEnded(RunEndedEvent evt)
+        {
+            submitButton.interactable = false;
+            string outcome = evt.Won ? "VICTORY" : "DEFEAT";
+            AppendLog($"═══ RUN OVER: {outcome} — Final Score: {evt.FinalScore} ═══");
+            UpdateStatus();
+        }
+
         // ── Helpers ──────────────────────────────────────────
 
         private void UpdateStatus()
@@ -213,13 +232,24 @@ namespace Spellwright.Encounter
                 return;
             }
 
+            // Show run-level info if RunManager is available
+            string runInfo = "";
+            if (RunManager.Instance != null && RunManager.Instance.IsRunActive)
+            {
+                runInfo = $"Run Score: {RunManager.Instance.Score} | ";
+            }
+
             if (!_encounter.IsActive)
             {
-                statusText.text = $"HP: {_encounter.CurrentHP}/{_encounter.MaxHP} | Idle — press New Encounter";
+                bool runOver = RunManager.Instance != null && !RunManager.Instance.IsRunActive;
+                string idleMsg = runOver
+                    ? "Run over — press New Encounter to start a new run"
+                    : "Idle — press New Encounter";
+                statusText.text = $"{runInfo}HP: {_encounter.CurrentHP}/{_encounter.MaxHP} | {idleMsg}";
                 return;
             }
 
-            statusText.text = $"HP: {_encounter.CurrentHP}/{_encounter.MaxHP} | "
+            statusText.text = $"{runInfo}HP: {_encounter.CurrentHP}/{_encounter.MaxHP} | "
                 + $"Clue #{_encounter.CurrentClueNumber} | "
                 + $"Guesses left: {_encounter.GuessesRemaining}";
         }

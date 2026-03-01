@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using Spellwright.Core;
 using Spellwright.Data;
 using Spellwright.Encounter;
+using Spellwright.Run;
 using UnityEditor;
 using UnityEngine;
 
@@ -25,6 +27,7 @@ namespace Spellwright.Editor
             if (TestScoringFormula()) passed++; else failed++;
             if (TestWordSelection()) passed++; else failed++;
             if (TestEncounterState()) passed++; else failed++;
+            if (TestRunManager()) passed++; else failed++;
 
             Debug.Log($"[Encounter Tests] ═══ RESULTS: {passed} passed, {failed} failed ═══");
         }
@@ -362,6 +365,206 @@ namespace Spellwright.Editor
             Debug.Log($"  OK: Clue number incremented correctly to {clueNumber}.");
 
             LogResult("Encounter State", allPassed);
+            return allPassed;
+        }
+
+        // ── Test: RunManager ──────────────────────────────────
+
+        [MenuItem("Spellwright/Tests/Run Manager")]
+        public static bool TestRunManager()
+        {
+            Debug.Log("[Encounter Tests] ── Run Manager ──");
+            bool allPassed = true;
+
+            // Create a temporary GameObject with RunManager
+            var go = new GameObject("TestRunManager");
+            var runManager = go.AddComponent<RunManager>();
+
+            // Find a GameConfigSO to initialize with
+            var configGuids = AssetDatabase.FindAssets("t:GameConfigSO");
+            if (configGuids.Length > 0)
+            {
+                var configPath = AssetDatabase.GUIDToAssetPath(configGuids[0]);
+                var config = AssetDatabase.LoadAssetAtPath<ScriptableObjects.GameConfigSO>(configPath);
+                // Set the serialized field via SerializedObject
+                var so = new SerializedObject(runManager);
+                so.FindProperty("gameConfig").objectReferenceValue = config;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            // Clear any leftover event subscriptions
+            EventBus.Instance.Clear<RunStartedEvent>();
+            EventBus.Instance.Clear<RunEndedEvent>();
+            EventBus.Instance.Clear<RunStateChangedEvent>();
+
+            // Test 1: StartRun initializes state
+            RunStartedEvent capturedStart = null;
+            EventBus.Instance.Subscribe<RunStartedEvent>(e => capturedStart = e);
+
+            runManager.StartRun();
+
+            if (!runManager.IsRunActive)
+            {
+                Debug.LogError("  FAIL: IsRunActive should be true after StartRun.");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log("  OK: IsRunActive = true after StartRun.");
+            }
+
+            if (runManager.CurrentHP <= 0 || runManager.MaxHP <= 0)
+            {
+                Debug.LogError($"  FAIL: HP not initialized. Current={runManager.CurrentHP}, Max={runManager.MaxHP}");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log($"  OK: HP initialized — {runManager.CurrentHP}/{runManager.MaxHP}");
+            }
+
+            if (runManager.Score != 0)
+            {
+                Debug.LogError($"  FAIL: Score should be 0 at start, got {runManager.Score}");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log("  OK: Score = 0 at start.");
+            }
+
+            if (capturedStart == null)
+            {
+                Debug.LogError("  FAIL: RunStartedEvent not published.");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log("  OK: RunStartedEvent published.");
+            }
+
+            // Test 2: UsedWords accumulates via EncounterEndedEvent
+            RunStateChangedEvent capturedChange = null;
+            EventBus.Instance.Subscribe<RunStateChangedEvent>(e => capturedChange = e);
+
+            EventBus.Instance.Publish(new EncounterEndedEvent
+            {
+                Won = true,
+                TargetWord = "castle",
+                GuessCount = 2,
+                Score = 120
+            });
+
+            if (runManager.UsedWords.Count != 1 || runManager.UsedWords[0] != "castle")
+            {
+                Debug.LogError($"  FAIL: UsedWords should contain 'castle'. Count={runManager.UsedWords.Count}");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log("  OK: UsedWords contains 'castle' after encounter.");
+            }
+
+            if (runManager.Score != 120)
+            {
+                Debug.LogError($"  FAIL: Score should be 120, got {runManager.Score}");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log("  OK: Score = 120 after first encounter.");
+            }
+
+            // Test 3: Score accumulates across multiple encounters
+            EventBus.Instance.Publish(new EncounterEndedEvent
+            {
+                Won = true,
+                TargetWord = "bridge",
+                GuessCount = 1,
+                Score = 180
+            });
+
+            if (runManager.Score != 300)
+            {
+                Debug.LogError($"  FAIL: Score should be 300 (120+180), got {runManager.Score}");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log("  OK: Score = 300 after two encounters.");
+            }
+
+            if (runManager.UsedWords.Count != 2)
+            {
+                Debug.LogError($"  FAIL: UsedWords should have 2 entries, got {runManager.UsedWords.Count}");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log("  OK: UsedWords has 2 entries.");
+            }
+
+            // Test 4: EndRun sets IsRunActive = false
+            RunEndedEvent capturedEnd = null;
+            EventBus.Instance.Subscribe<RunEndedEvent>(e => capturedEnd = e);
+
+            runManager.EndRun(won: false);
+
+            if (runManager.IsRunActive)
+            {
+                Debug.LogError("  FAIL: IsRunActive should be false after EndRun.");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log("  OK: IsRunActive = false after EndRun.");
+            }
+
+            if (capturedEnd == null)
+            {
+                Debug.LogError("  FAIL: RunEndedEvent not published.");
+                allPassed = false;
+            }
+            else if (capturedEnd.FinalScore != 300)
+            {
+                Debug.LogError($"  FAIL: RunEndedEvent.FinalScore should be 300, got {capturedEnd.FinalScore}");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log($"  OK: RunEndedEvent published with FinalScore={capturedEnd.FinalScore}.");
+            }
+
+            // Test 5: HP sync via HPChangedEvent
+            runManager.StartRun();
+            int startHP = runManager.CurrentHP;
+
+            EventBus.Instance.Publish(new HPChangedEvent
+            {
+                OldHP = startHP,
+                NewHP = startHP - 15,
+                MaxHP = runManager.MaxHP
+            });
+
+            if (runManager.CurrentHP != startHP - 15)
+            {
+                Debug.LogError($"  FAIL: HP should be {startHP - 15} after HPChangedEvent, got {runManager.CurrentHP}");
+                allPassed = false;
+            }
+            else
+            {
+                Debug.Log($"  OK: HP synced to {runManager.CurrentHP} via HPChangedEvent.");
+            }
+
+            // Cleanup
+            EventBus.Instance.Clear<RunStartedEvent>();
+            EventBus.Instance.Clear<RunEndedEvent>();
+            EventBus.Instance.Clear<RunStateChangedEvent>();
+            EventBus.Instance.Clear<EncounterEndedEvent>();
+            EventBus.Instance.Clear<HPChangedEvent>();
+            Object.DestroyImmediate(go);
+
+            LogResult("Run Manager", allPassed);
             return allPassed;
         }
 

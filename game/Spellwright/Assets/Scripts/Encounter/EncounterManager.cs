@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Spellwright.Core;
 using Spellwright.Data;
 using Spellwright.LLM;
+using Spellwright.Run;
 using Spellwright.ScriptableObjects;
 using UnityEngine;
 
@@ -27,6 +28,10 @@ namespace Spellwright.Encounter
         private int _currentHP;
         private int _maxHP;
 
+        // ── Pre-generation ───────────────────────────────────
+        private Task<ClueResponse> _preGeneratedClue;
+        private int _preGenGuessCount = -1;
+
         // ── Properties ───────────────────────────────────────
         public bool IsActive => _isActive;
         public int TargetWordLength => _targetWord?.LetterCount ?? 0;
@@ -49,6 +54,9 @@ namespace Spellwright.Encounter
         /// <param name="difficulty">Difficulty level (1-5) for word filtering.</param>
         public async void StartEncounter(WordPoolSO pool, NPCDataSO npc, List<string> usedWords, int difficulty)
         {
+            // Discard any pending pre-generated clue
+            DiscardPreGeneratedClue();
+
             // Filter words by difficulty, excluding already-used words
             var candidates = pool.GetWordsByDifficulty(difficulty)
                 .Where(w => !usedWords.Contains(w.Word))
@@ -68,8 +76,13 @@ namespace Spellwright.Encounter
             _usedWords = usedWords;
             _isActive = true;
 
-            // Initialize HP if not already set
-            if (_maxHP <= 0)
+            // Initialize HP from RunManager if available, otherwise from config
+            if (RunManager.Instance != null && RunManager.Instance.IsRunActive)
+            {
+                _currentHP = RunManager.Instance.CurrentHP;
+                _maxHP = RunManager.Instance.MaxHP;
+            }
+            else if (_maxHP <= 0)
             {
                 _maxHP = gameConfig != null ? gameConfig.startingHP : 100;
                 _currentHP = _maxHP;
@@ -89,6 +102,7 @@ namespace Spellwright.Encounter
 
         /// <summary>
         /// Requests the next clue from the LLM (or fallback).
+        /// Uses a pre-generated clue if one is available and context matches.
         /// </summary>
         public async Task RequestNextClue()
         {
@@ -100,14 +114,32 @@ namespace Spellwright.Encounter
                 return;
             }
 
-            var clue = await LLMManager.Instance.GenerateClueAsync(
-                _npcData,
-                _targetWord.Word,
-                _targetWord.Category,
-                _clueNumber,
-                _guesses,
-                new List<string>() // tome effects — empty for now
-            );
+            ClueResponse clue = null;
+
+            // Check if we have a valid pre-generated clue
+            if (_preGeneratedClue != null && _preGenGuessCount == _guesses.Count)
+            {
+                Debug.Log("[EncounterManager] Using pre-generated clue.");
+                clue = await _preGeneratedClue;
+                _preGeneratedClue = null;
+                _preGenGuessCount = -1;
+            }
+
+            // If no valid pre-gen, generate normally
+            if (clue == null)
+            {
+                // Discard stale pre-gen if context changed
+                DiscardPreGeneratedClue();
+
+                clue = await LLMManager.Instance.GenerateClueAsync(
+                    _npcData,
+                    _targetWord.Word,
+                    _targetWord.Category,
+                    _clueNumber,
+                    _guesses,
+                    new List<string>() // tome effects — empty for now
+                );
+            }
 
             EventBus.Instance.Publish(new ClueReceivedEvent
             {
@@ -115,6 +147,8 @@ namespace Spellwright.Encounter
                 ClueNumber = _clueNumber
             });
 
+            // Try to pre-generate the next clue in the background
+            TryPreGenerateNextClue();
         }
 
         /// <summary>
@@ -180,6 +214,7 @@ namespace Spellwright.Encounter
         private void EndEncounter(bool won, int score = 0)
         {
             _isActive = false;
+            DiscardPreGeneratedClue();
 
             EventBus.Instance.Publish(new EncounterEndedEvent
             {
@@ -188,7 +223,46 @@ namespace Spellwright.Encounter
                 GuessCount = _guesses.Count,
                 Score = score
             });
+        }
 
+        // ── Clue Pre-generation ──────────────────────────────
+
+        /// <summary>
+        /// Starts generating the next clue in the background if we haven't
+        /// reached the max clue count yet.
+        /// </summary>
+        private void TryPreGenerateNextClue()
+        {
+            if (!_isActive) return;
+            if (LLMManager.Instance == null || !LLMManager.Instance.IsReady) return;
+
+            int maxClues = gameConfig != null ? gameConfig.maxGuessesPerEncounter : 6;
+            int nextClueNumber = _clueNumber + 1;
+
+            if (nextClueNumber > maxClues) return;
+
+            _preGenGuessCount = _guesses.Count;
+            var guessSnapshot = new List<string>(_guesses);
+
+            Debug.Log($"[EncounterManager] Pre-generating clue #{nextClueNumber} (guess count: {_preGenGuessCount})");
+
+            _preGeneratedClue = LLMManager.Instance.GenerateClueAsync(
+                _npcData,
+                _targetWord.Word,
+                _targetWord.Category,
+                nextClueNumber,
+                guessSnapshot,
+                new List<string>() // tome effects — empty for now
+            );
+        }
+
+        /// <summary>
+        /// Discards any pending pre-generated clue.
+        /// </summary>
+        private void DiscardPreGeneratedClue()
+        {
+            _preGeneratedClue = null;
+            _preGenGuessCount = -1;
         }
 
         // ── Scoring ──────────────────────────────────────────
