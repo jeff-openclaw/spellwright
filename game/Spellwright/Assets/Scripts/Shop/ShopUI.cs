@@ -204,7 +204,7 @@ namespace Spellwright.Shop
                 descTmp.text = item.IsSold ? "" : item.TomeData.description;
             }
 
-            // ── Right area: price + buy button ──
+            // ── Right area: price + buy label ──
             if (!item.IsSold)
             {
                 // Price tag
@@ -220,40 +220,26 @@ namespace Spellwright.Shop
                 priceTmp.alignment = TextAlignmentOptions.Center;
                 priceTmp.raycastTarget = false;
 
-                // Buy button
-                var btnGO = new GameObject("BuyBtn");
-                btnGO.transform.SetParent(right.transform, false);
-                var btnRT = btnGO.AddComponent<RectTransform>();
-                btnRT.sizeDelta = new Vector2(0, 24);
-
-                var btnBg = btnGO.AddComponent<Image>();
-                btnBg.color = theme != null ? theme.buttonBg : new Color(0.05f, 0.2f, 0.05f, 0.9f);
-
-                var btn = btnGO.AddComponent<Button>();
-                btn.targetGraphic = btnBg;
-
-                var btnLabelGO = new GameObject("BtnLabel");
-                btnLabelGO.transform.SetParent(btnGO.transform, false);
-                var btnLabelRT = btnLabelGO.AddComponent<RectTransform>();
-                btnLabelRT.anchorMin = Vector2.zero;
-                btnLabelRT.anchorMax = Vector2.one;
-                btnLabelRT.offsetMin = Vector2.zero;
-                btnLabelRT.offsetMax = Vector2.zero;
-
-                var btnLabel = btnLabelGO.AddComponent<TextMeshProUGUI>();
-                btnLabel.text = "[ BUY ]";
+                // Buy label (visual indicator only)
+                var labelGO = new GameObject("BuyLabel");
+                labelGO.transform.SetParent(right.transform, false);
+                labelGO.AddComponent<RectTransform>();
+                var labelTmp = labelGO.AddComponent<TextMeshProUGUI>();
+                labelTmp.text = "[ BUY ]";
                 if (theme != null && theme.primaryFont != null)
-                    btnLabel.font = theme.primaryFont;
-                btnLabel.fontSize = theme != null ? theme.smallSize : 13;
-                btnLabel.color = theme != null ? theme.buttonText : new Color(0f, 1f, 0.33f);
-                btnLabel.alignment = TextAlignmentOptions.Center;
-                btnLabel.raycastTarget = false;
+                    labelTmp.font = theme.primaryFont;
+                labelTmp.fontSize = theme != null ? theme.smallSize : 13;
+                labelTmp.color = theme != null ? theme.buttonText : new Color(0f, 1f, 0.33f);
+                labelTmp.alignment = TextAlignmentOptions.Center;
+                labelTmp.raycastTarget = false;
+                var labelLe = labelGO.AddComponent<LayoutElement>();
+                labelLe.preferredHeight = 24;
 
+                // Make entire card clickable
+                var cardBtn = card.AddComponent<Button>();
+                cardBtn.targetGraphic = card.GetComponent<Image>();
                 int capturedIndex = index;
-                btn.onClick.AddListener(() => OnBuyClicked(capturedIndex));
-
-                var btnLe = btnGO.AddComponent<LayoutElement>();
-                btnLe.preferredHeight = 24;
+                cardBtn.onClick.AddListener(() => OnBuyClicked(capturedIndex));
             }
 
             // Add hover glow to card

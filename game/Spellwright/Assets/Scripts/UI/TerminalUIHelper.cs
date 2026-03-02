@@ -278,6 +278,11 @@ namespace Spellwright.UI
             var cardRT = card.AddComponent<RectTransform>();
             cardRT.sizeDelta = new Vector2(0, height);
 
+            var cardLe = card.AddComponent<LayoutElement>();
+            cardLe.minHeight = height;
+            cardLe.preferredHeight = height;
+            cardLe.flexibleHeight = 0;
+
             var cardBg = card.AddComponent<Image>();
             cardBg.color = theme != null ? theme.cardBg : new Color(0.04f, 0.10f, 0.04f, 0.9f);
 

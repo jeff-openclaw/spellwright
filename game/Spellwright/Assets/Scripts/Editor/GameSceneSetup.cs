@@ -834,10 +834,11 @@ namespace Spellwright.Editor
             var vlg1 = itemContainer.AddComponent<VerticalLayoutGroup>();
             vlg1.spacing = 6;
             vlg1.padding = new RectOffset(0, 0, 2, 2);
+            vlg1.childAlignment = TextAnchor.UpperLeft;
             vlg1.childForceExpandWidth = true;
             vlg1.childForceExpandHeight = false;
             vlg1.childControlWidth = true;
-            vlg1.childControlHeight = false;
+            vlg1.childControlHeight = true;
 
             // ── Separator ──
             TerminalUIHelper.CreateSeparator(panel.transform, "MidSeparator",
@@ -854,10 +855,11 @@ namespace Spellwright.Editor
             var vlg2 = equippedContainer.AddComponent<VerticalLayoutGroup>();
             vlg2.spacing = 6;
             vlg2.padding = new RectOffset(0, 0, 2, 2);
+            vlg2.childAlignment = TextAnchor.UpperLeft;
             vlg2.childForceExpandWidth = true;
             vlg2.childForceExpandHeight = false;
             vlg2.childControlWidth = true;
-            vlg2.childControlHeight = false;
+            vlg2.childControlHeight = true;
 
             // ── Feedback text ──
             var feedbackText = CreateText(panel.transform, "FeedbackText", "",
