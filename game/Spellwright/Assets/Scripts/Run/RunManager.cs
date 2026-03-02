@@ -27,6 +27,16 @@ namespace Spellwright.Run
         public int Gold => _state.Gold;
         public IReadOnlyList<string> UsedWords => _state.UsedWords;
         public int CurrentNodeIndex => _state.CurrentNodeIndex;
+        public IReadOnlyList<NodeType> NodeSequence => _state.NodeSequence;
+
+        /// <summary>The NodeType at the current index, or Encounter if out of range.</summary>
+        public NodeType CurrentNodeType =>
+            _state.CurrentNodeIndex < _state.NodeSequence.Count
+                ? _state.NodeSequence[_state.CurrentNodeIndex]
+                : NodeType.Encounter;
+
+        /// <summary>Total number of encounters won in this run.</summary>
+        public int EncountersWon { get; private set; }
 
         // ── Lifecycle ────────────────────────────────────────
 
@@ -76,18 +86,16 @@ namespace Spellwright.Run
                 IsRunActive = true
             };
 
-            // Generate a simple node sequence based on config
+            EncountersWon = 0;
+
+            // Generate node sequence: E-E-S-E-E-E-S-E-B
             _state.NodeSequence.Clear();
-            if (gameConfig != null)
+            _state.NodeSequence.AddRange(new[]
             {
-                int totalFloors = gameConfig.actsPerRun * gameConfig.floorsPerAct;
-                for (int i = 0; i < totalFloors; i++)
-                {
-                    // Last node of each act is a Boss, rest are Encounters
-                    bool isActEnd = (i + 1) % gameConfig.floorsPerAct == 0;
-                    _state.NodeSequence.Add(isActEnd ? NodeType.Boss : NodeType.Encounter);
-                }
-            }
+                NodeType.Encounter, NodeType.Encounter, NodeType.Shop,
+                NodeType.Encounter, NodeType.Encounter, NodeType.Encounter, NodeType.Shop,
+                NodeType.Encounter, NodeType.Boss
+            });
 
             Debug.Log($"[RunManager] Run started — HP: {_state.CurrentHP}/{_state.MaxHP}, Nodes: {_state.NodeSequence.Count}");
 
@@ -139,6 +147,16 @@ namespace Spellwright.Run
             // Accumulate score
             _state.Score += evt.Score;
 
+            // Track encounters won
+            if (evt.Won) EncountersWon++;
+
+            // Gold reward for winning
+            if (evt.Won)
+            {
+                int reward = 3 + evt.Score / 20;
+                AddGold(reward);
+            }
+
             // Track used words
             if (!string.IsNullOrEmpty(evt.TargetWord))
                 _state.UsedWords.Add(evt.TargetWord);
@@ -146,6 +164,64 @@ namespace Spellwright.Run
             Debug.Log($"[RunManager] Encounter ended — Score: +{evt.Score} (total: {_state.Score}), Used words: {_state.UsedWords.Count}");
 
             EventBus.Instance.Publish(new RunStateChangedEvent { State = _state });
+        }
+
+        /// <summary>Adds gold and publishes a GoldChangedEvent.</summary>
+        public void AddGold(int amount)
+        {
+            if (amount == 0) return;
+            int old = _state.Gold;
+            _state.Gold += amount;
+            EventBus.Instance.Publish(new GoldChangedEvent { OldGold = old, NewGold = _state.Gold });
+        }
+
+        /// <summary>Spends gold if sufficient. Returns true on success.</summary>
+        public bool SpendGold(int amount)
+        {
+            if (amount <= 0 || _state.Gold < amount) return false;
+            int old = _state.Gold;
+            _state.Gold -= amount;
+            EventBus.Instance.Publish(new GoldChangedEvent { OldGold = old, NewGold = _state.Gold });
+            return true;
+        }
+
+        /// <summary>Heals the player by the given amount (capped at MaxHP).</summary>
+        public void Heal(int amount)
+        {
+            if (amount <= 0) return;
+            int old = _state.CurrentHP;
+            _state.CurrentHP = Mathf.Min(_state.CurrentHP + amount, _state.MaxHP);
+            if (_state.CurrentHP != old)
+            {
+                EventBus.Instance.Publish(new HPChangedEvent
+                {
+                    OldHP = old,
+                    NewHP = _state.CurrentHP,
+                    MaxHP = _state.MaxHP
+                });
+            }
+        }
+
+        /// <summary>Applies damage to the player. Used by EncounterManager indirectly via events,
+        /// and directly for testing.</summary>
+        public void TakeDamage(int amount)
+        {
+            if (amount <= 0 || !_state.IsRunActive) return;
+            int old = _state.CurrentHP;
+            _state.CurrentHP = Mathf.Max(0, _state.CurrentHP - amount);
+
+            EventBus.Instance.Publish(new HPChangedEvent
+            {
+                OldHP = old,
+                NewHP = _state.CurrentHP,
+                MaxHP = _state.MaxHP
+            });
+
+            if (_state.CurrentHP <= 0)
+            {
+                Debug.Log("[RunManager] HP depleted — ending run.");
+                EndRun(won: false);
+            }
         }
 
         private void OnHPChanged(HPChangedEvent evt)

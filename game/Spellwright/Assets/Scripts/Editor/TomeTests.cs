@@ -421,9 +421,21 @@ namespace Spellwright.Editor
             Debug.Log("[Tome Tests] ── TomeManager Factory ──");
             bool allPassed = true;
 
-            // Create a temporary TomeManager
-            var go = new GameObject("TestTomeManager");
-            var manager = go.AddComponent<TomeManager>();
+            // Use existing singleton if available, otherwise create temporary
+            bool createdTemp = false;
+            GameObject go = null;
+            TomeManager manager;
+
+            if (TomeManager.Instance != null)
+            {
+                manager = TomeManager.Instance;
+            }
+            else
+            {
+                go = new GameObject("TestTomeManager");
+                manager = go.AddComponent<TomeManager>();
+                createdTemp = true;
+            }
 
             // Test each known effect class
             string[] effectNames = { "VowelLensEffect", "FirstLightEffect", "EchoChamberEffect", "ThickSkinEffect", "SecondWindEffect" };
@@ -462,7 +474,7 @@ namespace Spellwright.Editor
 
             // Test EquipTome flow with a real TomeDataSO search
             var tomeGuids = AssetDatabase.FindAssets("t:TomeDataSO");
-            if (tomeGuids.Length > 0)
+            if (tomeGuids.Length > 0 && manager.TomeSystem != null)
             {
                 var tomePath = AssetDatabase.GUIDToAssetPath(tomeGuids[0]);
                 var tomeData = AssetDatabase.LoadAssetAtPath<TomeDataSO>(tomePath);
@@ -499,12 +511,18 @@ namespace Spellwright.Editor
                     }
                 }
             }
+            else if (manager.TomeSystem == null)
+            {
+                Debug.Log("  SKIP: TomeSystem not initialized (edit mode singleton).");
+            }
             else
             {
                 Debug.Log("  SKIP: No TomeDataSO assets found in project.");
             }
 
-            Object.DestroyImmediate(go);
+            if (createdTemp && go != null)
+                Object.DestroyImmediate(go);
+
             LogResult("TomeManager Factory", allPassed);
             return allPassed;
         }

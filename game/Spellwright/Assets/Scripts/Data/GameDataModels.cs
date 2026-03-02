@@ -15,6 +15,18 @@ namespace Spellwright.Data
         Event
     }
 
+    /// <summary>High-level game flow states.</summary>
+    public enum GameState
+    {
+        MainMenu,
+        RunSetup,
+        Map,
+        Encounter,
+        Shop,
+        Boss,
+        RunEnd
+    }
+
     /// <summary>Rarity tier for Tomes.</summary>
     public enum TomeRarity
     {
@@ -194,5 +206,19 @@ namespace Spellwright.Data
     public class RunStateChangedEvent
     {
         public RunState State { get; set; }
+    }
+
+    /// <summary>Fired when the game state machine transitions.</summary>
+    public class GameStateChangedEvent
+    {
+        public GameState OldState { get; set; }
+        public GameState NewState { get; set; }
+    }
+
+    /// <summary>Fired when a map node is selected for play.</summary>
+    public class NodeSelectedEvent
+    {
+        public int NodeIndex { get; set; }
+        public NodeType NodeType { get; set; }
     }
 }
