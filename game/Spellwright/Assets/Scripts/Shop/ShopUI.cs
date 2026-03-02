@@ -38,6 +38,7 @@ namespace Spellwright.Shop
 
             EventBus.Instance.Subscribe<GameStateChangedEvent>(OnGameStateChanged);
 
+            // Generate inventory once on enable (GameStateChangedEvent handler defers to avoid double-gen)
             if (shopManager != null)
             {
                 shopManager.GenerateInventory();
@@ -55,9 +56,10 @@ namespace Spellwright.Shop
 
         private void OnGameStateChanged(GameStateChangedEvent evt)
         {
+            // Inventory is already generated in OnEnable when the panel activates.
+            // Only refresh display here in case state changed while already visible.
             if (evt.NewState == GameState.Shop && shopManager != null)
             {
-                shopManager.GenerateInventory();
                 RefreshUI();
             }
         }
@@ -120,7 +122,8 @@ namespace Spellwright.Shop
 
             if (item.IsHealItem)
             {
-                label.text = $"Heal Potion (+{ShopManager.HealAmount} HP) — {item.Price}g";
+                int healAmt = shopManager != null ? shopManager.HealAmountValue : 8;
+                label.text = $"Heal Potion (+{healAmt} HP) — {item.Price}g";
                 label.color = new Color(0.3f, 0.9f, 0.3f);
             }
             else if (item.TomeData != null)

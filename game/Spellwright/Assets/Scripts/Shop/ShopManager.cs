@@ -15,11 +15,17 @@ namespace Spellwright.Shop
     public class ShopManager : MonoBehaviour
     {
         [SerializeField] private TomeDataSO[] allTomes;
+        [SerializeField] private GameConfigSO gameConfig;
 
-        public const int HealCost = 5;
-        public const int HealAmount = 5;
         public const float SellMultiplier = 0.5f;
-        public const int MinSellPrice = 3;
+        public const int MinSellPrice = 2;
+
+        private int HealCost => gameConfig != null ? gameConfig.healCost : 8;
+        private int HealAmount => gameConfig != null ? gameConfig.healAmount : 8;
+        private float TomePriceMultiplier => gameConfig != null ? gameConfig.tomePriceMultiplier : 0.3f;
+
+        /// <summary>Publicly readable heal amount for UI display.</summary>
+        public int HealAmountValue => HealAmount;
 
         private readonly List<ShopItem> _inventory = new List<ShopItem>();
         public IReadOnlyList<ShopItem> Inventory => _inventory;
@@ -69,7 +75,7 @@ namespace Spellwright.Shop
             for (int i = 0; i < count; i++)
             {
                 var tome = shuffled[i];
-                int price = GetTomePrice(tome);
+                int price = Mathf.Max(3, Mathf.RoundToInt(GetTomePrice(tome) * TomePriceMultiplier));
                 _inventory.Add(new ShopItem
                 {
                     TomeData = tome,
@@ -130,7 +136,7 @@ namespace Spellwright.Shop
             };
         }
 
-        /// <summary>Buys a heal: 5 gold = 5 HP.</summary>
+        /// <summary>Buys a heal potion.</summary>
         public ShopResult BuyHeal()
         {
             if (RunManager.Instance == null)
@@ -175,9 +181,11 @@ namespace Spellwright.Shop
                 }
             }
 
-            int sellPrice = tomeData != null
-                ? Mathf.Max(MinSellPrice, Mathf.RoundToInt(tomeData.shopCost * SellMultiplier))
+            // Sell price is based on the actual buy price (with multiplier), not the raw shopCost
+            int buyPrice = tomeData != null
+                ? Mathf.Max(3, Mathf.RoundToInt(GetTomePrice(tomeData) * TomePriceMultiplier))
                 : MinSellPrice;
+            int sellPrice = Mathf.Max(MinSellPrice, Mathf.RoundToInt(buyPrice * SellMultiplier));
 
             bool removed = TomeManager.Instance.UnequipTome(tomeId);
             if (!removed)

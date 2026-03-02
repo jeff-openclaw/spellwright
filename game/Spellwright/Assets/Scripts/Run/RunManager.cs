@@ -150,10 +150,15 @@ namespace Spellwright.Run
             // Track encounters won
             if (evt.Won) EncountersWon++;
 
-            // Gold reward for winning
+            // Gold reward for winning — config-driven
             if (evt.Won)
             {
-                int reward = 3 + evt.Score / 20;
+                int guessesRemaining = gameConfig != null
+                    ? gameConfig.maxGuessesPerEncounter - evt.GuessCount
+                    : 6 - evt.GuessCount;
+                int reward = gameConfig != null
+                    ? gameConfig.CalculateGoldReward(guessesRemaining)
+                    : 8 + 2 * guessesRemaining;
                 AddGold(reward);
             }
 
@@ -193,14 +198,18 @@ namespace Spellwright.Run
             _state.CurrentHP = Mathf.Min(_state.CurrentHP + amount, _state.MaxHP);
             if (_state.CurrentHP != old)
             {
+                _publishingHP = true;
                 EventBus.Instance.Publish(new HPChangedEvent
                 {
                     OldHP = old,
                     NewHP = _state.CurrentHP,
                     MaxHP = _state.MaxHP
                 });
+                _publishingHP = false;
             }
         }
+
+        private bool _publishingHP;
 
         /// <summary>Applies damage to the player. Used by EncounterManager indirectly via events,
         /// and directly for testing.</summary>
@@ -210,12 +219,14 @@ namespace Spellwright.Run
             int old = _state.CurrentHP;
             _state.CurrentHP = Mathf.Max(0, _state.CurrentHP - amount);
 
+            _publishingHP = true;
             EventBus.Instance.Publish(new HPChangedEvent
             {
                 OldHP = old,
                 NewHP = _state.CurrentHP,
                 MaxHP = _state.MaxHP
             });
+            _publishingHP = false;
 
             if (_state.CurrentHP <= 0)
             {
@@ -226,12 +237,13 @@ namespace Spellwright.Run
 
         private void OnHPChanged(HPChangedEvent evt)
         {
-            if (!_state.IsRunActive) return;
+            // Ignore events we published ourselves (TakeDamage / Heal)
+            if (_publishingHP || !_state.IsRunActive) return;
 
             _state.CurrentHP = evt.NewHP;
             _state.MaxHP = evt.MaxHP;
 
-            // End run if HP depleted
+            // End run if HP depleted (from EncounterManager's HP tracking)
             if (_state.CurrentHP <= 0)
             {
                 Debug.Log("[RunManager] HP depleted — ending run.");

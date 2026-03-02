@@ -23,10 +23,16 @@ namespace Spellwright.Run
         [SerializeField] private GameObject shopPanel;
         [SerializeField] private GameObject runEndPanel;
 
-        [Header("Boss")]
+        [Header("Encounter Setup")]
         [SerializeField] private NPCDataSO bossNPC;
         [SerializeField] private WordPoolSO[] wordPools;
         [SerializeField] private EncounterManager encounterManager;
+        [SerializeField] private GameConfigSO gameConfig;
+
+        [Header("NPCs (ordered by difficulty: easy → hard)")]
+        [SerializeField] private NPCDataSO[] regularNPCs;
+
+        private int _encounterCount;
 
         private GameState _currentState = GameState.MainMenu;
         public GameState CurrentState => _currentState;
@@ -83,6 +89,7 @@ namespace Spellwright.Run
 
                 case GameState.RunSetup:
                     // Start a new run, then go directly to Map
+                    _encounterCount = 0;
                     if (RunManager.Instance != null)
                         RunManager.Instance.StartRun();
                     TransitionTo(GameState.Map);
@@ -94,6 +101,7 @@ namespace Spellwright.Run
 
                 case GameState.Encounter:
                     ShowPanel(encounterPanel);
+                    StartRegularEncounter();
                     break;
 
                 case GameState.Boss:
@@ -171,11 +179,21 @@ namespace Spellwright.Run
 
         private void OnEncounterEnded(EncounterEndedEvent evt)
         {
-            if (evt.IsBoss && evt.Won)
+            if (evt.IsBoss)
             {
-                // Beating the boss triggers victory — ReturnToMap advances past the final node
-                ReturnToMap();
+                if (evt.Won)
+                {
+                    // Beating the boss triggers victory — ReturnToMap advances past the final node
+                    ReturnToMap();
+                }
+                else
+                {
+                    // Boss loss = run loss (even if HP remains)
+                    if (RunManager.Instance != null && RunManager.Instance.IsRunActive)
+                        RunManager.Instance.EndRun(won: false);
+                }
             }
+            // Non-boss encounters: EncounterUI shows result + continue button → calls ReturnToMap
         }
 
         private void OnRunEnded(RunEndedEvent evt)
@@ -183,7 +201,61 @@ namespace Spellwright.Run
             TransitionTo(GameState.RunEnd);
         }
 
-        // ── Boss ──────────────────────────────────────────────
+        // ── Encounters ───────────────────────────────────────
+
+        /// <summary>Starts a regular encounter with progressive difficulty and NPC selection.</summary>
+        private void StartRegularEncounter()
+        {
+            if (encounterManager == null || wordPools == null || wordPools.Length == 0)
+            {
+                Debug.LogWarning("[GameManager] Regular encounter missing references.");
+                return;
+            }
+
+            _encounterCount++;
+
+            // Pick a random word pool
+            var pool = wordPools[Random.Range(0, wordPools.Length)];
+            var usedWords = RunManager.Instance != null
+                ? new List<string>(RunManager.Instance.UsedWords)
+                : new List<string>();
+
+            // Select NPC based on encounter progression
+            NPCDataSO npc = SelectNPCForEncounter(_encounterCount);
+
+            // Get difficulty from config
+            Vector2Int diff = gameConfig != null
+                ? gameConfig.GetDifficultyForEncounter(_encounterCount)
+                : new Vector2Int(1, 2);
+
+            int difficulty = Random.Range(diff.x, diff.y + 1);
+
+            Debug.Log($"[GameManager] Starting encounter #{_encounterCount}: NPC={npc?.displayName}, Difficulty={difficulty}");
+            encounterManager.StartEncounter(pool, npc, usedWords, difficulty);
+        }
+
+        /// <summary>Picks an NPC based on encounter number for progressive difficulty.</summary>
+        private NPCDataSO SelectNPCForEncounter(int encounterNumber)
+        {
+            if (regularNPCs == null || regularNPCs.Length == 0)
+            {
+                Debug.LogWarning("[GameManager] No regular NPCs assigned, falling back to first available.");
+                return null;
+            }
+
+            // Early encounters (1-2): easiest NPC
+            // Mid encounters (3-4): middle NPC
+            // Late encounters (5-6): hardest NPC
+            int npcIndex;
+            if (encounterNumber <= 2)
+                npcIndex = 0;
+            else if (encounterNumber <= 4)
+                npcIndex = Mathf.Min(1, regularNPCs.Length - 1);
+            else
+                npcIndex = Mathf.Min(2, regularNPCs.Length - 1);
+
+            return regularNPCs[npcIndex];
+        }
 
         private void StartBossEncounter()
         {
@@ -198,7 +270,8 @@ namespace Spellwright.Run
                 ? new List<string>(RunManager.Instance.UsedWords)
                 : new List<string>();
 
-            encounterManager.StartEncounter(pool, bossNPC, usedWords, 3, 4);
+            var bossDiff = gameConfig != null ? gameConfig.bossDifficulty : new Vector2Int(3, 4);
+            encounterManager.StartEncounter(pool, bossNPC, usedWords, bossDiff.x, bossDiff.y);
         }
 
         // ── Helpers ───────────────────────────────────────────
