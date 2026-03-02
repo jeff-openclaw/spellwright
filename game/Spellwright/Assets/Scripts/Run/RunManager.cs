@@ -12,7 +12,7 @@ namespace Spellwright.Run
     /// </summary>
     public class RunManager : MonoBehaviour
     {
-        public static RunManager Instance { get; private set; }
+        public static RunManager Instance { get; set; }
 
         [SerializeField] private GameConfigSO gameConfig;
 

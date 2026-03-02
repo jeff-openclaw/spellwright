@@ -13,9 +13,9 @@ namespace Spellwright.Tomes
     /// </summary>
     public class TomeManager : MonoBehaviour
     {
-        public static TomeManager Instance { get; private set; }
+        public static TomeManager Instance { get; set; }
 
-        public TomeSystem TomeSystem { get; private set; }
+        public TomeSystem TomeSystem { get; set; }
 
         private void Awake()
         {
