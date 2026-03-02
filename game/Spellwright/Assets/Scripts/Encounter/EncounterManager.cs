@@ -31,7 +31,7 @@ namespace Spellwright.Encounter
 
         // ── Pre-generation ───────────────────────────────────
         private Task<ClueResponse> _preGeneratedClue;
-        private int _preGenGuessCount = -1;
+        private string _preGenTargetWord;
 
         // ── Properties ───────────────────────────────────────
         public bool IsActive => _isActive;
@@ -118,6 +118,9 @@ namespace Spellwright.Encounter
 
             Debug.Log($"[EncounterManager] Encounter started: \"{_targetWord.Word}\" ({_targetWord.Category}, difficulty {_targetWord.Difficulty})");
 
+            // Start pre-generating the first clue immediately
+            TryPreGenerateNextClue();
+
             await RequestNextClue();
         }
 
@@ -137,13 +140,13 @@ namespace Spellwright.Encounter
 
             ClueResponse clue = null;
 
-            // Check if we have a valid pre-generated clue
-            if (_preGeneratedClue != null && _preGenGuessCount == _guesses.Count)
+            // Check if we have a valid pre-generated clue for the current word
+            if (_preGeneratedClue != null && _preGenTargetWord == _targetWord.Word)
             {
                 Debug.Log("[EncounterManager] Using pre-generated clue.");
                 clue = await _preGeneratedClue;
                 _preGeneratedClue = null;
-                _preGenGuessCount = -1;
+                _preGenTargetWord = null;
             }
 
             // If no valid pre-gen, generate normally
@@ -268,10 +271,10 @@ namespace Spellwright.Encounter
 
             if (nextClueNumber > maxClues) return;
 
-            _preGenGuessCount = _guesses.Count;
+            _preGenTargetWord = _targetWord.Word;
             var guessSnapshot = new List<string>(_guesses);
 
-            Debug.Log($"[EncounterManager] Pre-generating clue #{nextClueNumber} (guess count: {_preGenGuessCount})");
+            Debug.Log($"[EncounterManager] Pre-generating clue #{nextClueNumber} for \"{_preGenTargetWord}\"");
 
             _preGeneratedClue = LLMManager.Instance.GenerateClueAsync(
                 _npcData,
@@ -289,7 +292,7 @@ namespace Spellwright.Encounter
         private void DiscardPreGeneratedClue()
         {
             _preGeneratedClue = null;
-            _preGenGuessCount = -1;
+            _preGenTargetWord = null;
         }
 
         // ── Scoring ──────────────────────────────────────────
