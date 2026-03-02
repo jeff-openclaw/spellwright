@@ -154,6 +154,14 @@ namespace Spellwright.Data
         public TomeInstance Tome { get; set; }
     }
 
+    /// <summary>Fired when a Tome effect triggers during an encounter.</summary>
+    public class TomeTriggeredEvent
+    {
+        public string TomeName { get; set; }
+        public string Description { get; set; }
+        public string RevealedInfo { get; set; }
+    }
+
     /// <summary>Fired when player HP changes.</summary>
     public class HPChangedEvent
     {

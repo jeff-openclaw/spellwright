@@ -6,6 +6,7 @@ using Spellwright.Data;
 using Spellwright.LLM;
 using Spellwright.Run;
 using Spellwright.ScriptableObjects;
+using Spellwright.Tomes;
 using UnityEngine;
 
 namespace Spellwright.Encounter
@@ -95,6 +96,26 @@ namespace Spellwright.Encounter
                 NPC = _npcData
             });
 
+            // Apply Tome HP bonuses (effects write modifiers during event dispatch above)
+            if (TomeManager.Instance != null)
+            {
+                int hpBonus = TomeManager.Instance.TomeSystem.PendingMaxHPBonus;
+                if (hpBonus > 0)
+                {
+                    int oldHP = _currentHP;
+                    _maxHP += hpBonus;
+                    _currentHP += hpBonus;
+                    Debug.Log($"[EncounterManager] Tome HP bonus applied: +{hpBonus} (now {_currentHP}/{_maxHP})");
+
+                    EventBus.Instance.Publish(new HPChangedEvent
+                    {
+                        OldHP = oldHP,
+                        NewHP = _currentHP,
+                        MaxHP = _maxHP
+                    });
+                }
+            }
+
             Debug.Log($"[EncounterManager] Encounter started: \"{_targetWord.Word}\" ({_targetWord.Category}, difficulty {_targetWord.Difficulty})");
 
             await RequestNextClue();
@@ -137,7 +158,7 @@ namespace Spellwright.Encounter
                     _targetWord.Category,
                     _clueNumber,
                     _guesses,
-                    new List<string>() // tome effects — empty for now
+                    TomeManager.Instance?.GetActiveEffectNames() ?? new List<string>()
                 );
             }
 
@@ -183,8 +204,14 @@ namespace Spellwright.Encounter
                 return result;
             }
 
-            // Wrong but valid guess — deduct HP
+            // Wrong but valid guess — deduct HP (reduced by Tome effects)
             int hpLoss = gameConfig != null ? gameConfig.hpLostPerWrongGuess : 15;
+            if (TomeManager.Instance != null)
+            {
+                int reduction = TomeManager.Instance.TomeSystem.PendingHPLossReduction;
+                if (reduction > 0)
+                    hpLoss = Mathf.Max(0, hpLoss - reduction);
+            }
             int oldHP = _currentHP;
             _currentHP = Mathf.Max(0, _currentHP - hpLoss);
 
@@ -252,7 +279,7 @@ namespace Spellwright.Encounter
                 _targetWord.Category,
                 nextClueNumber,
                 guessSnapshot,
-                new List<string>() // tome effects — empty for now
+                TomeManager.Instance?.GetActiveEffectNames() ?? new List<string>()
             );
         }
 

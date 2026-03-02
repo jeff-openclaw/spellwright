@@ -44,6 +44,18 @@ namespace Spellwright.Tomes
         private readonly List<EquippedTome> _equipped = new List<EquippedTome>();
         private readonly EventBus _eventBus;
 
+        /// <summary>
+        /// Accumulated max HP bonus from effects during OnEncounterStart dispatch.
+        /// EncounterManager reads this after publishing EncounterStartedEvent.
+        /// </summary>
+        public int PendingMaxHPBonus { get; set; }
+
+        /// <summary>
+        /// Accumulated HP loss reduction from effects during OnWrongGuess dispatch.
+        /// EncounterManager reads this after publishing GuessSubmittedEvent.
+        /// </summary>
+        public int PendingHPLossReduction { get; set; }
+
         public TomeSystem(EventBus eventBus)
         {
             _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
@@ -115,6 +127,7 @@ namespace Spellwright.Tomes
 
         private void OnEncounterStarted(EncounterStartedEvent evt)
         {
+            PendingMaxHPBonus = 0;
             foreach (var t in _equipped)
                 t.Effect.OnEncounterStart(evt);
         }
@@ -123,6 +136,7 @@ namespace Spellwright.Tomes
         {
             if (evt.Result == null) return;
 
+            PendingHPLossReduction = 0;
             foreach (var t in _equipped)
             {
                 if (evt.Result.IsCorrect)

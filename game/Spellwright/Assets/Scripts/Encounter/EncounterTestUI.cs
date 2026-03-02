@@ -3,6 +3,7 @@ using Spellwright.Core;
 using Spellwright.Data;
 using Spellwright.Run;
 using Spellwright.ScriptableObjects;
+using Spellwright.Tomes;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,8 +33,15 @@ namespace Spellwright.Encounter
         [SerializeField] private Text statusText;
         [SerializeField] private Text logText;
 
+        [Header("Tomes")]
+        [SerializeField] private TomeDataSO[] testTomeAssets;
+        [SerializeField] private Text tomeListText;
+        [SerializeField] private Text tomeTriggerLogText;
+
         private EncounterManager _encounter;
         private bool _isProcessing;
+        private readonly Dictionary<string, Text> _tomeToggleLabels = new Dictionary<string, Text>();
+        private readonly Dictionary<string, Image> _tomeToggleBgs = new Dictionary<string, Image>();
 
         private void Start()
         {
@@ -54,12 +62,20 @@ namespace Spellwright.Encounter
             EventBus.Instance.Subscribe<EncounterEndedEvent>(OnEncounterEnded);
             EventBus.Instance.Subscribe<HPChangedEvent>(OnHPChanged);
             EventBus.Instance.Subscribe<RunEndedEvent>(OnRunEnded);
+            EventBus.Instance.Subscribe<TomeTriggeredEvent>(OnTomeTriggered);
+            EventBus.Instance.Subscribe<TomeEquippedEvent>(OnTomeEquipped);
 
             // Initial state
             blanksText.text = "";
             clueText.text = "Press 'New Encounter' to begin.";
             logText.text = "";
+            if (tomeListText != null) tomeListText.text = "";
+            if (tomeTriggerLogText != null) tomeTriggerLogText.text = "";
             submitButton.interactable = false;
+
+            // Create per-tome toggle buttons
+            CreateTomeToggles();
+
             UpdateStatus();
         }
 
@@ -71,6 +87,8 @@ namespace Spellwright.Encounter
             EventBus.Instance.Unsubscribe<EncounterEndedEvent>(OnEncounterEnded);
             EventBus.Instance.Unsubscribe<HPChangedEvent>(OnHPChanged);
             EventBus.Instance.Unsubscribe<RunEndedEvent>(OnRunEnded);
+            EventBus.Instance.Unsubscribe<TomeTriggeredEvent>(OnTomeTriggered);
+            EventBus.Instance.Unsubscribe<TomeEquippedEvent>(OnTomeEquipped);
         }
 
         // ── Setup ────────────────────────────────────────────
@@ -164,16 +182,18 @@ namespace Spellwright.Encounter
 
         // ── Event Handlers ───────────────────────────────────
 
+        private string _currentBlanks;
+
         private void OnEncounterStarted(EncounterStartedEvent evt)
         {
             // Show blanks
-            string blanks = "";
+            _currentBlanks = "";
             for (int i = 0; i < evt.TargetWord.Length; i++)
             {
-                if (i > 0) blanks += " ";
-                blanks += "_";
+                if (i > 0) _currentBlanks += " ";
+                _currentBlanks += "_";
             }
-            blanksText.text = blanks;
+            blanksText.text = _currentBlanks;
             submitButton.interactable = true;
             AppendLog($"NPC: {evt.NPC.DisplayName} | Category: {evt.Category} | Letters: {evt.TargetWord.Length}");
             UpdateStatus();
@@ -220,6 +240,133 @@ namespace Spellwright.Encounter
             string outcome = evt.Won ? "VICTORY" : "DEFEAT";
             AppendLog($"═══ RUN OVER: {outcome} — Final Score: {evt.FinalScore} ═══");
             UpdateStatus();
+        }
+
+        // ── Tome Event Handlers ─────────────────────────────
+
+        private void OnTomeTriggered(TomeTriggeredEvent evt)
+        {
+            AppendLog($"TOME [{evt.TomeName}]: {evt.RevealedInfo}");
+            AppendTomeLog($"[{evt.TomeName}] {evt.RevealedInfo}");
+
+            // Update blanks display for letter-revealing tomes
+            if (_currentBlanks != null && evt.TomeName == "First Light"
+                && evt.RevealedInfo != null && evt.RevealedInfo.Length > 0)
+            {
+                // Replace first "_" with the revealed letter
+                char revealed = evt.RevealedInfo[evt.RevealedInfo.Length - 1];
+                if (char.IsLetter(revealed))
+                {
+                    _currentBlanks = revealed.ToString().ToUpperInvariant() + _currentBlanks.Substring(1);
+                    blanksText.text = _currentBlanks;
+                }
+            }
+        }
+
+        private void OnTomeEquipped(TomeEquippedEvent evt)
+        {
+            UpdateTomeList();
+        }
+
+        private void CreateTomeToggles()
+        {
+            if (tomeListText == null || TomeManager.Instance == null || testTomeAssets == null)
+            {
+                if (tomeListText != null) tomeListText.text = "(no TomeManager)";
+                return;
+            }
+
+            tomeListText.text = "Tomes (click to toggle):";
+
+            // Create a container for toggle buttons on the right half of the bottom area
+            var containerGO = new GameObject("TomeTogglesContainer");
+            containerGO.transform.SetParent(tomeListText.transform.parent, false);
+
+            var containerRT = containerGO.AddComponent<RectTransform>();
+            containerRT.anchorMin = new Vector2(0.5f, 0.0f);
+            containerRT.anchorMax = new Vector2(0.95f, 0.14f);
+            containerRT.offsetMin = Vector2.zero;
+            containerRT.offsetMax = Vector2.zero;
+
+            var layout = containerGO.AddComponent<VerticalLayoutGroup>();
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = true;
+            layout.spacing = 2;
+
+            foreach (var tome in testTomeAssets)
+            {
+                if (tome == null) continue;
+                CreateTomeToggleButton(tome, containerGO.transform);
+            }
+        }
+
+        private void CreateTomeToggleButton(TomeDataSO tome, Transform parent)
+        {
+            var btnGO = new GameObject($"TomeBtn_{tome.tomeId}");
+            btnGO.transform.SetParent(parent, false);
+
+            var img = btnGO.AddComponent<Image>();
+            img.color = new Color(0.2f, 0.2f, 0.2f, 0.6f);
+
+            var btn = btnGO.AddComponent<Button>();
+            btn.targetGraphic = img;
+
+            // Label
+            var labelGO = new GameObject("Label");
+            labelGO.transform.SetParent(btnGO.transform, false);
+            var labelRT = labelGO.AddComponent<RectTransform>();
+            labelRT.anchorMin = Vector2.zero;
+            labelRT.anchorMax = Vector2.one;
+            labelRT.offsetMin = new Vector2(5, 0);
+            labelRT.offsetMax = new Vector2(-5, 0);
+
+            var label = labelGO.AddComponent<Text>();
+            label.text = $"[ ] {tome.displayName}";
+            label.font = tomeListText.font;
+            label.fontSize = Mathf.Max(tomeListText.fontSize - 2, 10);
+            label.color = tomeListText.color;
+            label.alignment = TextAnchor.MiddleLeft;
+            label.verticalOverflow = VerticalWrapMode.Overflow;
+            label.horizontalOverflow = HorizontalWrapMode.Overflow;
+
+            _tomeToggleLabels[tome.tomeId] = label;
+            _tomeToggleBgs[tome.tomeId] = img;
+
+            var capturedTome = tome;
+            btn.onClick.AddListener(() => ToggleTome(capturedTome));
+        }
+
+        private static readonly Color TomeOffColor = new Color(0.2f, 0.2f, 0.2f, 0.6f);
+        private static readonly Color TomeOnColor = new Color(0.15f, 0.5f, 0.15f, 0.8f);
+
+        private void ToggleTome(TomeDataSO tome)
+        {
+            // Check if currently equipped by trying to unequip first
+            bool wasEquipped = TomeManager.Instance.UnequipTome(tome.tomeId);
+            if (!wasEquipped)
+                TomeManager.Instance.EquipTome(tome);
+
+            bool isNowEquipped = !wasEquipped;
+            if (_tomeToggleLabels.TryGetValue(tome.tomeId, out var label))
+            {
+                string marker = isNowEquipped ? "[x]" : "[ ]";
+                label.text = $"{marker} {tome.displayName}";
+            }
+            if (_tomeToggleBgs.TryGetValue(tome.tomeId, out var bg))
+                bg.color = isNowEquipped ? TomeOnColor : TomeOffColor;
+        }
+
+        private void UpdateTomeList()
+        {
+            // Toggle labels are updated directly in ToggleTome, nothing extra needed
+        }
+
+        private void AppendTomeLog(string message)
+        {
+            if (tomeTriggerLogText == null) return;
+            if (tomeTriggerLogText.text.Length > 0)
+                tomeTriggerLogText.text += "\n";
+            tomeTriggerLogText.text += message;
         }
 
         // ── Helpers ──────────────────────────────────────────
