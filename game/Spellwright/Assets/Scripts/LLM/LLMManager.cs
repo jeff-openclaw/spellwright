@@ -188,6 +188,10 @@ namespace Spellwright.LLM
                 if (parsed == null)
                     return null;
 
+                // Boss safety: truncate clue to max allowed words
+                if (npc.IsBoss && gameConfig != null)
+                    ResponseParser.TruncateClue(parsed, gameConfig.maxBossClueWords);
+
                 parsed.UsedFallbackModel = false;
                 parsed.GenerationTimeMs = (float)sw.Elapsed.TotalMilliseconds;
                 return parsed;

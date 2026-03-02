@@ -26,6 +26,7 @@ namespace Spellwright.Encounter
         private List<string> _guesses = new List<string>();
         private List<string> _usedWords;
         private bool _isActive;
+        private bool _isBoss;
         private int _currentHP;
         private int _maxHP;
 
@@ -55,11 +56,26 @@ namespace Spellwright.Encounter
         /// <param name="difficulty">Difficulty level (1-5) for word filtering.</param>
         public async void StartEncounter(WordPoolSO pool, NPCDataSO npc, List<string> usedWords, int difficulty)
         {
+            StartEncounterInternal(pool, npc, usedWords, pool.GetWordsByDifficulty(difficulty));
+            await PostStartEncounter();
+        }
+
+        /// <summary>
+        /// Starts a boss encounter using a difficulty range for word selection.
+        /// </summary>
+        public async void StartEncounter(WordPoolSO pool, NPCDataSO npc, List<string> usedWords, int minDifficulty, int maxDifficulty)
+        {
+            StartEncounterInternal(pool, npc, usedWords, pool.GetWordsByDifficultyRange(minDifficulty, maxDifficulty));
+            await PostStartEncounter();
+        }
+
+        private void StartEncounterInternal(WordPoolSO pool, NPCDataSO npc, List<string> usedWords, List<WordEntry> wordCandidates)
+        {
             // Discard any pending pre-generated clue
             DiscardPreGeneratedClue();
 
-            // Filter words by difficulty, excluding already-used words
-            var candidates = pool.GetWordsByDifficulty(difficulty)
+            // Filter out already-used words
+            var candidates = wordCandidates
                 .Where(w => !usedWords.Contains(w.Word))
                 .ToList();
 
@@ -72,10 +88,16 @@ namespace Spellwright.Encounter
             // Random selection
             _targetWord = candidates[Random.Range(0, candidates.Count)];
             _npcData = npc.ToPromptData();
+            _isBoss = npc.isBoss;
             _clueNumber = 0;
             _guesses.Clear();
             _usedWords = usedWords;
             _isActive = true;
+        }
+
+        private async Task PostStartEncounter()
+        {
+            if (_targetWord == null) return;
 
             // Initialize HP from RunManager if available, otherwise from config
             if (RunManager.Instance != null && RunManager.Instance.IsRunActive)
@@ -117,6 +139,16 @@ namespace Spellwright.Encounter
             }
 
             Debug.Log($"[EncounterManager] Encounter started: \"{_targetWord.Word}\" ({_targetWord.Category}, difficulty {_targetWord.Difficulty})");
+
+            // Boss intro event before first clue
+            if (_isBoss)
+            {
+                EventBus.Instance.Publish(new BossIntroEvent
+                {
+                    BossName = _npcData.DisplayName,
+                    IntroText = $"{_npcData.DisplayName} awakens..."
+                });
+            }
 
             // Start pre-generating the first clue immediately
             TryPreGenerateNextClue();
@@ -249,6 +281,7 @@ namespace Spellwright.Encounter
             EventBus.Instance.Publish(new EncounterEndedEvent
             {
                 Won = won,
+                IsBoss = _isBoss,
                 TargetWord = _targetWord.Word,
                 GuessCount = _guesses.Count,
                 Score = score

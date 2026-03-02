@@ -148,9 +148,17 @@ namespace Spellwright.Data
     public class EncounterEndedEvent
     {
         public bool Won { get; set; }
+        public bool IsBoss { get; set; }
         public string TargetWord { get; set; }
         public int GuessCount { get; set; }
         public int Score { get; set; }
+    }
+
+    /// <summary>Fired before the first clue in a boss encounter.</summary>
+    public class BossIntroEvent
+    {
+        public string BossName { get; set; }
+        public string IntroText { get; set; }
     }
 
     /// <summary>Fired when a Tome is equipped.</summary>

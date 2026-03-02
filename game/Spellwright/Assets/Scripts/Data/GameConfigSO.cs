@@ -14,6 +14,7 @@ namespace Spellwright.ScriptableObjects
         public int maxGuessesPerEncounter = 6;
         public int hpLostPerWrongGuess = 15;
         public int baseScorePerCorrectGuess = 100;
+        public int maxBossClueWords = 3;
 
         [Header("LLM")]
         [Tooltip("GGUF model filename in StreamingAssets/Models/")]

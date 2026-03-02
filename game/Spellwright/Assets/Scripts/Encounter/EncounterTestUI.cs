@@ -40,8 +40,13 @@ namespace Spellwright.Encounter
 
         private EncounterManager _encounter;
         private bool _isProcessing;
+        private bool _isBossEncounter;
         private readonly Dictionary<string, Text> _tomeToggleLabels = new Dictionary<string, Text>();
         private readonly Dictionary<string, Image> _tomeToggleBgs = new Dictionary<string, Image>();
+
+        // Boss UI
+        private static readonly Color BossAccentColor = new Color(0.7f, 0.1f, 0.1f, 1f);
+        private Color _defaultStatusColor;
 
         private void Start()
         {
@@ -64,6 +69,10 @@ namespace Spellwright.Encounter
             EventBus.Instance.Subscribe<RunEndedEvent>(OnRunEnded);
             EventBus.Instance.Subscribe<TomeTriggeredEvent>(OnTomeTriggered);
             EventBus.Instance.Subscribe<TomeEquippedEvent>(OnTomeEquipped);
+            EventBus.Instance.Subscribe<BossIntroEvent>(OnBossIntro);
+
+            // Store default colors
+            _defaultStatusColor = statusText != null ? statusText.color : Color.white;
 
             // Initial state
             blanksText.text = "";
@@ -89,6 +98,7 @@ namespace Spellwright.Encounter
             EventBus.Instance.Unsubscribe<RunEndedEvent>(OnRunEnded);
             EventBus.Instance.Unsubscribe<TomeTriggeredEvent>(OnTomeTriggered);
             EventBus.Instance.Unsubscribe<TomeEquippedEvent>(OnTomeEquipped);
+            EventBus.Instance.Unsubscribe<BossIntroEvent>(OnBossIntro);
         }
 
         // ── Setup ────────────────────────────────────────────
@@ -157,9 +167,17 @@ namespace Spellwright.Encounter
 
             logText.text = "";
             clueText.text = "Generating first clue...";
-            AppendLog($"Starting encounter — Pool: {pool.category}, NPC: {npc.displayName}, Difficulty: {difficulty}");
 
-            _encounter.StartEncounter(pool, npc, usedWords, difficulty);
+            if (npc.isBoss)
+            {
+                AppendLog($"Starting BOSS encounter — Pool: {pool.category}, NPC: {npc.displayName}, Difficulty: 3-4");
+                _encounter.StartEncounter(pool, npc, usedWords, 3, 4);
+            }
+            else
+            {
+                AppendLog($"Starting encounter — Pool: {pool.category}, NPC: {npc.displayName}, Difficulty: {difficulty}");
+                _encounter.StartEncounter(pool, npc, usedWords, difficulty);
+            }
         }
 
         private async void OnSubmitClicked()
@@ -219,13 +237,33 @@ namespace Spellwright.Encounter
         private void OnEncounterEnded(EncounterEndedEvent evt)
         {
             submitButton.interactable = false;
+
+            string bossTag = evt.IsBoss ? "BOSS " : "";
             string result = evt.Won
-                ? $"YOU WON! Score: {evt.Score}"
-                : $"YOU LOST!";
+                ? $"{bossTag}YOU WON! Score: {evt.Score}"
+                : $"{bossTag}YOU LOST!";
             blanksText.text = evt.TargetWord.ToUpperInvariant();
             AppendLog($"─── {result} ───");
             AppendLog($"The word was: \"{evt.TargetWord}\" | Guesses: {evt.GuessCount}");
+
+            // Reset boss styling
+            if (_isBossEncounter)
+            {
+                _isBossEncounter = false;
+                ResetBossUI();
+            }
+
             UpdateStatus();
+        }
+
+        private void OnBossIntro(BossIntroEvent evt)
+        {
+            _isBossEncounter = true;
+            ApplyBossUI();
+
+            AppendLog($"═══ BOSS: {evt.BossName} ═══");
+            AppendLog(evt.IntroText);
+            clueText.text = evt.IntroText;
         }
 
         private void OnHPChanged(HPChangedEvent evt)
@@ -367,6 +405,28 @@ namespace Spellwright.Encounter
             if (tomeTriggerLogText.text.Length > 0)
                 tomeTriggerLogText.text += "\n";
             tomeTriggerLogText.text += message;
+        }
+
+        // ── Boss UI ──────────────────────────────────────────
+
+        private void ApplyBossUI()
+        {
+            if (statusText != null)
+                statusText.color = BossAccentColor;
+            if (blanksText != null)
+                blanksText.color = BossAccentColor;
+            if (clueText != null)
+                clueText.color = BossAccentColor;
+        }
+
+        private void ResetBossUI()
+        {
+            if (statusText != null)
+                statusText.color = _defaultStatusColor;
+            if (blanksText != null)
+                blanksText.color = _defaultStatusColor;
+            if (clueText != null)
+                clueText.color = _defaultStatusColor;
         }
 
         // ── Helpers ──────────────────────────────────────────

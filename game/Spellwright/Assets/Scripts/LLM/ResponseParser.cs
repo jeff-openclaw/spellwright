@@ -105,6 +105,24 @@ namespace Spellwright.LLM
             return null;
         }
 
+        // ── Boss Truncation ────────────────────────────────
+
+        /// <summary>
+        /// Truncates the clue to at most <paramref name="maxWords"/> words.
+        /// Splits on whitespace, takes the first N words, and rejoins.
+        /// </summary>
+        public static void TruncateClue(ClueResponse response, int maxWords)
+        {
+            if (response == null || string.IsNullOrWhiteSpace(response.Clue))
+                return;
+
+            var words = response.Clue.Split((char[])null, System.StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length <= maxWords)
+                return;
+
+            response.Clue = string.Join(" ", words, 0, maxWords);
+        }
+
         // ── Safety ─────────────────────────────────────────
 
         /// <summary>

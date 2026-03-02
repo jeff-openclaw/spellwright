@@ -62,6 +62,11 @@ namespace Spellwright.ScriptableObjects
             return GetWords().FindAll(w => w.Difficulty == difficulty);
         }
 
+        public List<WordEntry> GetWordsByDifficultyRange(int min, int max)
+        {
+            return GetWords().FindAll(w => w.Difficulty >= min && w.Difficulty <= max);
+        }
+
         public int WordCount => GetWords().Count;
     }
 }

@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using Spellwright.Core;
 using Spellwright.Data;
+using Spellwright.Encounter;
+using Spellwright.ScriptableObjects;
 using UnityEngine;
 
 namespace Spellwright.Run
@@ -19,6 +22,11 @@ namespace Spellwright.Run
         [SerializeField] private GameObject encounterPanel;
         [SerializeField] private GameObject shopPanel;
         [SerializeField] private GameObject runEndPanel;
+
+        [Header("Boss")]
+        [SerializeField] private NPCDataSO bossNPC;
+        [SerializeField] private WordPoolSO[] wordPools;
+        [SerializeField] private EncounterManager encounterManager;
 
         private GameState _currentState = GameState.MainMenu;
         public GameState CurrentState => _currentState;
@@ -85,8 +93,12 @@ namespace Spellwright.Run
                     break;
 
                 case GameState.Encounter:
+                    ShowPanel(encounterPanel);
+                    break;
+
                 case GameState.Boss:
                     ShowPanel(encounterPanel);
+                    StartBossEncounter();
                     break;
 
                 case GameState.Shop:
@@ -159,13 +171,34 @@ namespace Spellwright.Run
 
         private void OnEncounterEnded(EncounterEndedEvent evt)
         {
-            // After encounter, return to map (with small delay for UX)
-            // The ReturnToMap call advances the node
+            if (evt.IsBoss && evt.Won)
+            {
+                // Beating the boss triggers victory — ReturnToMap advances past the final node
+                ReturnToMap();
+            }
         }
 
         private void OnRunEnded(RunEndedEvent evt)
         {
             TransitionTo(GameState.RunEnd);
+        }
+
+        // ── Boss ──────────────────────────────────────────────
+
+        private void StartBossEncounter()
+        {
+            if (encounterManager == null || bossNPC == null || wordPools == null || wordPools.Length == 0)
+            {
+                Debug.LogWarning("[GameManager] Boss encounter missing references (encounterManager, bossNPC, or wordPools).");
+                return;
+            }
+
+            var pool = wordPools[Random.Range(0, wordPools.Length)];
+            var usedWords = RunManager.Instance != null
+                ? new List<string>(RunManager.Instance.UsedWords)
+                : new List<string>();
+
+            encounterManager.StartEncounter(pool, bossNPC, usedWords, 3, 4);
         }
 
         // ── Helpers ───────────────────────────────────────────
