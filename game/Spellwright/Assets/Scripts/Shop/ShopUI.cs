@@ -3,6 +3,8 @@ using Spellwright.Core;
 using Spellwright.Data;
 using Spellwright.Run;
 using Spellwright.Tomes;
+using Spellwright.UI;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,18 +20,16 @@ namespace Spellwright.Shop
         [SerializeField] private ShopManager shopManager;
         [SerializeField] private Transform itemContainer;
         [SerializeField] private Transform equippedContainer;
-        [SerializeField] private Text goldText;
-        [SerializeField] private Text hpText;
-        [SerializeField] private Text feedbackText;
+        [SerializeField] private TextMeshProUGUI goldText;
+        [SerializeField] private TextMeshProUGUI hpText;
+        [SerializeField] private TextMeshProUGUI feedbackText;
         [SerializeField] private Button leaveButton;
+
+        [Header("Theme")]
+        [SerializeField] private TerminalThemeSO theme;
 
         private readonly List<GameObject> _itemEntries = new List<GameObject>();
         private readonly List<GameObject> _equippedEntries = new List<GameObject>();
-
-        private static readonly Color CommonColor = new Color(0.7f, 0.7f, 0.7f);
-        private static readonly Color UncommonColor = new Color(0.3f, 0.8f, 0.3f);
-        private static readonly Color RareColor = new Color(0.3f, 0.5f, 1f);
-        private static readonly Color LegendaryColor = new Color(1f, 0.6f, 0f);
 
         private void OnEnable()
         {
@@ -101,8 +101,8 @@ namespace Spellwright.Shop
 
             var bg = entryGO.AddComponent<Image>();
             bg.color = item.IsSold
-                ? new Color(0.1f, 0.1f, 0.1f, 0.4f)
-                : new Color(0.15f, 0.15f, 0.2f, 0.8f);
+                ? new Color(0.02f, 0.04f, 0.02f, 0.4f)
+                : (theme != null ? theme.panelBg : new Color(0.03f, 0.08f, 0.03f, 0.95f));
 
             // Layout
             var layout = entryGO.AddComponent<HorizontalLayoutGroup>();
@@ -116,25 +116,28 @@ namespace Spellwright.Shop
             labelGO.transform.SetParent(entryGO.transform, false);
             labelGO.AddComponent<RectTransform>();
 
-            var label = labelGO.AddComponent<Text>();
-            label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            label.fontSize = 14;
+            var label = labelGO.AddComponent<TextMeshProUGUI>();
+            if (theme != null && theme.primaryFont != null)
+                label.font = theme.primaryFont;
+            label.fontSize = theme != null ? theme.labelSize : 14;
 
             if (item.IsHealItem)
             {
                 int healAmt = shopManager != null ? shopManager.HealAmountValue : 8;
                 label.text = $"Heal Potion (+{healAmt} HP) — {item.Price}g";
-                label.color = new Color(0.3f, 0.9f, 0.3f);
+                label.color = theme != null ? theme.successColor : new Color(0.1f, 0.9f, 0.3f);
             }
             else if (item.TomeData != null)
             {
                 label.text = item.IsSold
                     ? $"[SOLD] {item.TomeData.displayName}"
                     : $"{item.TomeData.displayName} ({item.TomeData.rarity}) — {item.Price}g\n  {item.TomeData.description}";
-                label.color = item.IsSold ? Color.gray : GetRarityColor(item.TomeData.rarity);
+                label.color = item.IsSold
+                    ? (theme != null ? theme.inactiveColor : new Color(0.3f, 0.5f, 0.3f))
+                    : (theme != null ? theme.GetRarityColor(item.TomeData.rarity) : Color.white);
             }
 
-            label.alignment = TextAnchor.MiddleLeft;
+            label.alignment = TextAlignmentOptions.MidlineLeft;
 
             // Buy button
             if (!item.IsSold)
@@ -145,7 +148,7 @@ namespace Spellwright.Shop
                 btnRT.sizeDelta = new Vector2(60, 0);
 
                 var btnBg = btnGO.AddComponent<Image>();
-                btnBg.color = new Color(0.2f, 0.4f, 0.2f, 0.9f);
+                btnBg.color = theme != null ? theme.buttonBg : new Color(0.05f, 0.2f, 0.05f, 0.9f);
 
                 var btn = btnGO.AddComponent<Button>();
                 btn.targetGraphic = btnBg;
@@ -158,12 +161,13 @@ namespace Spellwright.Shop
                 btnLabelRT.offsetMin = Vector2.zero;
                 btnLabelRT.offsetMax = Vector2.zero;
 
-                var btnLabel = btnLabelGO.AddComponent<Text>();
+                var btnLabel = btnLabelGO.AddComponent<TextMeshProUGUI>();
                 btnLabel.text = "BUY";
-                btnLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                btnLabel.fontSize = 14;
-                btnLabel.color = Color.white;
-                btnLabel.alignment = TextAnchor.MiddleCenter;
+                if (theme != null && theme.primaryFont != null)
+                    btnLabel.font = theme.primaryFont;
+                btnLabel.fontSize = theme != null ? theme.labelSize : 14;
+                btnLabel.color = theme != null ? theme.buttonText : new Color(0f, 1f, 0.33f);
+                btnLabel.alignment = TextAlignmentOptions.Center;
 
                 int capturedIndex = index;
                 btn.onClick.AddListener(() => OnBuyClicked(capturedIndex));
@@ -186,7 +190,9 @@ namespace Spellwright.Shop
             rt.sizeDelta = new Vector2(0, 40);
 
             var bg = entryGO.AddComponent<Image>();
-            bg.color = new Color(0.2f, 0.15f, 0.1f, 0.8f);
+            bg.color = theme != null
+                ? new Color(theme.panelBg.r, theme.panelBg.g, theme.panelBg.b, 0.8f)
+                : new Color(0.03f, 0.08f, 0.03f, 0.8f);
 
             var layout = entryGO.AddComponent<HorizontalLayoutGroup>();
             layout.childForceExpandWidth = true;
@@ -199,12 +205,13 @@ namespace Spellwright.Shop
             labelGO.transform.SetParent(entryGO.transform, false);
             labelGO.AddComponent<RectTransform>();
 
-            var label = labelGO.AddComponent<Text>();
+            var label = labelGO.AddComponent<TextMeshProUGUI>();
             label.text = $"{tome.TomeName} ({tome.Rarity})";
-            label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            label.fontSize = 14;
-            label.color = GetRarityColor(tome.Rarity);
-            label.alignment = TextAnchor.MiddleLeft;
+            if (theme != null && theme.primaryFont != null)
+                label.font = theme.primaryFont;
+            label.fontSize = theme != null ? theme.labelSize : 14;
+            label.color = theme != null ? theme.GetRarityColor(tome.Rarity) : Color.white;
+            label.alignment = TextAlignmentOptions.MidlineLeft;
 
             // Sell button
             var btnGO = new GameObject("SellBtn");
@@ -213,7 +220,7 @@ namespace Spellwright.Shop
             btnRT.sizeDelta = new Vector2(70, 0);
 
             var btnBg = btnGO.AddComponent<Image>();
-            btnBg.color = new Color(0.5f, 0.2f, 0.2f, 0.9f);
+            btnBg.color = theme != null ? theme.buttonBgDanger : new Color(0.3f, 0.05f, 0.05f, 0.9f);
 
             var btn = btnGO.AddComponent<Button>();
             btn.targetGraphic = btnBg;
@@ -226,12 +233,13 @@ namespace Spellwright.Shop
             btnLabelRT.offsetMin = Vector2.zero;
             btnLabelRT.offsetMax = Vector2.zero;
 
-            var btnLabel = btnLabelGO.AddComponent<Text>();
+            var btnLabel = btnLabelGO.AddComponent<TextMeshProUGUI>();
             btnLabel.text = "SELL";
-            btnLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            btnLabel.fontSize = 14;
-            btnLabel.color = Color.white;
-            btnLabel.alignment = TextAnchor.MiddleCenter;
+            if (theme != null && theme.primaryFont != null)
+                btnLabel.font = theme.primaryFont;
+            btnLabel.fontSize = theme != null ? theme.labelSize : 14;
+            btnLabel.color = theme != null ? theme.buttonText : new Color(0f, 1f, 0.33f);
+            btnLabel.alignment = TextAlignmentOptions.Center;
 
             string capturedId = tome.TomeId;
             btn.onClick.AddListener(() => OnSellClicked(capturedId));
@@ -286,18 +294,6 @@ namespace Spellwright.Shop
             foreach (var e in entries)
                 if (e != null) Destroy(e);
             entries.Clear();
-        }
-
-        private static Color GetRarityColor(TomeRarity rarity)
-        {
-            return rarity switch
-            {
-                TomeRarity.Common => CommonColor,
-                TomeRarity.Uncommon => UncommonColor,
-                TomeRarity.Rare => RareColor,
-                TomeRarity.Legendary => LegendaryColor,
-                _ => Color.white
-            };
         }
     }
 }

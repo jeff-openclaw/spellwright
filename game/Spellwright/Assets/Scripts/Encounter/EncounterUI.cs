@@ -3,6 +3,8 @@ using Spellwright.Core;
 using Spellwright.Data;
 using Spellwright.Run;
 using Spellwright.Tomes;
+using Spellwright.UI;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,42 +18,45 @@ namespace Spellwright.Encounter
     public class EncounterUI : MonoBehaviour
     {
         [Header("NPC Info")]
-        [SerializeField] private Text npcNameText;
-        [SerializeField] private Text npcArchetypeText;
+        [SerializeField] private TextMeshProUGUI npcNameText;
+        [SerializeField] private TextMeshProUGUI npcArchetypeText;
 
         [Header("Word Display")]
-        [SerializeField] private Text blanksText;
-        [SerializeField] private Text categoryText;
+        [SerializeField] private TextMeshProUGUI blanksText;
+        [SerializeField] private TextMeshProUGUI categoryText;
 
         [Header("Clue Display")]
-        [SerializeField] private Text clueText;
-        [SerializeField] private Text clueNumberText;
+        [SerializeField] private TextMeshProUGUI clueText;
+        [SerializeField] private TextMeshProUGUI clueNumberText;
 
         [Header("Input")]
-        [SerializeField] private InputField guessInput;
+        [SerializeField] private TMP_InputField guessInput;
         [SerializeField] private Button submitButton;
 
         [Header("Status")]
-        [SerializeField] private Text hpText;
+        [SerializeField] private TextMeshProUGUI hpText;
         [SerializeField] private Image hpBarFill;
-        [SerializeField] private Text goldText;
-        [SerializeField] private Text guessesText;
-        [SerializeField] private Text scoreText;
+        [SerializeField] private TextMeshProUGUI goldText;
+        [SerializeField] private TextMeshProUGUI guessesText;
+        [SerializeField] private TextMeshProUGUI scoreText;
 
         [Header("Guess History")]
-        [SerializeField] private Text historyText;
+        [SerializeField] private TextMeshProUGUI historyText;
 
         [Header("Tome Info")]
-        [SerializeField] private Text tomeInfoText;
+        [SerializeField] private TextMeshProUGUI tomeInfoText;
 
         [Header("Result Overlay")]
         [SerializeField] private GameObject resultPanel;
-        [SerializeField] private Text resultTitleText;
-        [SerializeField] private Text resultDetailsText;
+        [SerializeField] private TextMeshProUGUI resultTitleText;
+        [SerializeField] private TextMeshProUGUI resultDetailsText;
         [SerializeField] private Button continueButton;
 
         [Header("Flash Overlay")]
         [SerializeField] private Image flashOverlay;
+
+        [Header("Theme")]
+        [SerializeField] private TerminalThemeSO theme;
 
         [Header("Juice Settings")]
         [SerializeField] private float typewriterSpeed = 0.03f;
@@ -73,13 +78,6 @@ namespace Spellwright.Encounter
         private Coroutine _flashCoroutine;
         private RectTransform _shakeTarget;
         private Vector2 _shakeOriginalPos;
-
-        // Boss styling
-        private static readonly Color BossAccentColor = new Color(0.85f, 0.1f, 0.1f, 1f);
-        private static readonly Color NormalTextColor = Color.white;
-        private static readonly Color DamageFlashColor = new Color(0.8f, 0.1f, 0.1f, 0.4f);
-        private static readonly Color SuccessFlashColor = new Color(0.1f, 0.8f, 0.2f, 0.4f);
-        private static readonly Color BossIntroFlashColor = new Color(0.5f, 0.0f, 0.0f, 0.3f);
 
         private void Start()
         {
@@ -114,9 +112,9 @@ namespace Spellwright.Encounter
             if (resultPanel != null)
                 resultPanel.SetActive(false);
 
-            // Handle input submission with Enter key
+            // Handle input submission with Enter key (onSubmit fires on Enter press)
             if (guessInput != null)
-                guessInput.onEndEdit.AddListener(OnInputEndEdit);
+                guessInput.onSubmit.AddListener(OnInputSubmit);
         }
 
         private void OnDestroy()
@@ -137,6 +135,11 @@ namespace Spellwright.Encounter
             {
                 _currentHPFill = Mathf.Lerp(_currentHPFill, _targetHPFill, Time.deltaTime * hpBarLerpSpeed);
                 hpBarFill.fillAmount = _currentHPFill;
+
+                // Dynamic HP bar color
+                hpBarFill.color = theme != null
+                    ? theme.GetHPBarColor(_currentHPFill)
+                    : new Color(0f, 0.8f, 0.25f);
             }
 
             // Focus input field when encounter is active
@@ -232,13 +235,16 @@ namespace Spellwright.Encounter
             }
 
             // Juice effects based on result
+            Color damageFlash = theme != null ? theme.damageFlash : new Color(0.8f, 0.1f, 0.1f, 0.4f);
+            Color successFlash = theme != null ? theme.successFlash : new Color(0.1f, 0.8f, 0.2f, 0.4f);
+
             if (evt.Result.IsCorrect)
             {
-                Flash(SuccessFlashColor);
+                Flash(successFlash);
             }
             else if (evt.Result.IsValidWord)
             {
-                Flash(DamageFlashColor);
+                Flash(damageFlash);
                 ScreenShake();
             }
 
@@ -270,7 +276,9 @@ namespace Spellwright.Encounter
         {
             _isBossEncounter = true;
             ApplyBossUI();
-            Flash(BossIntroFlashColor);
+
+            Color bossFlash = theme != null ? theme.bossIntroFlash : new Color(0.5f, 0f, 0f, 0.3f);
+            Flash(bossFlash);
 
             if (clueText != null)
             {
@@ -290,7 +298,10 @@ namespace Spellwright.Encounter
 
             // Flash on damage
             if (evt.NewHP < evt.OldHP)
-                Flash(DamageFlashColor);
+            {
+                Color damageFlash = theme != null ? theme.damageFlash : new Color(0.8f, 0.1f, 0.1f, 0.4f);
+                Flash(damageFlash);
+            }
         }
 
         private void OnTomeTriggered(TomeTriggeredEvent evt)
@@ -319,10 +330,9 @@ namespace Spellwright.Encounter
 
         // ── Input Handling ───────────────────────────────────
 
-        private void OnInputEndEdit(string text)
+        private void OnInputSubmit(string text)
         {
-            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-                OnSubmitClicked();
+            OnSubmitClicked();
         }
 
         private async void OnSubmitClicked()
@@ -361,7 +371,7 @@ namespace Spellwright.Encounter
                 resultPanel.SetActive(false);
 
             if (GameManager.Instance != null)
-                GameManager.Instance.ReturnToMap();
+                GameManager.Instance.GoToShop();
         }
 
         // ── Result Display ───────────────────────────────────
@@ -378,12 +388,12 @@ namespace Spellwright.Encounter
                 if (evt.Won)
                 {
                     resultTitleText.text = $"{bossTag}WORD FOUND!";
-                    resultTitleText.color = new Color(0.2f, 0.9f, 0.3f);
+                    resultTitleText.color = theme != null ? theme.successColor : new Color(0.1f, 0.9f, 0.3f);
                 }
                 else
                 {
                     resultTitleText.text = $"{bossTag}WORD LOST";
-                    resultTitleText.color = new Color(0.9f, 0.2f, 0.2f);
+                    resultTitleText.color = theme != null ? theme.damageColor : new Color(1f, 0.15f, 0.1f);
                 }
             }
 
@@ -405,7 +415,7 @@ namespace Spellwright.Encounter
 
         // ── Juice Effects ────────────────────────────────────
 
-        private IEnumerator TypewriterReveal(Text textComponent, string fullText)
+        private IEnumerator TypewriterReveal(TextMeshProUGUI textComponent, string fullText)
         {
             textComponent.text = "";
             for (int i = 0; i < fullText.Length; i++)
@@ -490,16 +500,18 @@ namespace Spellwright.Encounter
 
         private void ApplyBossUI()
         {
-            if (npcNameText != null) npcNameText.color = BossAccentColor;
-            if (blanksText != null) blanksText.color = BossAccentColor;
-            if (clueText != null) clueText.color = BossAccentColor;
+            Color bossColor = theme != null ? theme.bossAccent : new Color(0.85f, 0.1f, 0.1f);
+            if (npcNameText != null) npcNameText.color = bossColor;
+            if (blanksText != null) blanksText.color = bossColor;
+            if (clueText != null) clueText.color = bossColor;
         }
 
         private void ResetBossUI()
         {
-            if (npcNameText != null) npcNameText.color = NormalTextColor;
-            if (blanksText != null) blanksText.color = NormalTextColor;
-            if (clueText != null) clueText.color = NormalTextColor;
+            Color normalColor = theme != null ? theme.phosphorGreen : new Color(0f, 1f, 0.33f);
+            if (npcNameText != null) npcNameText.color = normalColor;
+            if (blanksText != null) blanksText.color = normalColor;
+            if (clueText != null) clueText.color = normalColor;
         }
 
         // ── Helpers ──────────────────────────────────────────

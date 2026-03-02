@@ -26,10 +26,11 @@ namespace Spellwright.LLM
             string category,
             int clueNumber,
             List<string> previousGuesses,
-            List<string> activeTomeEffects)
+            List<string> activeTomeEffects,
+            GameLanguage language = GameLanguage.English)
         {
-            var system = BuildSystemPrompt(npc, category, clueNumber, activeTomeEffects);
-            var user = BuildUserMessage(targetWord, category, clueNumber, previousGuesses);
+            var system = BuildSystemPrompt(npc, category, clueNumber, activeTomeEffects, language);
+            var user = BuildUserMessage(targetWord, category, clueNumber, previousGuesses, language);
             return (system, user);
         }
 
@@ -39,9 +40,17 @@ namespace Spellwright.LLM
             NPCPromptData npc,
             string category,
             int clueNumber,
-            List<string> activeTomeEffects)
+            List<string> activeTomeEffects,
+            GameLanguage language)
         {
             var sb = new StringBuilder();
+
+            // Language instruction — at the very top for maximum compliance
+            if (language == GameLanguage.Romanian)
+            {
+                sb.AppendLine("LANGUAGE: You MUST write ALL clue text in Romanian (romana). Do NOT use English for clues.");
+                sb.AppendLine();
+            }
 
             // NPC identity
             sb.AppendLine($"You are {npc.DisplayName}, a {npc.Archetype} in a magical word-guessing game.");
@@ -67,6 +76,12 @@ namespace Spellwright.LLM
             sb.AppendLine("- Your clue should be 1-2 sentences maximum.");
             sb.AppendLine($"- The word category is \"{category}\".");
             sb.AppendLine($"- This is clue #{clueNumber}. Each clue should be MORE specific than the last.");
+
+            // Language reminder (reinforced)
+            if (language == GameLanguage.Romanian)
+            {
+                sb.AppendLine("- REMEMBER: Your clue MUST be in Romanian (romana), not English.");
+            }
 
             // Boss constraint
             if (npc.IsBoss && !string.IsNullOrEmpty(npc.BossConstraint))
@@ -99,7 +114,8 @@ namespace Spellwright.LLM
             string targetWord,
             string category,
             int clueNumber,
-            List<string> previousGuesses)
+            List<string> previousGuesses,
+            GameLanguage language = GameLanguage.English)
         {
             var sb = new StringBuilder();
 
@@ -112,6 +128,9 @@ namespace Spellwright.LLM
             }
 
             sb.AppendLine($"Give clue #{clueNumber}. Remember: more specific than previous clues.");
+
+            if (language == GameLanguage.Romanian)
+                sb.AppendLine("Write the clue in Romanian.");
 
             return sb.ToString();
         }

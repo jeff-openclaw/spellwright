@@ -1,5 +1,7 @@
 using Spellwright.Core;
 using Spellwright.Data;
+using Spellwright.UI;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,9 +13,12 @@ namespace Spellwright.Run
     public class RunEndUI : MonoBehaviour
     {
         [Header("Display")]
-        [SerializeField] private Text titleText;
-        [SerializeField] private Text statsText;
+        [SerializeField] private TextMeshProUGUI titleText;
+        [SerializeField] private TextMeshProUGUI statsText;
         [SerializeField] private Button playAgainButton;
+
+        [Header("Theme")]
+        [SerializeField] private TerminalThemeSO theme;
 
         private void OnEnable()
         {
@@ -46,8 +51,8 @@ namespace Spellwright.Run
                 bool won = evt?.Won ?? false;
                 titleText.text = won ? "VICTORY!" : "DEFEAT";
                 titleText.color = won
-                    ? new Color(1f, 0.85f, 0.2f)
-                    : new Color(0.8f, 0.2f, 0.2f);
+                    ? (theme != null ? theme.amberBright : new Color(1f, 0.75f, 0f))
+                    : (theme != null ? theme.damageColor : new Color(1f, 0.15f, 0.1f));
             }
 
             if (statsText != null)

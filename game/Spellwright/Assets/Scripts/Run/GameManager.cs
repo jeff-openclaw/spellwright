@@ -26,6 +26,7 @@ namespace Spellwright.Run
         [Header("Encounter Setup")]
         [SerializeField] private NPCDataSO bossNPC;
         [SerializeField] private WordPoolSO[] wordPools;
+        [SerializeField] private WordPoolSO[] wordPoolsRo;
         [SerializeField] private EncounterManager encounterManager;
         [SerializeField] private GameConfigSO gameConfig;
 
@@ -33,6 +34,12 @@ namespace Spellwright.Run
         [SerializeField] private NPCDataSO[] regularNPCs;
 
         private int _encounterCount;
+
+        /// <summary>Returns the word pool array for the configured language.</summary>
+        private WordPoolSO[] ActiveWordPools =>
+            gameConfig != null && gameConfig.language == Data.GameLanguage.Romanian && wordPoolsRo != null && wordPoolsRo.Length > 0
+                ? wordPoolsRo
+                : wordPools;
 
         private GameState _currentState = GameState.MainMenu;
         public GameState CurrentState => _currentState;
@@ -133,7 +140,7 @@ namespace Spellwright.Run
             TransitionTo(GameState.RunSetup);
         }
 
-        /// <summary>Called from Map UI or encounter flow to proceed to the current node.</summary>
+        /// <summary>Called from Map UI to proceed to the current node.</summary>
         public void ProceedToCurrentNode()
         {
             if (RunManager.Instance == null || !RunManager.Instance.IsRunActive) return;
@@ -148,12 +155,6 @@ namespace Spellwright.Run
 
             switch (nodeType)
             {
-                case NodeType.Encounter:
-                    TransitionTo(GameState.Encounter);
-                    break;
-                case NodeType.Shop:
-                    TransitionTo(GameState.Shop);
-                    break;
                 case NodeType.Boss:
                     TransitionTo(GameState.Boss);
                     break;
@@ -161,6 +162,12 @@ namespace Spellwright.Run
                     TransitionTo(GameState.Encounter);
                     break;
             }
+        }
+
+        /// <summary>Called after encounter result to show the shop before returning to map.</summary>
+        public void GoToShop()
+        {
+            TransitionTo(GameState.Shop);
         }
 
         /// <summary>Called after encounter/shop completes to return to the map.</summary>
@@ -183,8 +190,10 @@ namespace Spellwright.Run
             {
                 if (evt.Won)
                 {
-                    // Beating the boss triggers victory — ReturnToMap advances past the final node
-                    ReturnToMap();
+                    // Boss victory — start next wave, show shop, then back to map
+                    if (RunManager.Instance != null && RunManager.Instance.IsRunActive)
+                        RunManager.Instance.StartNextWave();
+                    GoToShop();
                 }
                 else
                 {
@@ -206,7 +215,8 @@ namespace Spellwright.Run
         /// <summary>Starts a regular encounter with progressive difficulty and NPC selection.</summary>
         private void StartRegularEncounter()
         {
-            if (encounterManager == null || wordPools == null || wordPools.Length == 0)
+            var pools = ActiveWordPools;
+            if (encounterManager == null || pools == null || pools.Length == 0)
             {
                 Debug.LogWarning("[GameManager] Regular encounter missing references.");
                 return;
@@ -215,7 +225,7 @@ namespace Spellwright.Run
             _encounterCount++;
 
             // Pick a random word pool
-            var pool = wordPools[Random.Range(0, wordPools.Length)];
+            var pool = pools[Random.Range(0, pools.Length)];
             var usedWords = RunManager.Instance != null
                 ? new List<string>(RunManager.Instance.UsedWords)
                 : new List<string>();
@@ -259,13 +269,14 @@ namespace Spellwright.Run
 
         private void StartBossEncounter()
         {
-            if (encounterManager == null || bossNPC == null || wordPools == null || wordPools.Length == 0)
+            var bossPools = ActiveWordPools;
+            if (encounterManager == null || bossNPC == null || bossPools == null || bossPools.Length == 0)
             {
                 Debug.LogWarning("[GameManager] Boss encounter missing references (encounterManager, bossNPC, or wordPools).");
                 return;
             }
 
-            var pool = wordPools[Random.Range(0, wordPools.Length)];
+            var pool = bossPools[Random.Range(0, bossPools.Length)];
             var usedWords = RunManager.Instance != null
                 ? new List<string>(RunManager.Instance.UsedWords)
                 : new List<string>();

@@ -26,6 +26,7 @@ namespace Spellwright.LLM
 
         [SerializeField] private GameConfigSO gameConfig;
         [SerializeField] private TextAsset fallbackCluesAsset;
+        [SerializeField] private TextAsset fallbackCluesAssetRo;
 
         private LLMService _llmService;
         private FallbackClueService _fallbackService;
@@ -83,15 +84,18 @@ namespace Spellwright.LLM
         {
             _fallbackService = new FallbackClueService();
 
-            if (fallbackCluesAsset == null)
+            var lang = gameConfig != null ? gameConfig.language : Data.GameLanguage.English;
+            var asset = lang == Data.GameLanguage.Romanian ? fallbackCluesAssetRo : fallbackCluesAsset;
+
+            if (asset == null)
             {
-                Debug.LogWarning("[LLMManager] No fallback clues TextAsset assigned.");
+                Debug.LogWarning($"[LLMManager] No fallback clues TextAsset assigned for {lang}.");
                 return;
             }
 
-            _fallbackService.LoadFromJson(fallbackCluesAsset.text);
+            _fallbackService.LoadFromJson(asset.text);
             if (_fallbackService.IsLoaded)
-                Debug.Log($"[LLMManager] Fallback clues ready ({_fallbackService.WordCount} words).");
+                Debug.Log($"[LLMManager] Fallback clues ready ({_fallbackService.WordCount} words, {lang}).");
         }
 
         private async Task LoadLLMModelAsync()
@@ -153,9 +157,13 @@ namespace Spellwright.LLM
 
             // Last resort: generic clue
             Debug.LogWarning($"[LLMManager] No clue source available for \"{word}\". Using generic clue.");
+            var lang = gameConfig != null ? gameConfig.language : Data.GameLanguage.English;
+            var lastResortClue = lang == Data.GameLanguage.Romanian
+                ? $"Gandeste-te la categoria \"{category}\" — raspunsul are {word.Length} litere."
+                : $"Think about the category \"{category}\" — the answer has {word.Length} letters.";
             return new ClueResponse
             {
-                Clue = $"Think about the category \"{category}\" — the answer has {word.Length} letters.",
+                Clue = lastResortClue,
                 Mood = "neutral",
                 UsedFallbackModel = true,
                 GenerationTimeMs = 0f
@@ -172,10 +180,12 @@ namespace Spellwright.LLM
         {
             try
             {
+                var llmLang = gameConfig != null ? gameConfig.language : Data.GameLanguage.English;
                 var (systemPrompt, userMessage) = PromptBuilder.BuildCluePrompt(
                     npc, word, category, clueNumber,
                     previousGuesses ?? new List<string>(),
-                    activeTomeEffects ?? new List<string>());
+                    activeTomeEffects ?? new List<string>(),
+                    llmLang);
 
                 var sw = Stopwatch.StartNew();
                 var raw = await _llmService.ChatAsync(systemPrompt, userMessage, _cts.Token);

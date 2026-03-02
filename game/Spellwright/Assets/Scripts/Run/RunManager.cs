@@ -17,6 +17,7 @@ namespace Spellwright.Run
         [SerializeField] private GameConfigSO gameConfig;
 
         private RunState _state = new RunState();
+        private int _waveNumber;
 
         // ── Properties ───────────────────────────────────────
 
@@ -28,6 +29,7 @@ namespace Spellwright.Run
         public IReadOnlyList<string> UsedWords => _state.UsedWords;
         public int CurrentNodeIndex => _state.CurrentNodeIndex;
         public IReadOnlyList<NodeType> NodeSequence => _state.NodeSequence;
+        public int WaveNumber => _waveNumber;
 
         /// <summary>The NodeType at the current index, or Encounter if out of range.</summary>
         public NodeType CurrentNodeType =>
@@ -87,19 +89,38 @@ namespace Spellwright.Run
             };
 
             EncountersWon = 0;
+            _waveNumber = 1;
 
-            // Generate node sequence: E-E-S-E-E-E-S-E-B
+            // Generate wave 1: (E-S)×5 + B
             _state.NodeSequence.Clear();
-            _state.NodeSequence.AddRange(new[]
-            {
-                NodeType.Encounter, NodeType.Encounter, NodeType.Shop,
-                NodeType.Encounter, NodeType.Encounter, NodeType.Encounter, NodeType.Shop,
-                NodeType.Encounter, NodeType.Boss
-            });
+            AppendWaveNodes();
 
-            Debug.Log($"[RunManager] Run started — HP: {_state.CurrentHP}/{_state.MaxHP}, Nodes: {_state.NodeSequence.Count}");
+            Debug.Log($"[RunManager] Run started — HP: {_state.CurrentHP}/{_state.MaxHP}, Wave: {_waveNumber}, Nodes: {_state.NodeSequence.Count}");
 
             EventBus.Instance.Publish(new RunStartedEvent { State = _state });
+        }
+
+        /// <summary>
+        /// Starts the next wave after a boss victory. Appends new nodes and publishes events.
+        /// </summary>
+        public void StartNextWave()
+        {
+            if (!_state.IsRunActive) return;
+
+            _waveNumber++;
+            AppendWaveNodes();
+
+            Debug.Log($"[RunManager] Wave {_waveNumber} started — Nodes: {_state.NodeSequence.Count}");
+
+            EventBus.Instance.Publish(new RunStartedEvent { State = _state });
+        }
+
+        /// <summary>Appends one wave of nodes: E×5 + B. Shop is shown post-encounter, not as a map node.</summary>
+        private void AppendWaveNodes()
+        {
+            for (int i = 0; i < 5; i++)
+                _state.NodeSequence.Add(NodeType.Encounter);
+            _state.NodeSequence.Add(NodeType.Boss);
         }
 
         /// <summary>

@@ -13,9 +13,11 @@ namespace Spellwright.Encounter
         /// </summary>
         /// <param name="guess">Raw player input.</param>
         /// <param name="targetWord">The secret target word (lowercase).</param>
+        /// <param name="language">Game language for feedback strings.</param>
         /// <returns>A <see cref="GuessResult"/> with correctness, validity, and feedback.</returns>
-        public static GuessResult Process(string guess, string targetWord)
+        public static GuessResult Process(string guess, string targetWord, GameLanguage language = GameLanguage.English)
         {
+            bool ro = language == GameLanguage.Romanian;
             var normalized = guess?.Trim().ToLowerInvariant() ?? "";
             var target = targetWord?.Trim().ToLowerInvariant() ?? "";
 
@@ -31,17 +33,17 @@ namespace Spellwright.Encounter
             if (string.IsNullOrEmpty(normalized))
             {
                 result.IsValidWord = false;
-                result.Feedback = "Please enter a word.";
+                result.Feedback = ro ? "Introdu un cuvant." : "Please enter a word.";
                 return result;
             }
 
-            // Validate against the English dictionary
+            // Validate against the dictionary
             if (WordValidator.Instance != null && WordValidator.Instance.IsLoaded)
             {
-                if (!WordValidator.Instance.IsValidEnglishWord(normalized))
+                if (!WordValidator.Instance.IsValidWord(normalized))
                 {
                     result.IsValidWord = false;
-                    result.Feedback = "Not a recognized English word";
+                    result.Feedback = ro ? "Cuvant nerecunoscut" : "Not a recognized English word";
                     return result;
                 }
             }
@@ -51,21 +53,23 @@ namespace Spellwright.Encounter
             {
                 result.IsCorrect = true;
                 result.LettersCorrect = target.Length;
-                result.Feedback = "Correct!";
+                result.Feedback = ro ? "Corect!" : "Correct!";
                 return result;
             }
 
             // Wrong length
             if (normalized.Length != target.Length)
             {
-                result.Feedback = $"Wrong number of letters ({normalized.Length} vs {target.Length})";
+                result.Feedback = ro
+                    ? $"Numar gresit de litere ({normalized.Length} vs {target.Length})"
+                    : $"Wrong number of letters ({normalized.Length} vs {target.Length})";
                 result.LettersCorrect = CountMatchingPositions(normalized, target);
                 return result;
             }
 
             // Right length, wrong word
             result.LettersCorrect = CountMatchingPositions(normalized, target);
-            result.Feedback = "Not the right word, but same length!";
+            result.Feedback = ro ? "Nu e cuvantul corect, dar aceeasi lungime!" : "Not the right word, but same length!";
             return result;
         }
 

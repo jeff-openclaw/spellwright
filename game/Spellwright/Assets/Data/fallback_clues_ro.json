@@ -1,0 +1,124 @@
+{
+  "words": {
+    "pisica": {
+      "category": "animale",
+      "clues": [
+        "Un prieten blandit care toarce cand e fericit",
+        "Aceasta fiinta agila are mustati si vede bine noaptea",
+        "Animalul de companie care aterizeaza mereu in picioare"
+      ]
+    },
+    "munte": {
+      "category": "natura",
+      "clues": [
+        "Un urias de piatra care atinge cerul",
+        "Aceasta forma de relief impunatoare are varfuri acoperite de zapada",
+        "Carpati, Alpi si Himalaya sunt exemple celebre"
+      ]
+    },
+    "soare": {
+      "category": "natura",
+      "clues": [
+        "Steaua care ne da lumina si caldura in fiecare zi",
+        "Aceasta sfera de foc se ridica in est si apune in vest",
+        "Centrul sistemului nostru solar, fara el nu ar exista viata"
+      ]
+    },
+    "ciocan": {
+      "category": "unelte",
+      "clues": [
+        "O unealta care loveste cu putere cand ai nevoie",
+        "Acest instrument cu cap de metal si maner de lemn bate cuie",
+        "Il folosesti pentru a fixa sau a demola"
+      ]
+    },
+    "bucurie": {
+      "category": "emotii",
+      "clues": [
+        "Acel sentiment cald care te face sa zambesti fara motiv",
+        "Opusul tristetii, te umple de energie si lumina",
+        "Emotia pe care o simti la o veste buna sau o reuniune"
+      ]
+    },
+    "padure": {
+      "category": "natura",
+      "clues": [
+        "Un regat verde unde copacii ascund cerul",
+        "Aceasta zona este plina de copaci, animale si liniste",
+        "Amazonia si Padurea Neagra sunt exemple renumite"
+      ]
+    },
+    "dragon": {
+      "category": "mitologie",
+      "clues": [
+        "O creatura legendara cu aripi si suflare mortala",
+        "Acest reptilian mitic zboara si arunca flacari",
+        "O fiinta din basme cu solzi, coada lunga si putere imensa"
+      ]
+    },
+    "paine": {
+      "category": "mancare",
+      "clues": [
+        "Alimentul de baza care insoteste orice masa",
+        "Se face din faina, apa si drojdie, coapta in cuptor",
+        "Aliment copt care poate fi alb sau negru"
+      ]
+    },
+    "fereastra": {
+      "category": "cotidian",
+      "clues": [
+        "Ochiul casei care lasa lumina sa intre",
+        "Aceasta deschidere din perete are sticla si permite ventilarea",
+        "O privesti afara prin ea in fiecare dimineata"
+      ]
+    },
+    "vulpe": {
+      "category": "animale",
+      "clues": [
+        "Un animal sireata cu blana rosie si coada stufoasa",
+        "Aceasta fiinta din padure apare adesea in fabule ca simbol al vicleniei",
+        "Un canid salbatic cu bot ascutit care traieste in vizuina"
+      ]
+    },
+    "curcubeu": {
+      "category": "natura",
+      "clues": [
+        "Un pod de culori care apare cand lacrimile cerului intalnesc lumina",
+        "Acest arc spectral se formeaza dupa ploaie in prezenta soarelui",
+        "Are sapte culori si conecteaza cerul cu pamantul"
+      ]
+    },
+    "cascada": {
+      "category": "natura",
+      "clues": [
+        "Apa care se arunca in gol cu un zgomot asurzitor",
+        "O cadere de apa naturala de pe o inaltime",
+        "Niagara este cel mai faimos exemplu din lume"
+      ]
+    },
+    "elefant": {
+      "category": "animale",
+      "clues": [
+        "Un urias bland a carui memorie este legendara",
+        "Aceasta creatura gri are o trompa lunga si urechi enorme",
+        "Cel mai mare animal terestru, originar din Africa si Asia"
+      ]
+    },
+    "sarmale": {
+      "category": "mancare",
+      "clues": [
+        "O mancare traditionala invelita in frunze",
+        "Acest preparat contine carne tocata si orez, rulat in frunza de varza",
+        "Preparatul romanesc nelipsit de pe masa de Craciun"
+      ]
+    },
+    "strigoi": {
+      "category": "mitologie",
+      "clues": [
+        "O creatura a noptii care bantuie din lumea cealalta",
+        "Acest spirit nelinistit din folclorul romanesc se ridica din mormant",
+        "O fiinta din legendele romanesti, rudenie cu vampirul"
+      ]
+    }
+  }
+}

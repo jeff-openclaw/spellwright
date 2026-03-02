@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Spellwright.Data;
+using Spellwright.ScriptableObjects;
 using UnityEngine;
 using WeCantSpell.Hunspell;
 
@@ -13,12 +15,13 @@ namespace Spellwright.Encounter
     /// </summary>
     public class WordValidator : MonoBehaviour
     {
-        public static WordValidator Instance { get; private set; }
+        public static WordValidator Instance { get; set; }
 
-        [SerializeField] private string language = "en_US";
+        [SerializeField] private GameConfigSO gameConfig;
 
         private WordList _dictionary;
         private bool _isLoaded;
+        private string _loadedLangCode;
 
         public bool IsLoaded => _isLoaded;
 
@@ -37,9 +40,15 @@ namespace Spellwright.Encounter
 
         private void LoadDictionary()
         {
+            var langCode = gameConfig != null ? gameConfig.HunspellLanguageCode : "en_US";
+
+            // Skip reload if already loaded for this language
+            if (_isLoaded && _loadedLangCode == langCode)
+                return;
+
             var dictDir = Path.Combine(Application.streamingAssetsPath, "Dictionaries");
-            var dicPath = Path.Combine(dictDir, $"{language}.dic");
-            var affPath = Path.Combine(dictDir, $"{language}.aff");
+            var dicPath = Path.Combine(dictDir, $"{langCode}.dic");
+            var affPath = Path.Combine(dictDir, $"{langCode}.aff");
 
             if (!File.Exists(dicPath))
             {
@@ -54,11 +63,48 @@ namespace Spellwright.Encounter
 
             _dictionary = WordList.CreateFromFiles(dicPath, affPath);
             _isLoaded = true;
-            Debug.Log($"[WordValidator] Dictionary loaded: {language}");
+            _loadedLangCode = langCode;
+            Debug.Log($"[WordValidator] Dictionary loaded: {langCode}");
+        }
+
+        /// <summary>
+        /// Reloads the dictionary if the configured language has changed.
+        /// </summary>
+        private void EnsureCorrectDictionary()
+        {
+            var langCode = gameConfig != null ? gameConfig.HunspellLanguageCode : "en_US";
+            if (_loadedLangCode != langCode)
+                LoadDictionary();
+        }
+
+        /// <summary>
+        /// Checks whether a word is valid in the loaded dictionary.
+        /// For Romanian, also accepts words without diacritics by checking suggestions.
+        /// </summary>
+        public bool IsValidWord(string word)
+        {
+            EnsureCorrectDictionary();
+            if (!_isLoaded || string.IsNullOrWhiteSpace(word))
+                return false;
+
+            var clean = word.Trim().ToLowerInvariant();
+            if (_dictionary.Check(clean))
+                return true;
+
+            // For Romanian, accept words without diacritics if Hunspell suggests
+            // the diacritics-bearing variant (e.g. "pisica" → "pisică")
+            if (gameConfig != null && gameConfig.language == GameLanguage.Romanian)
+            {
+                var suggestions = _dictionary.Suggest(clean);
+                return suggestions.Any(s => RemoveDiacritics(s) == clean);
+            }
+
+            return false;
         }
 
         /// <summary>
         /// Checks whether a word is a valid English word.
+        /// Kept for backwards compatibility.
         /// </summary>
         public bool IsValidEnglishWord(string word)
         {
@@ -68,11 +114,20 @@ namespace Spellwright.Encounter
             return _dictionary.Check(word.Trim().ToLowerInvariant());
         }
 
+        private static string RemoveDiacritics(string text)
+        {
+            return text
+                .Replace('ă', 'a').Replace('â', 'a').Replace('î', 'i')
+                .Replace('ș', 's').Replace('ş', 's')
+                .Replace('ț', 't').Replace('ţ', 't');
+        }
+
         /// <summary>
         /// Returns spelling suggestions for a misspelled word.
         /// </summary>
         public List<string> GetSuggestions(string word)
         {
+            EnsureCorrectDictionary();
             if (!_isLoaded || string.IsNullOrWhiteSpace(word))
                 return new List<string>();
 

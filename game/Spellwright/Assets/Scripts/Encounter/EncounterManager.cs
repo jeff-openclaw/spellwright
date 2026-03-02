@@ -215,7 +215,8 @@ namespace Spellwright.Encounter
         {
             if (!_isActive) return null;
 
-            var result = GuessProcessor.Process(guess, _targetWord.Word);
+            var language = gameConfig != null ? gameConfig.language : Data.GameLanguage.English;
+            var result = GuessProcessor.Process(guess, _targetWord.Word, language);
             _guesses.Add(result.GuessedWord);
 
             EventBus.Instance.Publish(new GuessSubmittedEvent

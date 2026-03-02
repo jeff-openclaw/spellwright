@@ -5,6 +5,13 @@ namespace Spellwright.Data
 {
     // ── Enums ──────────────────────────────────────────────
 
+    /// <summary>Supported game languages for clues, feedback, and word pools.</summary>
+    public enum GameLanguage
+    {
+        English,
+        Romanian
+    }
+
     /// <summary>Types of nodes on the run map.</summary>
     public enum NodeType
     {

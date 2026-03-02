@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using Spellwright.Core;
 using Spellwright.Data;
+using Spellwright.ScriptableObjects;
+using Spellwright.UI;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,18 +19,21 @@ namespace Spellwright.Run
         [Header("References")]
         [SerializeField] private Transform nodeContainer;
         [SerializeField] private Button proceedButton;
-        [SerializeField] private Text mapTitleText;
-        [SerializeField] private Text statsText;
+        [SerializeField] private TextMeshProUGUI mapTitleText;
+        [SerializeField] private TextMeshProUGUI statsText;
+
+        [Header("Language")]
+        [SerializeField] private Button languageButton;
+        [SerializeField] private TextMeshProUGUI languageButtonText;
+        [SerializeField] private GameConfigSO gameConfig;
+
+        [Header("Theme")]
+        [SerializeField] private TerminalThemeSO theme;
 
         [Header("Prefab (optional)")]
         [SerializeField] private GameObject nodeEntryPrefab;
 
         private readonly List<MapNodeEntry> _nodeEntries = new List<MapNodeEntry>();
-
-        private static readonly Color CompletedColor = new Color(0.3f, 0.6f, 0.3f, 1f);
-        private static readonly Color CurrentColor = new Color(1f, 0.85f, 0.2f, 1f);
-        private static readonly Color FutureColor = new Color(0.5f, 0.5f, 0.5f, 1f);
-        private static readonly Color BossColor = new Color(0.8f, 0.2f, 0.2f, 1f);
 
         private void OnEnable()
         {
@@ -36,7 +42,10 @@ namespace Spellwright.Run
 
             if (proceedButton != null)
                 proceedButton.onClick.AddListener(OnProceedClicked);
+            if (languageButton != null)
+                languageButton.onClick.AddListener(OnLanguageClicked);
 
+            UpdateLanguageLabel();
             RefreshMap();
         }
 
@@ -47,6 +56,8 @@ namespace Spellwright.Run
 
             if (proceedButton != null)
                 proceedButton.onClick.RemoveListener(OnProceedClicked);
+            if (languageButton != null)
+                languageButton.onClick.RemoveListener(OnLanguageClicked);
         }
 
         private void OnRunStarted(RunStartedEvent evt)
@@ -83,6 +94,7 @@ namespace Spellwright.Run
 
             UpdateNodeStates();
             UpdateStats();
+            UpdateLanguageButtonVisibility();
         }
 
         private void CreateNodeEntry(int index, NodeType nodeType)
@@ -102,7 +114,9 @@ namespace Spellwright.Run
                 rt.sizeDelta = new Vector2(0, 36);
 
                 var bg = entryGO.AddComponent<Image>();
-                bg.color = new Color(0.15f, 0.15f, 0.15f, 0.8f);
+                bg.color = theme != null
+                    ? new Color(theme.panelBg.r, theme.panelBg.g, theme.panelBg.b, 0.6f)
+                    : new Color(0.03f, 0.08f, 0.03f, 0.6f);
 
                 var labelGO = new GameObject("Label");
                 labelGO.transform.SetParent(entryGO.transform, false);
@@ -112,18 +126,19 @@ namespace Spellwright.Run
                 labelRT.offsetMin = new Vector2(10, 0);
                 labelRT.offsetMax = new Vector2(-10, 0);
 
-                var label = labelGO.AddComponent<Text>();
-                label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                label.fontSize = 16;
-                label.color = Color.white;
-                label.alignment = TextAnchor.MiddleLeft;
+                var label = labelGO.AddComponent<TextMeshProUGUI>();
+                if (theme != null && theme.primaryFont != null)
+                    label.font = theme.primaryFont;
+                label.fontSize = theme != null ? theme.labelSize : 14;
+                label.color = theme != null ? theme.phosphorGreen : Color.white;
+                label.alignment = TextAlignmentOptions.MidlineLeft;
             }
 
             var entry = new MapNodeEntry
             {
                 Root = entryGO,
                 Background = entryGO.GetComponent<Image>(),
-                Label = entryGO.GetComponentInChildren<Text>(),
+                Label = entryGO.GetComponentInChildren<TextMeshProUGUI>(),
                 Index = index,
                 Type = nodeType
             };
@@ -137,6 +152,11 @@ namespace Spellwright.Run
 
             int currentIndex = RunManager.Instance.CurrentNodeIndex;
 
+            Color completedColor = theme != null ? theme.nodeCompleted : new Color(0f, 0.5f, 0.18f);
+            Color currentColor = theme != null ? theme.nodeCurrent : new Color(0f, 1f, 0.33f);
+            Color futureColor = theme != null ? theme.nodeFuture : new Color(0.2f, 0.35f, 0.2f);
+            Color bossColor = theme != null ? theme.nodeBoss : new Color(0.85f, 0.1f, 0.1f);
+
             foreach (var entry in _nodeEntries)
             {
                 string icon = GetNodeIcon(entry.Type);
@@ -147,17 +167,17 @@ namespace Spellwright.Run
                 if (entry.Index < currentIndex)
                 {
                     prefix = "[DONE]";
-                    color = CompletedColor;
+                    color = completedColor;
                 }
                 else if (entry.Index == currentIndex)
                 {
                     prefix = ">>>";
-                    color = entry.Type == NodeType.Boss ? BossColor : CurrentColor;
+                    color = entry.Type == NodeType.Boss ? bossColor : currentColor;
                 }
                 else
                 {
                     prefix = "   ";
-                    color = FutureColor;
+                    color = futureColor;
                 }
 
                 if (entry.Label != null)
@@ -167,7 +187,9 @@ namespace Spellwright.Run
                 {
                     var bgColor = entry.Index == currentIndex
                         ? new Color(color.r, color.g, color.b, 0.25f)
-                        : new Color(0.15f, 0.15f, 0.15f, 0.6f);
+                        : (theme != null
+                            ? new Color(theme.panelBg.r, theme.panelBg.g, theme.panelBg.b, 0.6f)
+                            : new Color(0.03f, 0.08f, 0.03f, 0.6f));
                     entry.Background.color = bgColor;
                 }
 
@@ -225,11 +247,39 @@ namespace Spellwright.Run
             };
         }
 
+        private void OnLanguageClicked()
+        {
+            if (gameConfig == null) return;
+
+            gameConfig.language = gameConfig.language == GameLanguage.English
+                ? GameLanguage.Romanian
+                : GameLanguage.English;
+
+            UpdateLanguageLabel();
+            Debug.Log($"[MapUI] Language set to {gameConfig.language}");
+        }
+
+        private void UpdateLanguageLabel()
+        {
+            if (languageButtonText == null) return;
+            languageButtonText.text = gameConfig != null && gameConfig.language == GameLanguage.Romanian
+                ? "RO" : "EN";
+        }
+
+        private void UpdateLanguageButtonVisibility()
+        {
+            if (languageButton == null) return;
+
+            // Only show language picker before the first encounter starts
+            bool show = RunManager.Instance != null && RunManager.Instance.CurrentNodeIndex == 0;
+            languageButton.gameObject.SetActive(show);
+        }
+
         private class MapNodeEntry
         {
             public GameObject Root;
             public Image Background;
-            public Text Label;
+            public TextMeshProUGUI Label;
             public int Index;
             public NodeType Type;
         }

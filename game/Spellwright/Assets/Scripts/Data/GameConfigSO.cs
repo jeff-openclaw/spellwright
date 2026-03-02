@@ -1,3 +1,4 @@
+using Spellwright.Data;
 using UnityEngine;
 
 namespace Spellwright.ScriptableObjects
@@ -5,6 +6,16 @@ namespace Spellwright.ScriptableObjects
     [CreateAssetMenu(fileName = "GameConfig", menuName = "Spellwright/Game Config")]
     public class GameConfigSO : ScriptableObject
     {
+        [Header("Language")]
+        public GameLanguage language = GameLanguage.English;
+
+        /// <summary>Returns the Hunspell language code for the selected language.</summary>
+        public string HunspellLanguageCode => language switch
+        {
+            GameLanguage.Romanian => "ro_RO",
+            _ => "en_US"
+        };
+
         [Header("Player Defaults")]
         public int startingHP = 30;
         public int startingGold = 0;

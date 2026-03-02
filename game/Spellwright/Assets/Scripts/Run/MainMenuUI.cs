@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +9,7 @@ namespace Spellwright.Run
     /// </summary>
     public class MainMenuUI : MonoBehaviour
     {
-        [SerializeField] private Text titleText;
+        [SerializeField] private TextMeshProUGUI titleText;
         [SerializeField] private Button startButton;
 
         private void OnEnable()

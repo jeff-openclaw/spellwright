@@ -5,6 +5,8 @@ using Spellwright.Run;
 using Spellwright.ScriptableObjects;
 using Spellwright.Shop;
 using Spellwright.Tomes;
+using Spellwright.UI;
+using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -22,19 +24,18 @@ namespace Spellwright.Editor
     /// </summary>
     public static class GameSceneSetup
     {
-        private static readonly Color BgDark = new Color(0.08f, 0.08f, 0.12f, 1f);
-        private static readonly Color PanelBg = new Color(0.1f, 0.1f, 0.15f, 0.95f);
-        private static readonly Color AccentGold = new Color(1f, 0.85f, 0.2f);
-        private static readonly Color TextWhite = new Color(0.9f, 0.9f, 0.9f);
-        private static readonly Color TextGray = new Color(0.6f, 0.6f, 0.6f);
-        private static readonly Color BtnGreen = new Color(0.15f, 0.4f, 0.15f, 0.9f);
-        private static readonly Color BtnRed = new Color(0.5f, 0.15f, 0.15f, 0.9f);
-        private static readonly Color BarBg = new Color(0.2f, 0.2f, 0.2f, 1f);
-        private static readonly Color BarFill = new Color(0.2f, 0.7f, 0.2f, 1f);
+        private static TerminalThemeSO _theme;
 
         [MenuItem("Spellwright/Setup Game Scene")]
         public static void SetupScene()
         {
+            // Load theme asset
+            _theme = LoadAsset<TerminalThemeSO>("Assets/Data/Config/TerminalTheme.asset");
+            if (_theme == null)
+            {
+                Debug.LogWarning("[GameSceneSetup] TerminalTheme.asset not found — using fallback colors.");
+            }
+
             // Create new scene
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             scene.name = "GameScene";
@@ -49,7 +50,8 @@ namespace Spellwright.Editor
             var canvas = canvasGO.GetComponent<Canvas>();
 
             // Background
-            var bg = CreateFullscreenImage(canvasGO.transform, "Background", BgDark);
+            Color bgColor = _theme != null ? _theme.terminalBg : new Color(0.02f, 0.05f, 0.02f, 1f);
+            var bg = CreateFullscreenImage(canvasGO.transform, "Background", bgColor);
 
             // ── Panels ──────────────────────────────────────
             var mainMenuPanel = CreateMainMenuPanel(canvasGO.transform);
@@ -73,12 +75,15 @@ namespace Spellwright.Editor
 
             // WordValidator
             var wordValGO = new GameObject("WordValidator");
-            wordValGO.AddComponent<Encounter.WordValidator>();
+            var wordVal = wordValGO.AddComponent<Encounter.WordValidator>();
+            SetSerializedField(wordVal, "gameConfig", LoadAsset<GameConfigSO>("Assets/Data/Config/GameConfig.asset"));
 
             // LLMManager
             var llmGO = new GameObject("LLMManager");
             var llmMgr = llmGO.AddComponent<LLM.LLMManager>();
+            SetSerializedField(llmMgr, "gameConfig", LoadAsset<GameConfigSO>("Assets/Data/Config/GameConfig.asset"));
             SetSerializedField(llmMgr, "fallbackCluesAsset", LoadAsset<TextAsset>("Assets/Data/fallback_clues.json"));
+            SetSerializedField(llmMgr, "fallbackCluesAssetRo", LoadAsset<TextAsset>("Assets/Data/fallback_clues_ro.json"));
 
             // TomeManager
             var tomeGO = new GameObject("TomeManager");
@@ -184,26 +189,51 @@ namespace Spellwright.Editor
             Debug.Log("[GameSceneSetup] CRTRenderFeature added to PC_Renderer.asset.");
         }
 
+        // ── Theme Color Helpers ─────────────────────────────
+
+        private static Color ThemeColor(System.Func<TerminalThemeSO, Color> getter, Color fallback)
+        {
+            return _theme != null ? getter(_theme) : fallback;
+        }
+
+        private static Color PhosphorGreen => ThemeColor(t => t.phosphorGreen, new Color(0f, 1f, 0.33f));
+        private static Color PhosphorBright => ThemeColor(t => t.phosphorBright, new Color(0.2f, 1f, 0.5f));
+        private static Color PhosphorDim => ThemeColor(t => t.phosphorDim, new Color(0f, 0.5f, 0.18f));
+        private static Color TerminalBg => ThemeColor(t => t.terminalBg, new Color(0.02f, 0.05f, 0.02f, 1f));
+        private static Color PanelBg => ThemeColor(t => t.panelBg, new Color(0.03f, 0.08f, 0.03f, 0.95f));
+        private static Color BorderColor => ThemeColor(t => t.borderColor, new Color(0f, 0.6f, 0.2f, 0.8f));
+        private static Color AmberBright => ThemeColor(t => t.amberBright, new Color(1f, 0.75f, 0f));
+        private static Color CyanInfo => ThemeColor(t => t.cyanInfo, new Color(0f, 0.85f, 0.85f));
+        private static Color MagentaMagic => ThemeColor(t => t.magentaMagic, new Color(0.85f, 0.2f, 0.85f));
+        private static Color ButtonBg => ThemeColor(t => t.buttonBg, new Color(0.05f, 0.2f, 0.05f, 0.9f));
+        private static Color ButtonBgDanger => ThemeColor(t => t.buttonBgDanger, new Color(0.3f, 0.05f, 0.05f, 0.9f));
+        private static Color ButtonText => ThemeColor(t => t.buttonText, new Color(0f, 1f, 0.33f));
+        private static Color HpBarBg => ThemeColor(t => t.hpBarBg, new Color(0.1f, 0.15f, 0.1f, 1f));
+        private static Color HpBarFill => ThemeColor(t => t.hpBarFill, new Color(0f, 0.8f, 0.25f, 1f));
+
         // ── Panel Creators ──────────────────────────────────
 
         private static GameObject CreateMainMenuPanel(Transform parent)
         {
             var panel = CreatePanel(parent, "MainMenuPanel");
+            AddPanelBorder(panel);
             var menuUI = panel.AddComponent<MainMenuUI>();
 
             // Title
-            var title = CreateText(panel.transform, "TitleText", "SPELLWRIGHT", 48, AccentGold,
-                TextAnchor.MiddleCenter, new Vector2(0.1f, 0.5f), new Vector2(0.9f, 0.85f));
+            var title = CreateText(panel.transform, "TitleText", "SPELLWRIGHT",
+                _theme != null ? _theme.titleSize : 48, PhosphorBright,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.5f), new Vector2(0.9f, 0.85f));
 
             // Subtitle
-            CreateText(panel.transform, "SubtitleText", "A Word-Guessing Roguelike", 18, TextGray,
-                TextAnchor.MiddleCenter, new Vector2(0.2f, 0.42f), new Vector2(0.8f, 0.52f));
+            CreateText(panel.transform, "SubtitleText", "A Word-Guessing Roguelike",
+                _theme != null ? _theme.bodySize : 18, PhosphorDim,
+                TextAlignmentOptions.Center, new Vector2(0.2f, 0.42f), new Vector2(0.8f, 0.52f));
 
             // Start button
-            var startBtn = CreateButton(panel.transform, "StartButton", "START RUN", BtnGreen,
+            var startBtn = CreateButton(panel.transform, "StartButton", "START RUN", ButtonBg,
                 new Vector2(0.3f, 0.2f), new Vector2(0.7f, 0.32f));
 
-            SetSerializedField(menuUI, "titleText", title.GetComponent<Text>());
+            SetSerializedField(menuUI, "titleText", title);
             SetSerializedField(menuUI, "startButton", startBtn.GetComponent<Button>());
 
             return panel;
@@ -212,15 +242,18 @@ namespace Spellwright.Editor
         private static GameObject CreateMapPanel(Transform parent)
         {
             var panel = CreatePanel(parent, "MapPanel");
+            AddPanelBorder(panel);
             var mapUI = panel.AddComponent<MapUI>();
 
             // Title
-            var title = CreateText(panel.transform, "MapTitleText", "- YOUR JOURNEY -", 28, AccentGold,
-                TextAnchor.MiddleCenter, new Vector2(0.1f, 0.88f), new Vector2(0.9f, 0.97f));
+            var title = CreateText(panel.transform, "MapTitleText", "- YOUR JOURNEY -",
+                _theme != null ? _theme.headerSize : 28, PhosphorBright,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.88f), new Vector2(0.9f, 0.97f));
 
             // Stats
-            var stats = CreateText(panel.transform, "StatsText", "HP: --/-- | Gold: -- | Score: --", 16, TextWhite,
-                TextAnchor.MiddleCenter, new Vector2(0.05f, 0.82f), new Vector2(0.95f, 0.89f));
+            var stats = CreateText(panel.transform, "StatsText", "HP: --/-- | Gold: -- | Score: --",
+                _theme != null ? _theme.labelSize : 14, PhosphorGreen,
+                TextAlignmentOptions.Center, new Vector2(0.05f, 0.82f), new Vector2(0.95f, 0.89f));
 
             // Node container with vertical layout
             var container = CreateContainer(panel.transform, "NodeContainer",
@@ -233,13 +266,22 @@ namespace Spellwright.Editor
             vlg.childControlHeight = false;
 
             // Proceed button
-            var proceedBtn = CreateButton(panel.transform, "ProceedButton", "PROCEED", BtnGreen,
+            var proceedBtn = CreateButton(panel.transform, "ProceedButton", "PROCEED", ButtonBg,
                 new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.12f));
 
-            SetSerializedField(mapUI, "mapTitleText", title.GetComponent<Text>());
-            SetSerializedField(mapUI, "statsText", stats.GetComponent<Text>());
+            // Language toggle button (small, bottom-left)
+            var langBtn = CreateButton(panel.transform, "LanguageButton", "EN", ButtonBg,
+                new Vector2(0.02f, 0.03f), new Vector2(0.15f, 0.10f));
+            var langLabel = langBtn.GetComponentInChildren<TMP_Text>();
+
+            SetSerializedField(mapUI, "mapTitleText", title);
+            SetSerializedField(mapUI, "statsText", stats);
             SetSerializedField(mapUI, "nodeContainer", container.transform);
             SetSerializedField(mapUI, "proceedButton", proceedBtn.GetComponent<Button>());
+            SetSerializedField(mapUI, "languageButton", langBtn.GetComponent<Button>());
+            SetSerializedField(mapUI, "languageButtonText", langLabel);
+            SetSerializedField(mapUI, "gameConfig", LoadAsset<GameConfigSO>("Assets/Data/Config/GameConfig.asset"));
+            SetSerializedField(mapUI, "theme", _theme);
 
             return panel;
         }
@@ -247,67 +289,83 @@ namespace Spellwright.Editor
         private static GameObject CreateEncounterPanel(Transform parent)
         {
             var panel = CreatePanel(parent, "EncounterPanel");
+            AddPanelBorder(panel);
 
             // ── NPC Info (top) ──
-            var npcName = CreateText(panel.transform, "NpcNameText", "NPC Name", 24, AccentGold,
-                TextAnchor.MiddleCenter, new Vector2(0.05f, 0.92f), new Vector2(0.95f, 0.98f));
-            var npcArchetype = CreateText(panel.transform, "NpcArchetypeText", "Archetype", 14, TextGray,
-                TextAnchor.MiddleCenter, new Vector2(0.2f, 0.88f), new Vector2(0.8f, 0.93f));
+            var npcName = CreateText(panel.transform, "NpcNameText", "NPC Name",
+                _theme != null ? _theme.headerSize - 4 : 24, PhosphorBright,
+                TextAlignmentOptions.Center, new Vector2(0.05f, 0.92f), new Vector2(0.95f, 0.98f));
+            var npcArchetype = CreateText(panel.transform, "NpcArchetypeText", "Archetype",
+                _theme != null ? _theme.labelSize : 14, PhosphorDim,
+                TextAlignmentOptions.Center, new Vector2(0.2f, 0.88f), new Vector2(0.8f, 0.93f));
 
             // ── Word Display ──
-            var blanks = CreateText(panel.transform, "BlanksText", "_ _ _ _ _", 36, TextWhite,
-                TextAnchor.MiddleCenter, new Vector2(0.1f, 0.78f), new Vector2(0.9f, 0.88f));
-            var category = CreateText(panel.transform, "CategoryText", "Category: ...", 14, TextGray,
-                TextAnchor.MiddleCenter, new Vector2(0.2f, 0.74f), new Vector2(0.8f, 0.79f));
+            var blanks = CreateText(panel.transform, "BlanksText", "_ _ _ _ _",
+                _theme != null ? _theme.blanksSize : 36, PhosphorGreen,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.78f), new Vector2(0.9f, 0.88f));
+            var category = CreateText(panel.transform, "CategoryText", "Category: ...",
+                _theme != null ? _theme.labelSize : 14, PhosphorDim,
+                TextAlignmentOptions.Center, new Vector2(0.2f, 0.74f), new Vector2(0.8f, 0.79f));
 
             // ── Clue Area ──
-            var clueNum = CreateText(panel.transform, "ClueNumberText", "Clue 1/6", 14, AccentGold,
-                TextAnchor.MiddleLeft, new Vector2(0.05f, 0.68f), new Vector2(0.3f, 0.74f));
-            var clue = CreateText(panel.transform, "ClueText", "Waiting for clue...", 18, TextWhite,
-                TextAnchor.UpperLeft, new Vector2(0.05f, 0.52f), new Vector2(0.95f, 0.68f));
+            var clueNum = CreateText(panel.transform, "ClueNumberText", "Clue 1/6",
+                _theme != null ? _theme.labelSize : 14, AmberBright,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.68f), new Vector2(0.3f, 0.74f));
+            var clue = CreateText(panel.transform, "ClueText", "Waiting for clue...",
+                _theme != null ? _theme.bodySize : 18, PhosphorGreen,
+                TextAlignmentOptions.TopLeft, new Vector2(0.05f, 0.52f), new Vector2(0.95f, 0.68f));
 
             // ── Status Bar ──
-            var hpTextGO = CreateText(panel.transform, "HPText", "HP: 30/30", 14, TextWhite,
-                TextAnchor.MiddleLeft, new Vector2(0.05f, 0.46f), new Vector2(0.25f, 0.52f));
+            var hpTextGO = CreateText(panel.transform, "HPText", "HP: 30/30",
+                _theme != null ? _theme.labelSize : 14, PhosphorGreen,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.46f), new Vector2(0.25f, 0.52f));
 
             // HP Bar
-            var hpBarBg = CreateFullscreenImage(panel.transform, "HPBarBg", BarBg);
+            var hpBarBg = CreateFullscreenImage(panel.transform, "HPBarBg", HpBarBg);
             SetAnchors(hpBarBg, new Vector2(0.25f, 0.47f), new Vector2(0.55f, 0.51f));
-            var hpBarFill = CreateFullscreenImage(hpBarBg.transform, "HPBarFill", BarFill);
+            var hpBarFill = CreateFullscreenImage(hpBarBg.transform, "HPBarFill", HpBarFill);
             var hpFillRT = hpBarFill.GetComponent<RectTransform>();
             hpFillRT.anchorMin = Vector2.zero;
             hpFillRT.anchorMax = Vector2.one;
             hpFillRT.offsetMin = Vector2.zero;
             hpFillRT.offsetMax = Vector2.zero;
 
-            var goldText = CreateText(panel.transform, "GoldText", "Gold: 0", 14, AccentGold,
-                TextAnchor.MiddleCenter, new Vector2(0.58f, 0.46f), new Vector2(0.73f, 0.52f));
-            var guessesText = CreateText(panel.transform, "GuessesText", "Guesses: 6", 14, TextWhite,
-                TextAnchor.MiddleCenter, new Vector2(0.73f, 0.46f), new Vector2(0.88f, 0.52f));
-            var scoreText = CreateText(panel.transform, "ScoreText", "Score: 0", 14, TextWhite,
-                TextAnchor.MiddleRight, new Vector2(0.85f, 0.46f), new Vector2(0.95f, 0.52f));
+            var goldText = CreateText(panel.transform, "GoldText", "Gold: 0",
+                _theme != null ? _theme.labelSize : 14, AmberBright,
+                TextAlignmentOptions.Center, new Vector2(0.58f, 0.46f), new Vector2(0.73f, 0.52f));
+            var guessesText = CreateText(panel.transform, "GuessesText", "Guesses: 6",
+                _theme != null ? _theme.labelSize : 14, PhosphorGreen,
+                TextAlignmentOptions.Center, new Vector2(0.73f, 0.46f), new Vector2(0.88f, 0.52f));
+            var scoreText = CreateText(panel.transform, "ScoreText", "Score: 0",
+                _theme != null ? _theme.labelSize : 14, PhosphorGreen,
+                TextAlignmentOptions.MidlineRight, new Vector2(0.85f, 0.46f), new Vector2(0.95f, 0.52f));
 
             // ── Input Area ──
             var inputGO = CreateInputField(panel.transform, "GuessInput",
                 new Vector2(0.05f, 0.38f), new Vector2(0.75f, 0.45f));
-            var submitBtn = CreateButton(panel.transform, "SubmitButton", "GUESS", BtnGreen,
+            var submitBtn = CreateButton(panel.transform, "SubmitButton", "GUESS", ButtonBg,
                 new Vector2(0.77f, 0.38f), new Vector2(0.95f, 0.45f));
 
             // ── Guess History ──
-            var history = CreateText(panel.transform, "HistoryText", "", 13, TextGray,
-                TextAnchor.UpperLeft, new Vector2(0.05f, 0.1f), new Vector2(0.65f, 0.36f));
+            var history = CreateText(panel.transform, "HistoryText", "",
+                _theme != null ? _theme.smallSize : 13, PhosphorDim,
+                TextAlignmentOptions.TopLeft, new Vector2(0.05f, 0.1f), new Vector2(0.65f, 0.36f));
 
             // ── Tome Info ──
-            var tomeInfo = CreateText(panel.transform, "TomeInfoText", "", 13, new Color(0.6f, 0.4f, 1f),
-                TextAnchor.UpperLeft, new Vector2(0.67f, 0.1f), new Vector2(0.95f, 0.36f));
+            var tomeInfo = CreateText(panel.transform, "TomeInfoText", "",
+                _theme != null ? _theme.smallSize : 13, MagentaMagic,
+                TextAlignmentOptions.TopLeft, new Vector2(0.67f, 0.1f), new Vector2(0.95f, 0.36f));
 
             // ── Result Panel (overlay) ──
-            var resultPanel = CreateFullscreenImage(panel.transform, "ResultPanel", new Color(0f, 0f, 0f, 0.85f));
-            var resultTitle = CreateText(resultPanel.transform, "ResultTitleText", "VICTORY!", 36, AccentGold,
-                TextAnchor.MiddleCenter, new Vector2(0.1f, 0.55f), new Vector2(0.9f, 0.75f));
-            var resultDetails = CreateText(resultPanel.transform, "ResultDetailsText", "", 18, TextWhite,
-                TextAnchor.MiddleCenter, new Vector2(0.1f, 0.35f), new Vector2(0.9f, 0.55f));
-            var continueBtn = CreateButton(resultPanel.transform, "ContinueButton", "CONTINUE", BtnGreen,
+            var resultPanel = CreateFullscreenImage(panel.transform, "ResultPanel",
+                new Color(TerminalBg.r, TerminalBg.g, TerminalBg.b, 0.9f));
+            var resultTitle = CreateText(resultPanel.transform, "ResultTitleText", "VICTORY!",
+                _theme != null ? _theme.blanksSize : 36, PhosphorBright,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.55f), new Vector2(0.9f, 0.75f));
+            var resultDetails = CreateText(resultPanel.transform, "ResultDetailsText", "",
+                _theme != null ? _theme.bodySize : 18, PhosphorGreen,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.35f), new Vector2(0.9f, 0.55f));
+            var continueBtn = CreateButton(resultPanel.transform, "ContinueButton", "CONTINUE", ButtonBg,
                 new Vector2(0.3f, 0.15f), new Vector2(0.7f, 0.28f));
             resultPanel.SetActive(false);
 
@@ -321,20 +379,25 @@ namespace Spellwright.Editor
         private static GameObject CreateShopPanel(Transform parent)
         {
             var panel = CreatePanel(parent, "ShopPanel");
+            AddPanelBorder(panel);
 
             // Title
-            CreateText(panel.transform, "ShopTitle", "- ARCANE SHOP -", 28, AccentGold,
-                TextAnchor.MiddleCenter, new Vector2(0.1f, 0.9f), new Vector2(0.9f, 0.98f));
+            CreateText(panel.transform, "ShopTitle", "- ARCANE SHOP -",
+                _theme != null ? _theme.headerSize : 28, PhosphorBright,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.9f), new Vector2(0.9f, 0.98f));
 
             // Status
-            var goldText = CreateText(panel.transform, "GoldText", "Gold: 0", 18, AccentGold,
-                TextAnchor.MiddleLeft, new Vector2(0.05f, 0.84f), new Vector2(0.45f, 0.9f));
-            var hpText = CreateText(panel.transform, "HPText", "HP: 30/30", 18, TextWhite,
-                TextAnchor.MiddleRight, new Vector2(0.55f, 0.84f), new Vector2(0.95f, 0.9f));
+            var goldText = CreateText(panel.transform, "GoldText", "Gold: 0",
+                _theme != null ? _theme.bodySize : 18, AmberBright,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.84f), new Vector2(0.45f, 0.9f));
+            var hpText = CreateText(panel.transform, "HPText", "HP: 30/30",
+                _theme != null ? _theme.bodySize : 18, PhosphorGreen,
+                TextAlignmentOptions.MidlineRight, new Vector2(0.55f, 0.84f), new Vector2(0.95f, 0.9f));
 
             // Buy section header
-            CreateText(panel.transform, "BuyHeader", "Available Items:", 16, TextGray,
-                TextAnchor.MiddleLeft, new Vector2(0.05f, 0.78f), new Vector2(0.95f, 0.84f));
+            CreateText(panel.transform, "BuyHeader", "Available Items:",
+                _theme != null ? _theme.labelSize : 16, PhosphorDim,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.78f), new Vector2(0.95f, 0.84f));
 
             // Item container
             var itemContainer = CreateContainer(panel.transform, "ItemContainer",
@@ -347,8 +410,9 @@ namespace Spellwright.Editor
             vlg1.childControlHeight = false;
 
             // Sell section header
-            CreateText(panel.transform, "SellHeader", "Your Tomes (sell):", 16, TextGray,
-                TextAnchor.MiddleLeft, new Vector2(0.05f, 0.36f), new Vector2(0.95f, 0.42f));
+            CreateText(panel.transform, "SellHeader", "Your Tomes (sell):",
+                _theme != null ? _theme.labelSize : 16, PhosphorDim,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.36f), new Vector2(0.95f, 0.42f));
 
             // Equipped container
             var equippedContainer = CreateContainer(panel.transform, "EquippedContainer",
@@ -361,21 +425,23 @@ namespace Spellwright.Editor
             vlg2.childControlHeight = false;
 
             // Feedback text
-            var feedbackText = CreateText(panel.transform, "FeedbackText", "", 16, AccentGold,
-                TextAnchor.MiddleCenter, new Vector2(0.1f, 0.06f), new Vector2(0.9f, 0.12f));
+            var feedbackText = CreateText(panel.transform, "FeedbackText", "",
+                _theme != null ? _theme.labelSize : 16, AmberBright,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.06f), new Vector2(0.9f, 0.12f));
 
             // Leave button
-            var leaveBtn = CreateButton(panel.transform, "LeaveButton", "LEAVE SHOP", BtnRed,
+            var leaveBtn = CreateButton(panel.transform, "LeaveButton", "LEAVE SHOP", ButtonBgDanger,
                 new Vector2(0.3f, 0.01f), new Vector2(0.7f, 0.06f));
 
             // Wire ShopUI (will be added by caller who also has shopManager ref)
             var shopUI = panel.AddComponent<ShopUI>();
             SetSerializedField(shopUI, "itemContainer", itemContainer.transform);
             SetSerializedField(shopUI, "equippedContainer", equippedContainer.transform);
-            SetSerializedField(shopUI, "goldText", goldText.GetComponent<Text>());
-            SetSerializedField(shopUI, "hpText", hpText.GetComponent<Text>());
-            SetSerializedField(shopUI, "feedbackText", feedbackText.GetComponent<Text>());
+            SetSerializedField(shopUI, "goldText", goldText);
+            SetSerializedField(shopUI, "hpText", hpText);
+            SetSerializedField(shopUI, "feedbackText", feedbackText);
             SetSerializedField(shopUI, "leaveButton", leaveBtn.GetComponent<Button>());
+            SetSerializedField(shopUI, "theme", _theme);
 
             return panel;
         }
@@ -383,18 +449,22 @@ namespace Spellwright.Editor
         private static GameObject CreateRunEndPanel(Transform parent)
         {
             var panel = CreatePanel(parent, "RunEndPanel");
+            AddPanelBorder(panel);
             var runEndUI = panel.AddComponent<RunEndUI>();
 
-            var title = CreateText(panel.transform, "TitleText", "RUN OVER", 42, AccentGold,
-                TextAnchor.MiddleCenter, new Vector2(0.1f, 0.6f), new Vector2(0.9f, 0.85f));
-            var stats = CreateText(panel.transform, "StatsText", "Score: 0\nEncounters: 0", 20, TextWhite,
-                TextAnchor.MiddleCenter, new Vector2(0.15f, 0.3f), new Vector2(0.85f, 0.6f));
-            var playAgainBtn = CreateButton(panel.transform, "PlayAgainButton", "PLAY AGAIN", BtnGreen,
+            var title = CreateText(panel.transform, "TitleText", "RUN OVER",
+                _theme != null ? _theme.titleSize - 6 : 42, PhosphorBright,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.6f), new Vector2(0.9f, 0.85f));
+            var stats = CreateText(panel.transform, "StatsText", "Score: 0\nEncounters: 0",
+                _theme != null ? _theme.bodySize + 2 : 20, PhosphorGreen,
+                TextAlignmentOptions.Center, new Vector2(0.15f, 0.3f), new Vector2(0.85f, 0.6f));
+            var playAgainBtn = CreateButton(panel.transform, "PlayAgainButton", "PLAY AGAIN", ButtonBg,
                 new Vector2(0.3f, 0.12f), new Vector2(0.7f, 0.25f));
 
-            SetSerializedField(runEndUI, "titleText", title.GetComponent<Text>());
-            SetSerializedField(runEndUI, "statsText", stats.GetComponent<Text>());
+            SetSerializedField(runEndUI, "titleText", title);
+            SetSerializedField(runEndUI, "statsText", stats);
             SetSerializedField(runEndUI, "playAgainButton", playAgainBtn.GetComponent<Button>());
+            SetSerializedField(runEndUI, "theme", _theme);
 
             return panel;
         }
@@ -441,6 +511,23 @@ namespace Spellwright.Editor
             for (int i = 0; i < poolPaths.Length; i++)
                 poolsProp.GetArrayElementAtIndex(i).objectReferenceValue = LoadAsset<WordPoolSO>(poolPaths[i]);
 
+            // Romanian word pools
+            var poolsRoProp = so.FindProperty("wordPoolsRo");
+            var roPoolPaths = new[]
+            {
+                "Assets/Data/Words/ro/animale.asset",
+                "Assets/Data/Words/ro/emotii.asset",
+                "Assets/Data/Words/ro/cotidian.asset",
+                "Assets/Data/Words/ro/mancare.asset",
+                "Assets/Data/Words/ro/mitologie.asset",
+                "Assets/Data/Words/ro/natura.asset",
+                "Assets/Data/Words/ro/stiinta.asset",
+                "Assets/Data/Words/ro/unelte.asset"
+            };
+            poolsRoProp.arraySize = roPoolPaths.Length;
+            for (int i = 0; i < roPoolPaths.Length; i++)
+                poolsRoProp.GetArrayElementAtIndex(i).objectReferenceValue = LoadAsset<WordPoolSO>(roPoolPaths[i]);
+
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
@@ -468,26 +555,27 @@ namespace Spellwright.Editor
         {
             // Find all the child elements by name
             var so = new SerializedObject(encUI);
-            so.FindProperty("npcNameText").objectReferenceValue = FindChild<Text>(panel, "NpcNameText");
-            so.FindProperty("npcArchetypeText").objectReferenceValue = FindChild<Text>(panel, "NpcArchetypeText");
-            so.FindProperty("blanksText").objectReferenceValue = FindChild<Text>(panel, "BlanksText");
-            so.FindProperty("categoryText").objectReferenceValue = FindChild<Text>(panel, "CategoryText");
-            so.FindProperty("clueText").objectReferenceValue = FindChild<Text>(panel, "ClueText");
-            so.FindProperty("clueNumberText").objectReferenceValue = FindChild<Text>(panel, "ClueNumberText");
-            so.FindProperty("guessInput").objectReferenceValue = FindChild<InputField>(panel, "GuessInput");
+            so.FindProperty("npcNameText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "NpcNameText");
+            so.FindProperty("npcArchetypeText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "NpcArchetypeText");
+            so.FindProperty("blanksText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "BlanksText");
+            so.FindProperty("categoryText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "CategoryText");
+            so.FindProperty("clueText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "ClueText");
+            so.FindProperty("clueNumberText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "ClueNumberText");
+            so.FindProperty("guessInput").objectReferenceValue = FindChild<TMP_InputField>(panel, "GuessInput");
             so.FindProperty("submitButton").objectReferenceValue = FindChild<Button>(panel, "SubmitButton");
-            so.FindProperty("hpText").objectReferenceValue = FindChild<Text>(panel, "HPText");
+            so.FindProperty("hpText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "HPText");
             so.FindProperty("hpBarFill").objectReferenceValue = FindChild<Image>(panel, "HPBarFill");
-            so.FindProperty("goldText").objectReferenceValue = FindChild<Text>(panel, "GoldText");
-            so.FindProperty("guessesText").objectReferenceValue = FindChild<Text>(panel, "GuessesText");
-            so.FindProperty("scoreText").objectReferenceValue = FindChild<Text>(panel, "ScoreText");
-            so.FindProperty("historyText").objectReferenceValue = FindChild<Text>(panel, "HistoryText");
-            so.FindProperty("tomeInfoText").objectReferenceValue = FindChild<Text>(panel, "TomeInfoText");
+            so.FindProperty("goldText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "GoldText");
+            so.FindProperty("guessesText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "GuessesText");
+            so.FindProperty("scoreText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "ScoreText");
+            so.FindProperty("historyText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "HistoryText");
+            so.FindProperty("tomeInfoText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "TomeInfoText");
             so.FindProperty("resultPanel").objectReferenceValue = FindChildGO(panel, "ResultPanel");
-            so.FindProperty("resultTitleText").objectReferenceValue = FindChild<Text>(panel, "ResultTitleText");
-            so.FindProperty("resultDetailsText").objectReferenceValue = FindChild<Text>(panel, "ResultDetailsText");
+            so.FindProperty("resultTitleText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "ResultTitleText");
+            so.FindProperty("resultDetailsText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "ResultDetailsText");
             so.FindProperty("continueButton").objectReferenceValue = FindChild<Button>(panel, "ContinueButton");
             so.FindProperty("flashOverlay").objectReferenceValue = FindChild<Image>(panel, "FlashOverlay");
+            so.FindProperty("theme").objectReferenceValue = _theme;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
@@ -506,7 +594,7 @@ namespace Spellwright.Editor
             go.tag = "MainCamera";
             var cam = go.AddComponent<Camera>();
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = BgDark;
+            cam.backgroundColor = TerminalBg;
             cam.orthographic = false;
             go.AddComponent<AudioListener>();
             // URP camera data is auto-added
@@ -560,8 +648,22 @@ namespace Spellwright.Editor
             return go;
         }
 
-        private static GameObject CreateText(Transform parent, string name, string text, int fontSize,
-            Color color, TextAnchor alignment, Vector2 anchorMin, Vector2 anchorMax)
+        private static void AddPanelBorder(GameObject panel)
+        {
+            // Add a background Image for the panel
+            var img = panel.GetComponent<Image>();
+            if (img == null)
+                img = panel.AddComponent<Image>();
+            img.color = PanelBg;
+
+            // Add terminal border via Outline
+            var outline = panel.AddComponent<Outline>();
+            outline.effectColor = BorderColor;
+            outline.effectDistance = new Vector2(2, -2);
+        }
+
+        private static TextMeshProUGUI CreateText(Transform parent, string name, string text, int fontSize,
+            Color color, TextAlignmentOptions alignment, Vector2 anchorMin, Vector2 anchorMax)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -572,18 +674,18 @@ namespace Spellwright.Editor
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            go.AddComponent<CanvasRenderer>();
-            var txt = go.AddComponent<Text>();
-            txt.text = text;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = fontSize;
-            txt.color = color;
-            txt.alignment = alignment;
-            txt.horizontalOverflow = HorizontalWrapMode.Wrap;
-            txt.verticalOverflow = VerticalWrapMode.Truncate;
-            txt.raycastTarget = false;
+            var tmp = go.AddComponent<TextMeshProUGUI>();
+            tmp.text = text;
+            if (_theme != null && _theme.primaryFont != null)
+                tmp.font = _theme.primaryFont;
+            tmp.fontSize = fontSize;
+            tmp.color = color;
+            tmp.alignment = alignment;
+            tmp.enableWordWrapping = true;
+            tmp.overflowMode = TextOverflowModes.Truncate;
+            tmp.raycastTarget = false;
 
-            return go;
+            return tmp;
         }
 
         private static GameObject CreateButton(Transform parent, string name, string label, Color bgColor,
@@ -598,14 +700,18 @@ namespace Spellwright.Editor
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            go.AddComponent<CanvasRenderer>();
             var img = go.AddComponent<Image>();
             img.color = bgColor;
+
+            // Terminal border
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = BorderColor;
+            outline.effectDistance = new Vector2(1, -1);
 
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = img;
 
-            // Label
+            // TMP Label
             var labelGO = new GameObject("Label");
             labelGO.transform.SetParent(go.transform, false);
             var labelRT = labelGO.AddComponent<RectTransform>();
@@ -614,14 +720,14 @@ namespace Spellwright.Editor
             labelRT.offsetMin = Vector2.zero;
             labelRT.offsetMax = Vector2.zero;
 
-            labelGO.AddComponent<CanvasRenderer>();
-            var txt = labelGO.AddComponent<Text>();
-            txt.text = label;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = 18;
-            txt.color = Color.white;
-            txt.alignment = TextAnchor.MiddleCenter;
-            txt.raycastTarget = false;
+            var tmp = labelGO.AddComponent<TextMeshProUGUI>();
+            tmp.text = label;
+            if (_theme != null && _theme.primaryFont != null)
+                tmp.font = _theme.primaryFont;
+            tmp.fontSize = _theme != null ? _theme.bodySize : 18;
+            tmp.color = ButtonText;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false;
 
             return go;
         }
@@ -638,48 +744,69 @@ namespace Spellwright.Editor
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            go.AddComponent<CanvasRenderer>();
             var bg = go.AddComponent<Image>();
-            bg.color = new Color(0.15f, 0.15f, 0.2f, 0.9f);
+            Color inputBg = _theme != null ? _theme.inputFieldBg : new Color(0.02f, 0.08f, 0.02f, 0.9f);
+            bg.color = inputBg;
+
+            // Terminal border
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = BorderColor;
+            outline.effectDistance = new Vector2(1, -1);
+
+            // Text area (required by TMP_InputField)
+            var textAreaGO = new GameObject("Text Area");
+            textAreaGO.transform.SetParent(go.transform, false);
+            var textAreaRT = textAreaGO.AddComponent<RectTransform>();
+            textAreaRT.anchorMin = Vector2.zero;
+            textAreaRT.anchorMax = Vector2.one;
+            textAreaRT.offsetMin = new Vector2(10, 0);
+            textAreaRT.offsetMax = new Vector2(-10, 0);
+            textAreaGO.AddComponent<RectMask2D>();
 
             // Placeholder text
             var placeholderGO = new GameObject("Placeholder");
-            placeholderGO.transform.SetParent(go.transform, false);
+            placeholderGO.transform.SetParent(textAreaGO.transform, false);
             var phRT = placeholderGO.AddComponent<RectTransform>();
             phRT.anchorMin = Vector2.zero;
             phRT.anchorMax = Vector2.one;
-            phRT.offsetMin = new Vector2(10, 0);
-            phRT.offsetMax = new Vector2(-10, 0);
-            placeholderGO.AddComponent<CanvasRenderer>();
-            var phText = placeholderGO.AddComponent<Text>();
-            phText.text = "Type your guess...";
-            phText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            phText.fontSize = 16;
-            phText.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
-            phText.fontStyle = FontStyle.Italic;
-            phText.alignment = TextAnchor.MiddleLeft;
+            phRT.offsetMin = Vector2.zero;
+            phRT.offsetMax = Vector2.zero;
+            var phTMP = placeholderGO.AddComponent<TextMeshProUGUI>();
+            phTMP.text = "Type your guess...";
+            if (_theme != null && _theme.primaryFont != null)
+                phTMP.font = _theme.primaryFont;
+            phTMP.fontSize = _theme != null ? _theme.bodySize : 18;
+            Color placeholder = _theme != null ? _theme.inputPlaceholder : new Color(0f, 0.35f, 0.12f, 0.5f);
+            phTMP.color = placeholder;
+            phTMP.fontStyle = FontStyles.Italic;
+            phTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            phTMP.raycastTarget = false;
 
             // Text component
             var textGO = new GameObject("Text");
-            textGO.transform.SetParent(go.transform, false);
+            textGO.transform.SetParent(textAreaGO.transform, false);
             var tRT = textGO.AddComponent<RectTransform>();
             tRT.anchorMin = Vector2.zero;
             tRT.anchorMax = Vector2.one;
-            tRT.offsetMin = new Vector2(10, 0);
-            tRT.offsetMax = new Vector2(-10, 0);
-            textGO.AddComponent<CanvasRenderer>();
-            var inputText = textGO.AddComponent<Text>();
-            inputText.text = "";
-            inputText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            inputText.fontSize = 16;
-            inputText.color = TextWhite;
-            inputText.alignment = TextAnchor.MiddleLeft;
-            inputText.supportRichText = false;
+            tRT.offsetMin = Vector2.zero;
+            tRT.offsetMax = Vector2.zero;
+            var inputTMP = textGO.AddComponent<TextMeshProUGUI>();
+            inputTMP.text = "";
+            if (_theme != null && _theme.primaryFont != null)
+                inputTMP.font = _theme.primaryFont;
+            inputTMP.fontSize = _theme != null ? _theme.bodySize : 18;
+            Color inputColor = _theme != null ? _theme.inputFieldText : new Color(0f, 1f, 0.33f);
+            inputTMP.color = inputColor;
+            inputTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            inputTMP.richText = false;
 
-            var input = go.AddComponent<InputField>();
-            input.textComponent = inputText;
-            input.placeholder = phText;
+            var input = go.AddComponent<TMP_InputField>();
+            input.textViewport = textAreaRT;
+            input.textComponent = inputTMP;
+            input.placeholder = phTMP;
             input.characterLimit = 25;
+            if (_theme != null)
+                input.fontAsset = _theme.primaryFont;
 
             return go;
         }
