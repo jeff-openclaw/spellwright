@@ -18,13 +18,13 @@ MonoBehaviour:
   decorativeFont: {fileID: 11400000, guid: a7d3cd00f33c54be29b01452904d9843, type: 2}
   titleSize: 56
   headerSize: 30
-  bodySize: 18
-  labelSize: 15
-  smallSize: 13
+  bodySize: 26
+  labelSize: 22
+  smallSize: 18
   blanksSize: 36
   decorativeTitleSize: 72
-  decorativeHeaderSize: 40
-  decorativeSubheaderSize: 26
+  decorativeHeaderSize: 42
+  decorativeSubheaderSize: 28
   titleGlowOffset: 0.6
   titleGlowPower: 1.0
   subtleGlowOffset: 0.4

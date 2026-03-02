@@ -26,6 +26,8 @@ Shader "Hidden/Spellwright/CRT"
             float _VignetteIntensity;
             float _VignetteRoundness;
             float _PhosphorIntensity;
+            float _NoiseIntensity;
+            float _NoiseSpeed;
             float _Brightness;
             float2 _Resolution;
 
@@ -36,6 +38,12 @@ Shader "Hidden/Spellwright/CRT"
                 float r2 = dot(centered, centered);
                 centered *= 1.0 + amount * r2;
                 return centered * 0.5 + 0.5;
+            }
+
+            // Pseudo-random noise for "purici" (static grain)
+            float Rand(float2 co, float seed)
+            {
+                return frac(sin(dot(co + seed * 0.001, float2(12.9898, 78.233))) * 43758.5453);
             }
 
             half4 Frag(Varyings input) : SV_Target
@@ -70,6 +78,11 @@ Shader "Hidden/Spellwright/CRT"
                     smoothstep(0.0, 1.0, 1.0 - abs(pixelX - 2.5))
                 );
                 color *= lerp(float3(1, 1, 1), phosphor, _PhosphorIntensity);
+
+                // --- Purici — animated pixel static/grain ---
+                float noiseSeed = floor(_Time.y * _NoiseSpeed);
+                float noise = Rand(distortedUV * _Resolution, noiseSeed);
+                color += (noise - 0.5) * _NoiseIntensity;
 
                 // --- Vignette — darken edges ---
                 float2 vignetteUV = uv * 2.0 - 1.0;

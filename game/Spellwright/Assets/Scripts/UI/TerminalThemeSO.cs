@@ -18,15 +18,15 @@ namespace Spellwright.UI
         [Header("Font Sizes")]
         public int titleSize = 56;
         public int headerSize = 30;
-        public int bodySize = 18;
-        public int labelSize = 15;
-        public int smallSize = 13;
+        public int bodySize = 26;
+        public int labelSize = 22;
+        public int smallSize = 18;
         public int blanksSize = 36;
 
         [Header("Decorative Font Sizes")]
         public int decorativeTitleSize = 72;
-        public int decorativeHeaderSize = 40;
-        public int decorativeSubheaderSize = 26;
+        public int decorativeHeaderSize = 42;
+        public int decorativeSubheaderSize = 28;
 
         [Header("Glow Settings")]
         public float titleGlowOffset = 0.6f;
