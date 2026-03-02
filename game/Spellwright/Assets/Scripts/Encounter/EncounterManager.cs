@@ -13,7 +13,7 @@ namespace Spellwright.Encounter
 {
     /// <summary>
     /// Manages the word-guessing encounter lifecycle: word selection, clue generation,
-    /// guess submission, scoring, HP tracking, and event publishing.
+    /// guess submission (letter or phrase), board state, scoring, HP tracking, and event publishing.
     /// </summary>
     public class EncounterManager : MonoBehaviour
     {
@@ -29,6 +29,7 @@ namespace Spellwright.Encounter
         private bool _isBoss;
         private int _currentHP;
         private int _maxHP;
+        private BoardState _boardState;
 
         // ── Pre-generation ───────────────────────────────────
         private Task<ClueResponse> _preGeneratedClue;
@@ -43,26 +44,28 @@ namespace Spellwright.Encounter
             : 0;
         public int CurrentHP => _currentHP;
         public int MaxHP => _maxHP;
+        public BoardState Board => _boardState;
+
+        // ── Lifecycle ────────────────────────────────────────
+
+        private void OnEnable()
+        {
+            EventBus.Instance.Subscribe<TomeRevealRequestEvent>(OnTomeRevealRequest);
+        }
+
+        private void OnDisable()
+        {
+            EventBus.Instance.Unsubscribe<TomeRevealRequestEvent>(OnTomeRevealRequest);
+        }
 
         // ── Encounter Lifecycle ──────────────────────────────
 
-        /// <summary>
-        /// Starts a new encounter: selects a word, publishes the start event,
-        /// and requests the first clue.
-        /// </summary>
-        /// <param name="pool">The word pool to draw from.</param>
-        /// <param name="npc">The NPC data for prompt generation.</param>
-        /// <param name="usedWords">Words already used in this run (to avoid repeats).</param>
-        /// <param name="difficulty">Difficulty level (1-5) for word filtering.</param>
         public async void StartEncounter(WordPoolSO pool, NPCDataSO npc, List<string> usedWords, int difficulty)
         {
             StartEncounterInternal(pool, npc, usedWords, pool.GetWordsByDifficulty(difficulty));
             await PostStartEncounter();
         }
 
-        /// <summary>
-        /// Starts a boss encounter using a difficulty range for word selection.
-        /// </summary>
         public async void StartEncounter(WordPoolSO pool, NPCDataSO npc, List<string> usedWords, int minDifficulty, int maxDifficulty)
         {
             StartEncounterInternal(pool, npc, usedWords, pool.GetWordsByDifficultyRange(minDifficulty, maxDifficulty));
@@ -71,10 +74,8 @@ namespace Spellwright.Encounter
 
         private void StartEncounterInternal(WordPoolSO pool, NPCDataSO npc, List<string> usedWords, List<WordEntry> wordCandidates)
         {
-            // Discard any pending pre-generated clue
             DiscardPreGeneratedClue();
 
-            // Filter out already-used words
             var candidates = wordCandidates
                 .Where(w => !usedWords.Contains(w.Word))
                 .ToList();
@@ -85,7 +86,6 @@ namespace Spellwright.Encounter
                 return;
             }
 
-            // Random selection
             _targetWord = candidates[Random.Range(0, candidates.Count)];
             _npcData = npc.ToPromptData();
             _isBoss = npc.isBoss;
@@ -93,6 +93,9 @@ namespace Spellwright.Encounter
             _guesses.Clear();
             _usedWords = usedWords;
             _isActive = true;
+
+            // Create the tile board
+            _boardState = new BoardState(_targetWord.Word);
         }
 
         private async Task PostStartEncounter()
@@ -115,10 +118,13 @@ namespace Spellwright.Encounter
             {
                 TargetWord = _targetWord.Word,
                 Category = _targetWord.Category,
-                NPC = _npcData
+                NPC = _npcData,
+                IsPhrase = _targetWord.IsPhrase,
+                WordCount = _targetWord.WordCount,
+                LetterCount = _targetWord.LetterCount
             });
 
-            // Apply Tome HP bonuses (effects write modifiers during event dispatch above)
+            // Apply Tome HP bonuses
             if (TomeManager.Instance != null)
             {
                 int hpBonus = TomeManager.Instance.TomeSystem.PendingMaxHPBonus;
@@ -138,9 +144,8 @@ namespace Spellwright.Encounter
                 }
             }
 
-            Debug.Log($"[EncounterManager] Encounter started: \"{_targetWord.Word}\" ({_targetWord.Category}, difficulty {_targetWord.Difficulty})");
+            Debug.Log($"[EncounterManager] Encounter started: \"{_targetWord.Word}\" ({_targetWord.Category}, difficulty {_targetWord.Difficulty}, phrase={_targetWord.IsPhrase})");
 
-            // Boss intro event before first clue
             if (_isBoss)
             {
                 EventBus.Instance.Publish(new BossIntroEvent
@@ -150,15 +155,13 @@ namespace Spellwright.Encounter
                 });
             }
 
-            // Start pre-generating the first clue immediately
             TryPreGenerateNextClue();
-
             await RequestNextClue();
         }
 
         /// <summary>
         /// Requests the next clue from the LLM (or fallback).
-        /// Uses a pre-generated clue if one is available and context matches.
+        /// After receiving the clue, reveals letters on the board per config.
         /// </summary>
         public async Task RequestNextClue()
         {
@@ -172,7 +175,6 @@ namespace Spellwright.Encounter
 
             ClueResponse clue = null;
 
-            // Check if we have a valid pre-generated clue for the current word
             if (_preGeneratedClue != null && _preGenTargetWord == _targetWord.Word)
             {
                 Debug.Log("[EncounterManager] Using pre-generated clue.");
@@ -181,10 +183,8 @@ namespace Spellwright.Encounter
                 _preGenTargetWord = null;
             }
 
-            // If no valid pre-gen, generate normally
             if (clue == null)
             {
-                // Discard stale pre-gen if context changed
                 DiscardPreGeneratedClue();
 
                 clue = await LLMManager.Instance.GenerateClueAsync(
@@ -203,45 +203,216 @@ namespace Spellwright.Encounter
                 ClueNumber = _clueNumber
             });
 
-            // Try to pre-generate the next clue in the background
+            // Reveal letters as clue bonus
+            if (_boardState != null && gameConfig != null)
+            {
+                int toReveal = gameConfig.lettersRevealedPerClue;
+                var revealed = new List<int>();
+                for (int i = 0; i < toReveal; i++)
+                {
+                    int idx = _boardState.RevealRandomHidden();
+                    if (idx >= 0) revealed.Add(idx);
+                }
+                if (revealed.Count > 0)
+                {
+                    EventBus.Instance.Publish(new LetterRevealedEvent
+                    {
+                        RevealedPositions = revealed,
+                        RevealedLetter = '\0',
+                        Source = "clue"
+                    });
+
+                    // Check auto-win after clue reveals
+                    if (_boardState.IsFullyRevealed())
+                    {
+                        int score = CalculateScore(_targetWord.LetterCount, _guesses.Count + 1);
+                        _usedWords?.Add(_targetWord.Word);
+                        EndEncounter(true, score);
+                    }
+                }
+            }
+
             TryPreGenerateNextClue();
         }
 
         /// <summary>
         /// Submits a player guess and processes the result.
+        /// Letter guesses that hit do NOT consume a guess slot. Only misses and phrase attempts count.
         /// </summary>
-        /// <returns>The evaluated <see cref="GuessResult"/>.</returns>
         public async Task<GuessResult> SubmitGuess(string guess)
         {
             if (!_isActive) return null;
 
-            var language = gameConfig != null ? gameConfig.language : Data.GameLanguage.English;
-            var result = GuessProcessor.Process(guess, _targetWord.Word, language);
-            _guesses.Add(result.GuessedWord);
+            var language = gameConfig != null ? gameConfig.language : GameLanguage.English;
+            var guessType = GuessProcessor.DetermineGuessType(guess);
 
-            EventBus.Instance.Publish(new GuessSubmittedEvent
-            {
-                Guess = result.GuessedWord,
-                Result = result
-            });
+            GuessResult result;
 
-            if (result.IsCorrect)
+            if (guessType == GuessType.Letter)
             {
-                int score = CalculateScore(_targetWord.Word.Length, _guesses.Count);
-                _usedWords?.Add(_targetWord.Word);
-                EndEncounter(true, score);
+                char letter = guess.Trim().ToLowerInvariant()[0];
+
+                // Check if already guessed
+                if (_boardState != null && _boardState.IsLetterAlreadyGuessed(letter))
+                {
+                    bool ro = language == GameLanguage.Romanian;
+                    return new GuessResult
+                    {
+                        GuessedWord = letter.ToString(),
+                        GuessType = GuessType.Letter,
+                        GuessedLetter = letter,
+                        IsCorrect = false,
+                        IsValidWord = false,
+                        IsLetterAlreadyGuessed = true,
+                        Feedback = ro ? "Ai incercat deja aceasta litera!" : "You already guessed that letter!"
+                    };
+                }
+
+                result = GuessProcessor.ProcessLetterGuess(letter, _targetWord.Word, language);
+
+                // Mark letter as guessed on the board
+                _boardState?.MarkLetterGuessed(letter);
+
+                if (result.IsLetterInPhrase)
+                {
+                    // Hit — reveal tiles, do NOT consume a guess
+                    if (_boardState != null)
+                    {
+                        int revealed = _boardState.RevealAllOfLetter(letter);
+                        var positions = _boardState.GetPositionsOfLetter(letter);
+
+                        EventBus.Instance.Publish(new LetterRevealedEvent
+                        {
+                            RevealedPositions = positions,
+                            RevealedLetter = letter,
+                            Source = "guess"
+                        });
+                    }
+
+                    EventBus.Instance.Publish(new GuessSubmittedEvent
+                    {
+                        Guess = result.GuessedWord,
+                        Result = result
+                    });
+
+                    // Check auto-win
+                    if (_boardState != null && _boardState.IsFullyRevealed())
+                    {
+                        result.IsCorrect = true;
+                        int score = CalculateScore(_targetWord.LetterCount, _guesses.Count + 1);
+                        _usedWords?.Add(_targetWord.Word);
+                        EndEncounter(true, score);
+                    }
+
+                    return result;
+                }
+                else
+                {
+                    // Miss — costs a guess, HP loss, consolation reveal
+                    _guesses.Add(result.GuessedWord);
+
+                    EventBus.Instance.Publish(new GuessSubmittedEvent
+                    {
+                        Guess = result.GuessedWord,
+                        Result = result
+                    });
+
+                    ApplyHPLoss(gameConfig != null ? gameConfig.hpLostPerWrongLetter : 2);
+
+                    // Consolation reveal
+                    if (gameConfig != null && gameConfig.consolationRevealOnWrongLetter && _boardState != null)
+                    {
+                        int idx = _boardState.RevealRandomHidden();
+                        if (idx >= 0)
+                        {
+                            EventBus.Instance.Publish(new LetterRevealedEvent
+                            {
+                                RevealedPositions = new List<int> { idx },
+                                RevealedLetter = '\0',
+                                Source = "consolation"
+                            });
+
+                            // Check auto-win after consolation reveal
+                            if (_boardState.IsFullyRevealed())
+                            {
+                                int score = CalculateScore(_targetWord.LetterCount, _guesses.Count);
+                                _usedWords?.Add(_targetWord.Word);
+                                EndEncounter(true, score);
+                                return result;
+                            }
+                        }
+                    }
+
+                    // Letter misses do NOT request a new clue — just return
+                    return result;
+                }
+            }
+            else
+            {
+                // Phrase guess
+                result = GuessProcessor.ProcessPhraseGuess(guess, _targetWord.Word, language);
+
+                if (!result.IsValidWord)
+                {
+                    // Invalid phrase — don't count
+                    EventBus.Instance.Publish(new GuessSubmittedEvent
+                    {
+                        Guess = result.GuessedWord,
+                        Result = result
+                    });
+                    return result;
+                }
+
+                _guesses.Add(result.GuessedWord);
+
+                EventBus.Instance.Publish(new GuessSubmittedEvent
+                {
+                    Guess = result.GuessedWord,
+                    Result = result
+                });
+
+                if (result.IsCorrect)
+                {
+                    // Reveal all tiles
+                    if (_boardState != null)
+                    {
+                        var positions = _boardState.RevealAll();
+                        EventBus.Instance.Publish(new LetterRevealedEvent
+                        {
+                            RevealedPositions = positions,
+                            RevealedLetter = '\0',
+                            Source = "guess"
+                        });
+                    }
+
+                    int score = CalculateScore(_targetWord.LetterCount, _guesses.Count);
+                    _usedWords?.Add(_targetWord.Word);
+                    EndEncounter(true, score);
+                    return result;
+                }
+
+                // Wrong phrase — HP loss
+                ApplyHPLoss(gameConfig != null ? gameConfig.hpLostPerWrongPhrase : 5);
+            }
+
+            // Check if max guesses reached
+            int maxGuesses = gameConfig != null ? gameConfig.maxGuessesPerEncounter : 6;
+            if (_guesses.Count >= maxGuesses)
+            {
+                EndEncounter(false, 0);
                 return result;
             }
 
-            if (!result.IsValidWord)
-            {
-                // Invalid words don't count as a guess attempt
-                _guesses.RemoveAt(_guesses.Count - 1);
-                return result;
-            }
+            // Request next clue
+            await RequestNextClue();
+            return result;
+        }
 
-            // Wrong but valid guess — deduct HP (reduced by Tome effects)
-            int hpLoss = gameConfig != null ? gameConfig.hpLostPerWrongGuess : 15;
+        // ── HP Loss Helper ──────────────────────────────────
+
+        private void ApplyHPLoss(int baseLoss)
+        {
+            int hpLoss = baseLoss;
             if (TomeManager.Instance != null)
             {
                 int reduction = TomeManager.Instance.TomeSystem.PendingHPLossReduction;
@@ -257,23 +428,61 @@ namespace Spellwright.Encounter
                 NewHP = _currentHP,
                 MaxHP = _maxHP
             });
-
-            // Check if max guesses reached
-            int maxGuesses = gameConfig != null ? gameConfig.maxGuessesPerEncounter : 6;
-            if (_guesses.Count >= maxGuesses)
-            {
-                EndEncounter(false, 0);
-                return result;
-            }
-
-            // Request next clue for the next attempt
-            await RequestNextClue();
-            return result;
         }
 
-        /// <summary>
-        /// Ends the encounter and publishes the result event.
-        /// </summary>
+        // ── Tome Reveal Handler ─────────────────────────────
+
+        private void OnTomeRevealRequest(TomeRevealRequestEvent evt)
+        {
+            if (_boardState == null || !_isActive) return;
+
+            List<int> revealed;
+            switch (evt.Type)
+            {
+                case RevealType.FirstLetter:
+                    int idx = _boardState.RevealFirstLetter();
+                    revealed = idx >= 0 ? new List<int> { idx } : new List<int>();
+                    break;
+                case RevealType.Vowels:
+                    revealed = _boardState.RevealAllVowels();
+                    break;
+                case RevealType.SpecificLetters:
+                    revealed = _boardState.RevealSpecificLetters(evt.Letters ?? new List<char>());
+                    break;
+                case RevealType.Random:
+                    revealed = new List<int>();
+                    for (int i = 0; i < evt.Count; i++)
+                    {
+                        int ri = _boardState.RevealRandomHidden();
+                        if (ri >= 0) revealed.Add(ri);
+                    }
+                    break;
+                default:
+                    revealed = new List<int>();
+                    break;
+            }
+
+            if (revealed.Count > 0)
+            {
+                EventBus.Instance.Publish(new LetterRevealedEvent
+                {
+                    RevealedPositions = revealed,
+                    RevealedLetter = '\0',
+                    Source = "tome"
+                });
+
+                // Check auto-win after tome reveals
+                if (_boardState.IsFullyRevealed())
+                {
+                    int score = CalculateScore(_targetWord.LetterCount, _guesses.Count + 1);
+                    _usedWords?.Add(_targetWord.Word);
+                    EndEncounter(true, score);
+                }
+            }
+        }
+
+        // ── End Encounter ───────────────────────────────────
+
         private void EndEncounter(bool won, int score = 0)
         {
             _isActive = false;
@@ -291,10 +500,6 @@ namespace Spellwright.Encounter
 
         // ── Clue Pre-generation ──────────────────────────────
 
-        /// <summary>
-        /// Starts generating the next clue in the background if we haven't
-        /// reached the max clue count yet.
-        /// </summary>
         private void TryPreGenerateNextClue()
         {
             if (!_isActive) return;
@@ -302,7 +507,6 @@ namespace Spellwright.Encounter
 
             int maxClues = gameConfig != null ? gameConfig.maxGuessesPerEncounter : 6;
             int nextClueNumber = _clueNumber + 1;
-
             if (nextClueNumber > maxClues) return;
 
             _preGenTargetWord = _targetWord.Word;
@@ -320,9 +524,6 @@ namespace Spellwright.Encounter
             );
         }
 
-        /// <summary>
-        /// Discards any pending pre-generated clue.
-        /// </summary>
         private void DiscardPreGeneratedClue()
         {
             _preGeneratedClue = null;
@@ -331,10 +532,6 @@ namespace Spellwright.Encounter
 
         // ── Scoring ──────────────────────────────────────────
 
-        /// <summary>
-        /// Calculates the score for a correct guess.
-        /// Base = wordLength x 10; multiplier: 1st=3x, 2nd=2x, 3rd=1.5x, 4+=1x.
-        /// </summary>
         public static int CalculateScore(int wordLength, int guessNumber)
         {
             int baseScore = wordLength * 10;
@@ -348,18 +545,12 @@ namespace Spellwright.Encounter
             return (int)(baseScore * multiplier);
         }
 
-        /// <summary>
-        /// Resets HP to the configured starting value. Call at the start of a run.
-        /// </summary>
         public void ResetHP()
         {
             _maxHP = gameConfig != null ? gameConfig.startingHP : 100;
             _currentHP = _maxHP;
         }
 
-        /// <summary>
-        /// Sets HP directly. Useful for test UI or run state restoration.
-        /// </summary>
         public void SetHP(int current, int max)
         {
             _currentHP = current;

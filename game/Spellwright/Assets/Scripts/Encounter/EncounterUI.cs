@@ -1,4 +1,5 @@
 using System.Collections;
+using DG.Tweening;
 using Spellwright.Core;
 using Spellwright.Data;
 using Spellwright.Run;
@@ -12,17 +13,18 @@ namespace Spellwright.Encounter
 {
     /// <summary>
     /// Production encounter UI with juice effects: typewriter, screen shake,
-    /// letter reveal animation, HP bar animation, damage/success flashes.
-    /// Replaces EncounterTestUI for the actual game flow.
+    /// tile board, guessed letters tracker, letter reveal animation, HP bar animation.
     /// </summary>
     public class EncounterUI : MonoBehaviour
     {
         [Header("NPC Info")]
         [SerializeField] private TextMeshProUGUI npcNameText;
         [SerializeField] private TextMeshProUGUI npcArchetypeText;
+        [SerializeField] private NPCPortraitUI npcPortraitUI;
 
-        [Header("Word Display")]
-        [SerializeField] private TextMeshProUGUI blanksText;
+        [Header("Tile Board")]
+        [SerializeField] private TileBoardUI tileBoardUI;
+        [SerializeField] private GuessedLettersUI guessedLettersUI;
         [SerializeField] private TextMeshProUGUI categoryText;
 
         [Header("Clue Display")]
@@ -32,6 +34,8 @@ namespace Spellwright.Encounter
         [Header("Input")]
         [SerializeField] private TMP_InputField guessInput;
         [SerializeField] private Button submitButton;
+        [SerializeField] private Button solveButton;
+        [SerializeField] private TextMeshProUGUI inputModeText;
 
         [Header("Status")]
         [SerializeField] private TextMeshProUGUI hpText;
@@ -48,12 +52,23 @@ namespace Spellwright.Encounter
 
         [Header("Result Overlay")]
         [SerializeField] private GameObject resultPanel;
+        [SerializeField] private TextMeshProUGUI resultBannerText;
         [SerializeField] private TextMeshProUGUI resultTitleText;
         [SerializeField] private TextMeshProUGUI resultDetailsText;
         [SerializeField] private Button continueButton;
 
         [Header("Flash Overlay")]
         [SerializeField] private Image flashOverlay;
+
+        [Header("Decorative")]
+        [SerializeField] private TextMeshProUGUI terminalPrompt;
+
+        [Header("Suspense")]
+        [SerializeField] private SuspenseEffects suspenseEffects;
+
+        [Header("Spinners & Counters")]
+        [SerializeField] private TextSpinner textSpinner;
+        [SerializeField] private AnimatedCounter animatedCounter;
 
         [Header("Theme")]
         [SerializeField] private TerminalThemeSO theme;
@@ -62,7 +77,6 @@ namespace Spellwright.Encounter
         [SerializeField] private float typewriterSpeed = 0.03f;
         [SerializeField] private float shakeIntensity = 8f;
         [SerializeField] private float shakeDuration = 0.3f;
-        [SerializeField] private float letterRevealDuration = 0.3f;
         [SerializeField] private float hpBarLerpSpeed = 5f;
         [SerializeField] private float flashDuration = 0.2f;
 
@@ -70,16 +84,18 @@ namespace Spellwright.Encounter
         private EncounterManager _encounter;
         private bool _isProcessing;
         private bool _isBossEncounter;
-        private string _currentBlanks;
+        private bool _isSolveMode;
         private float _targetHPFill;
         private float _currentHPFill;
+        private int _lastDisplayedGold;
+        private int _lastDisplayedScore;
         private Coroutine _typewriterCoroutine;
         private Coroutine _shakeCoroutine;
         private Coroutine _flashCoroutine;
         private RectTransform _shakeTarget;
         private Vector2 _shakeOriginalPos;
 
-        private void Start()
+        private void Awake()
         {
             _encounter = FindAnyObjectByType<EncounterManager>();
 
@@ -87,22 +103,13 @@ namespace Spellwright.Encounter
                 submitButton.onClick.AddListener(OnSubmitClicked);
             if (continueButton != null)
                 continueButton.onClick.AddListener(OnContinueClicked);
+            if (solveButton != null)
+                solveButton.onClick.AddListener(OnSolveToggle);
 
-            // Set up shake target (the main panel's RectTransform)
             _shakeTarget = GetComponent<RectTransform>();
             if (_shakeTarget != null)
                 _shakeOriginalPos = _shakeTarget.anchoredPosition;
 
-            // Subscribe to events
-            EventBus.Instance.Subscribe<EncounterStartedEvent>(OnEncounterStarted);
-            EventBus.Instance.Subscribe<ClueReceivedEvent>(OnClueReceived);
-            EventBus.Instance.Subscribe<GuessSubmittedEvent>(OnGuessSubmitted);
-            EventBus.Instance.Subscribe<EncounterEndedEvent>(OnEncounterEnded);
-            EventBus.Instance.Subscribe<HPChangedEvent>(OnHPChanged);
-            EventBus.Instance.Subscribe<TomeTriggeredEvent>(OnTomeTriggered);
-            EventBus.Instance.Subscribe<BossIntroEvent>(OnBossIntro);
-
-            // Initial state
             ClearDisplay();
             if (flashOverlay != null)
             {
@@ -112,12 +119,25 @@ namespace Spellwright.Encounter
             if (resultPanel != null)
                 resultPanel.SetActive(false);
 
-            // Handle input submission with Enter key (onSubmit fires on Enter press)
             if (guessInput != null)
                 guessInput.onSubmit.AddListener(OnInputSubmit);
+
+            SetLetterMode();
         }
 
-        private void OnDestroy()
+        private void OnEnable()
+        {
+            EventBus.Instance.Subscribe<EncounterStartedEvent>(OnEncounterStarted);
+            EventBus.Instance.Subscribe<ClueReceivedEvent>(OnClueReceived);
+            EventBus.Instance.Subscribe<GuessSubmittedEvent>(OnGuessSubmitted);
+            EventBus.Instance.Subscribe<EncounterEndedEvent>(OnEncounterEnded);
+            EventBus.Instance.Subscribe<HPChangedEvent>(OnHPChanged);
+            EventBus.Instance.Subscribe<TomeTriggeredEvent>(OnTomeTriggered);
+            EventBus.Instance.Subscribe<BossIntroEvent>(OnBossIntro);
+            EventBus.Instance.Subscribe<LetterRevealedEvent>(OnLetterRevealed);
+        }
+
+        private void OnDisable()
         {
             EventBus.Instance.Unsubscribe<EncounterStartedEvent>(OnEncounterStarted);
             EventBus.Instance.Unsubscribe<ClueReceivedEvent>(OnClueReceived);
@@ -126,6 +146,7 @@ namespace Spellwright.Encounter
             EventBus.Instance.Unsubscribe<HPChangedEvent>(OnHPChanged);
             EventBus.Instance.Unsubscribe<TomeTriggeredEvent>(OnTomeTriggered);
             EventBus.Instance.Unsubscribe<BossIntroEvent>(OnBossIntro);
+            EventBus.Instance.Unsubscribe<LetterRevealedEvent>(OnLetterRevealed);
         }
 
         private void Update()
@@ -135,8 +156,6 @@ namespace Spellwright.Encounter
             {
                 _currentHPFill = Mathf.Lerp(_currentHPFill, _targetHPFill, Time.deltaTime * hpBarLerpSpeed);
                 hpBarFill.fillAmount = _currentHPFill;
-
-                // Dynamic HP bar color
                 hpBarFill.color = theme != null
                     ? theme.GetHPBarColor(_currentHPFill)
                     : new Color(0f, 0.8f, 0.25f);
@@ -147,6 +166,67 @@ namespace Spellwright.Encounter
                 && !_isProcessing && !guessInput.isFocused
                 && (resultPanel == null || !resultPanel.activeSelf))
             {
+                guessInput.ActivateInputField();
+            }
+
+            // Update mode indicator based on current input
+            if (guessInput != null && inputModeText != null)
+            {
+                bool wouldBeLetter = guessInput.text.Length <= 1;
+                inputModeText.text = wouldBeLetter ? "LETTER MODE" : "SOLVE MODE";
+            }
+        }
+
+        // ── Input Mode ──────────────────────────────────────
+
+        private void SetLetterMode()
+        {
+            _isSolveMode = false;
+            if (guessInput != null)
+            {
+                guessInput.characterLimit = 0; // No limit — GuessProcessor determines type
+                var placeholder = guessInput.placeholder as TextMeshProUGUI;
+                if (placeholder != null)
+                    placeholder.text = "Guess a letter or solve...";
+            }
+            if (inputModeText != null)
+                inputModeText.text = "LETTER MODE";
+            if (solveButton != null)
+            {
+                var label = solveButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (label != null) label.text = "SOLVE";
+            }
+        }
+
+        private void SetSolveMode()
+        {
+            _isSolveMode = true;
+            if (guessInput != null)
+            {
+                guessInput.characterLimit = 50;
+                var placeholder = guessInput.placeholder as TextMeshProUGUI;
+                if (placeholder != null)
+                    placeholder.text = "Solve the phrase...";
+            }
+            if (inputModeText != null)
+                inputModeText.text = "SOLVE MODE";
+            if (solveButton != null)
+            {
+                var label = solveButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (label != null) label.text = "LETTER";
+            }
+        }
+
+        private void OnSolveToggle()
+        {
+            if (_isSolveMode)
+                SetLetterMode();
+            else
+                SetSolveMode();
+
+            if (guessInput != null)
+            {
+                guessInput.text = "";
                 guessInput.ActivateInputField();
             }
         }
@@ -164,17 +244,26 @@ namespace Spellwright.Encounter
             if (npcArchetypeText != null)
                 npcArchetypeText.text = evt.NPC.Archetype.ToString();
 
-            // Category
-            if (categoryText != null)
-                categoryText.text = $"Category: {evt.Category}";
+            // Portrait
+            if (npcPortraitUI != null)
+                npcPortraitUI.SetNPC(evt.NPC.Archetype, evt.NPC.IsBoss);
 
-            // Build blanks display
-            _currentBlanks = BuildBlanks(evt.TargetWord.Length);
-            if (blanksText != null)
+            // Category (with spinner)
+            if (categoryText != null)
             {
-                blanksText.text = "";
-                StartCoroutine(RevealLetters(_currentBlanks));
+                if (textSpinner != null)
+                    textSpinner.SpinToValue(categoryText, evt.Category, "\u2500\u2500 Category: ");
+                else
+                    categoryText.text = $"Category: {evt.Category}";
             }
+
+            // Initialize tile board
+            if (tileBoardUI != null && _encounter?.Board != null)
+                tileBoardUI.InitializeBoard(_encounter.Board);
+
+            // Reset guessed letters
+            if (guessedLettersUI != null)
+                guessedLettersUI.Reset();
 
             // Reset clue
             if (clueText != null) clueText.text = "...";
@@ -183,12 +272,14 @@ namespace Spellwright.Encounter
             // Clear history
             if (historyText != null) historyText.text = "";
 
-            // Update status
+            _currentHPFill = 0f;
+            _lastDisplayedGold = RunManager.Instance != null ? RunManager.Instance.Gold : 0;
+            _lastDisplayedScore = RunManager.Instance != null ? RunManager.Instance.Score : 0;
             UpdateStatus();
             UpdateTomeInfo();
 
-            // Reset HP bar for clean animation start
-            _currentHPFill = 0f;
+            // Reset to letter mode
+            SetLetterMode();
 
             // Enable input
             if (submitButton != null) submitButton.interactable = true;
@@ -208,7 +299,6 @@ namespace Spellwright.Encounter
                 clueNumberText.text = $"Clue #{evt.ClueNumber}{fallback}";
             }
 
-            // Typewriter effect for clue text
             if (clueText != null)
             {
                 if (_typewriterCoroutine != null)
@@ -222,27 +312,48 @@ namespace Spellwright.Encounter
             // Add to history
             if (historyText != null)
             {
-                string icon = evt.Result.IsCorrect ? ">>>" : evt.Result.IsValidWord ? " X " : " ? ";
-                string entry = $"[{icon}] {evt.Guess.ToUpperInvariant()}";
-                if (evt.Result.IsValidWord && !evt.Result.IsCorrect)
-                    entry += $"  ({evt.Result.LettersCorrect} correct)";
-                else if (!evt.Result.IsValidWord)
-                    entry += "  (invalid word)";
+                string icon;
+                string entry;
+
+                if (evt.Result.GuessType == GuessType.Letter)
+                {
+                    icon = evt.Result.IsLetterInPhrase ? ">>>" : " X ";
+                    entry = $"[{icon}] {evt.Result.GuessedLetter.ToString().ToUpperInvariant()}";
+                    if (evt.Result.IsLetterInPhrase)
+                        entry += $"  (x{evt.Result.LetterOccurrences})";
+                    else if (evt.Result.IsLetterAlreadyGuessed)
+                        entry += "  (already guessed)";
+                }
+                else
+                {
+                    icon = evt.Result.IsCorrect ? ">>>" : evt.Result.IsValidWord ? " X " : " ? ";
+                    entry = $"[{icon}] {evt.Guess.ToUpperInvariant()}";
+                    if (evt.Result.IsValidWord && !evt.Result.IsCorrect)
+                        entry += $"  ({evt.Result.LettersCorrect} correct)";
+                    else if (!evt.Result.IsValidWord)
+                        entry += "  (invalid)";
+                }
 
                 if (historyText.text.Length > 0)
                     historyText.text += "\n";
                 historyText.text += entry;
             }
 
-            // Juice effects based on result
+            // Update guessed letters display for letter guesses
+            if (evt.Result.GuessType == GuessType.Letter && guessedLettersUI != null)
+            {
+                guessedLettersUI.MarkLetterGuessed(evt.Result.GuessedLetter, evt.Result.IsLetterInPhrase);
+            }
+
+            // Juice effects
             Color damageFlash = theme != null ? theme.damageFlash : new Color(0.8f, 0.1f, 0.1f, 0.4f);
             Color successFlash = theme != null ? theme.successFlash : new Color(0.1f, 0.8f, 0.2f, 0.4f);
 
-            if (evt.Result.IsCorrect)
+            if (evt.Result.IsCorrect || (evt.Result.GuessType == GuessType.Letter && evt.Result.IsLetterInPhrase))
             {
                 Flash(successFlash);
             }
-            else if (evt.Result.IsValidWord)
+            else if (evt.Result.IsValidWord || (evt.Result.GuessType == GuessType.Letter && !evt.Result.IsLetterAlreadyGuessed))
             {
                 Flash(damageFlash);
                 ScreenShake();
@@ -251,24 +362,27 @@ namespace Spellwright.Encounter
             UpdateStatus();
         }
 
+        private void OnLetterRevealed(LetterRevealedEvent evt)
+        {
+            if (tileBoardUI != null && evt.RevealedPositions != null)
+                tileBoardUI.RevealTilesAnimated(evt.RevealedPositions);
+        }
+
         private void OnEncounterEnded(EncounterEndedEvent evt)
         {
-            // Disable input
             if (submitButton != null) submitButton.interactable = false;
             if (guessInput != null) guessInput.interactable = false;
 
-            // Reveal the word
-            if (blanksText != null)
-                blanksText.text = FormatWord(evt.TargetWord);
+            // Reveal all tiles with cascade
+            if (tileBoardUI != null)
+                tileBoardUI.RevealAllAnimated();
 
-            // Reset boss styling
             if (_isBossEncounter)
             {
                 _isBossEncounter = false;
                 ResetBossUI();
             }
 
-            // Show result panel
             ShowResult(evt);
         }
 
@@ -290,13 +404,11 @@ namespace Spellwright.Encounter
 
         private void OnHPChanged(HPChangedEvent evt)
         {
-            // Animate HP bar
             _targetHPFill = evt.MaxHP > 0 ? (float)evt.NewHP / evt.MaxHP : 0f;
 
             if (hpText != null)
                 hpText.text = $"{evt.NewHP}/{evt.MaxHP}";
 
-            // Flash on damage
             if (evt.NewHP < evt.OldHP)
             {
                 Color damageFlash = theme != null ? theme.damageFlash : new Color(0.8f, 0.1f, 0.1f, 0.4f);
@@ -306,25 +418,11 @@ namespace Spellwright.Encounter
 
         private void OnTomeTriggered(TomeTriggeredEvent evt)
         {
-            // Show tome effect in history
             if (historyText != null)
             {
                 if (historyText.text.Length > 0)
                     historyText.text += "\n";
                 historyText.text += $"<{evt.TomeName}> {evt.RevealedInfo}";
-            }
-
-            // Update blanks for First Light (reveals first letter)
-            if (_currentBlanks != null && evt.TomeName == "First Light"
-                && evt.RevealedInfo != null && evt.RevealedInfo.Length > 0)
-            {
-                char revealed = evt.RevealedInfo[evt.RevealedInfo.Length - 1];
-                if (char.IsLetter(revealed))
-                {
-                    _currentBlanks = revealed.ToString().ToUpperInvariant() + _currentBlanks.Substring(1);
-                    if (blanksText != null)
-                        blanksText.text = _currentBlanks;
-                }
             }
         }
 
@@ -380,7 +478,32 @@ namespace Spellwright.Encounter
         {
             if (resultPanel == null) return;
 
+            // Use dramatic reveal if suspense effects available
+            if (suspenseEffects != null)
+            {
+                suspenseEffects.PlayDramaticResult(() => ShowResultImmediate(evt));
+                return;
+            }
+
+            ShowResultImmediate(evt);
+        }
+
+        private void ShowResultImmediate(EncounterEndedEvent evt)
+        {
+            if (resultPanel == null) return;
+
             resultPanel.SetActive(true);
+
+            // ASCII banner (typed in)
+            if (resultBannerText != null)
+            {
+                string banner = ASCIIBanners.GetResultBanner(evt.Won);
+                resultBannerText.color = evt.Won
+                    ? (theme != null ? theme.successColor : new Color(0.1f, 0.9f, 0.3f))
+                    : (theme != null ? theme.damageColor : new Color(1f, 0.15f, 0.1f));
+                if (_typewriterCoroutine != null) StopCoroutine(_typewriterCoroutine);
+                _typewriterCoroutine = StartCoroutine(TypewriterReveal(resultBannerText, banner));
+            }
 
             if (resultTitleText != null)
             {
@@ -395,6 +518,10 @@ namespace Spellwright.Encounter
                     resultTitleText.text = $"{bossTag}WORD LOST";
                     resultTitleText.color = theme != null ? theme.damageColor : new Color(1f, 0.15f, 0.1f);
                 }
+
+                // Fade in title
+                resultTitleText.alpha = 0f;
+                resultTitleText.DOFade(1f, 0.5f).SetDelay(0.3f).SetUpdate(true);
             }
 
             if (resultDetailsText != null)
@@ -403,14 +530,35 @@ namespace Spellwright.Encounter
                 string details = $"The word was: {word}\nGuesses used: {evt.GuessCount}";
                 if (evt.Won && evt.Score > 0)
                     details += $"\nScore: +{evt.Score}";
-                resultDetailsText.text = details;
+
+                // Typewriter the details with delay
+                resultDetailsText.text = "";
+                StartCoroutine(DelayedTypewriter(resultDetailsText, details, 0.6f));
             }
 
-            // Boss encounters: GameManager handles flow automatically
-            // (boss win = ReturnToMap → RunEnd, boss loss = EndRun → RunEnd)
-            // Non-boss: show continue button for player to return to map
             if (continueButton != null)
+            {
                 continueButton.gameObject.SetActive(!evt.IsBoss);
+                if (!evt.IsBoss)
+                {
+                    // Scale-in the continue button with delay
+                    var btnRT = continueButton.GetComponent<RectTransform>();
+                    if (btnRT != null)
+                    {
+                        btnRT.localScale = Vector3.zero;
+                        btnRT.DOScale(Vector3.one, 0.3f)
+                            .SetDelay(1.2f)
+                            .SetEase(Ease.OutBack)
+                            .SetUpdate(true);
+                    }
+                }
+            }
+        }
+
+        private IEnumerator DelayedTypewriter(TextMeshProUGUI text, string content, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            yield return TypewriterReveal(text, content);
         }
 
         // ── Juice Effects ────────────────────────────────────
@@ -424,24 +572,6 @@ namespace Spellwright.Encounter
                 yield return new WaitForSeconds(typewriterSpeed);
             }
             _typewriterCoroutine = null;
-        }
-
-        private IEnumerator RevealLetters(string blanks)
-        {
-            if (blanksText == null) yield break;
-
-            blanksText.text = "";
-            for (int i = 0; i < blanks.Length; i++)
-            {
-                blanksText.text += blanks[i];
-                if (blanks[i] != ' ')
-                {
-                    // Brief scale punch for each letter slot
-                    blanksText.transform.localScale = Vector3.one * 1.1f;
-                    yield return new WaitForSeconds(letterRevealDuration / blanks.Length);
-                    blanksText.transform.localScale = Vector3.one;
-                }
-            }
         }
 
         private void ScreenShake()
@@ -460,11 +590,8 @@ namespace Spellwright.Encounter
             {
                 float x = Random.Range(-1f, 1f) * shakeIntensity;
                 float y = Random.Range(-1f, 1f) * shakeIntensity;
-
-                // Decay shake intensity over time
                 float decay = 1f - (elapsed / shakeDuration);
                 _shakeTarget.anchoredPosition = _shakeOriginalPos + new Vector2(x * decay, y * decay);
-
                 elapsed += Time.deltaTime;
                 yield return null;
             }
@@ -502,7 +629,6 @@ namespace Spellwright.Encounter
         {
             Color bossColor = theme != null ? theme.bossAccent : new Color(0.85f, 0.1f, 0.1f);
             if (npcNameText != null) npcNameText.color = bossColor;
-            if (blanksText != null) blanksText.color = bossColor;
             if (clueText != null) clueText.color = bossColor;
         }
 
@@ -510,7 +636,6 @@ namespace Spellwright.Encounter
         {
             Color normalColor = theme != null ? theme.phosphorGreen : new Color(0f, 1f, 0.33f);
             if (npcNameText != null) npcNameText.color = normalColor;
-            if (blanksText != null) blanksText.color = normalColor;
             if (clueText != null) clueText.color = normalColor;
         }
 
@@ -520,7 +645,6 @@ namespace Spellwright.Encounter
         {
             if (npcNameText != null) npcNameText.text = "";
             if (npcArchetypeText != null) npcArchetypeText.text = "";
-            if (blanksText != null) blanksText.text = "";
             if (categoryText != null) categoryText.text = "";
             if (clueText != null) clueText.text = "Waiting for encounter...";
             if (clueNumberText != null) clueNumberText.text = "";
@@ -530,6 +654,8 @@ namespace Spellwright.Encounter
             if (guessesText != null) guessesText.text = "";
             if (scoreText != null) scoreText.text = "";
             if (tomeInfoText != null) tomeInfoText.text = "";
+            if (tileBoardUI != null) tileBoardUI.ClearBoard();
+            if (guessedLettersUI != null) guessedLettersUI.Reset();
         }
 
         private void UpdateStatus()
@@ -550,13 +676,37 @@ namespace Spellwright.Encounter
             }
 
             if (goldText != null && RunManager.Instance != null)
-                goldText.text = $"{RunManager.Instance.Gold}g";
+            {
+                int newGold = RunManager.Instance.Gold;
+                if (animatedCounter != null && _lastDisplayedGold != newGold && _lastDisplayedGold > 0)
+                {
+                    Color flash = theme != null ? theme.amberBright : new Color(1f, 0.75f, 0f);
+                    animatedCounter.AnimateToValue(goldText, _lastDisplayedGold, newGold, "{0}g", 0.5f, flash);
+                }
+                else
+                {
+                    goldText.text = $"{newGold}g";
+                }
+                _lastDisplayedGold = newGold;
+            }
 
             if (guessesText != null)
                 guessesText.text = $"Guesses: {_encounter.GuessesRemaining}";
 
             if (scoreText != null && RunManager.Instance != null)
-                scoreText.text = $"Score: {RunManager.Instance.Score}";
+            {
+                int newScore = RunManager.Instance.Score;
+                if (animatedCounter != null && _lastDisplayedScore != newScore && _lastDisplayedScore > 0)
+                {
+                    Color flash = theme != null ? theme.cyanInfo : new Color(0f, 0.85f, 0.85f);
+                    animatedCounter.AnimateToValue(scoreText, _lastDisplayedScore, newScore, "Score: {0}", 0.5f, flash);
+                }
+                else
+                {
+                    scoreText.text = $"Score: {newScore}";
+                }
+                _lastDisplayedScore = newScore;
+            }
         }
 
         private void UpdateTomeInfo()
@@ -582,28 +732,6 @@ namespace Spellwright.Encounter
                 sb.Append($"* {tome.TomeName}");
             }
             tomeInfoText.text = sb.ToString();
-        }
-
-        private static string BuildBlanks(int length)
-        {
-            var sb = new System.Text.StringBuilder();
-            for (int i = 0; i < length; i++)
-            {
-                if (i > 0) sb.Append(' ');
-                sb.Append('_');
-            }
-            return sb.ToString();
-        }
-
-        private static string FormatWord(string word)
-        {
-            var sb = new System.Text.StringBuilder();
-            for (int i = 0; i < word.Length; i++)
-            {
-                if (i > 0) sb.Append(' ');
-                sb.Append(char.ToUpperInvariant(word[i]));
-            }
-            return sb.ToString();
         }
     }
 }
