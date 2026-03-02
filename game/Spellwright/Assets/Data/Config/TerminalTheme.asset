@@ -15,32 +15,53 @@ MonoBehaviour:
   primaryFont: {fileID: 11400000, guid: a7d3cd00f33c54be29b01452904d9843, type: 2}
   secondaryFont: {fileID: 11400000, guid: f126f4fe625c7444fbe0247aa741c7c7, type: 2}
   secondaryBoldFont: {fileID: 11400000, guid: 0407659cd355b415aa7fde397f8933ac, type: 2}
-  titleSize: 48
-  headerSize: 28
+  decorativeFont: {fileID: 11400000, guid: a7d3cd00f33c54be29b01452904d9843, type: 2}
+  titleSize: 56
+  headerSize: 30
   bodySize: 18
-  labelSize: 14
+  labelSize: 15
   smallSize: 13
   blanksSize: 36
-  phosphorGreen: {r: 0, g: 1, b: 0.33, a: 1}
-  phosphorBright: {r: 0.2, g: 1, b: 0.5, a: 1}
-  phosphorDim: {r: 0, g: 0.5, b: 0.18, a: 1}
-  terminalBg: {r: 0.02, g: 0.05, b: 0.02, a: 1}
-  panelBg: {r: 0.03, g: 0.08, b: 0.03, a: 0.95}
-  borderColor: {r: 0, g: 0.6, b: 0.2, a: 0.8}
-  amberBright: {r: 1, g: 0.75, b: 0, a: 1}
-  cyanInfo: {r: 0, g: 0.85, b: 0.85, a: 1}
-  magentaMagic: {r: 0.85, g: 0.2, b: 0.85, a: 1}
+  decorativeTitleSize: 72
+  decorativeHeaderSize: 40
+  decorativeSubheaderSize: 26
+  titleGlowOffset: 0.6
+  titleGlowPower: 1.0
+  subtleGlowOffset: 0.4
+  subtleGlowPower: 0.5
+  cardBg: {r: 0.03, g: 0.08, b: 0.04, a: 0.92}
+  cardBgHover: {r: 0.05, g: 0.14, b: 0.07, a: 0.98}
+  cardBgSold: {r: 0.02, g: 0.03, b: 0.02, a: 0.4}
+  panelFadeInDuration: 0.35
+  panelSlideDistance: 50
+  buttonHoverScale: 1.06
+  buttonHoverDuration: 0.12
+  staggerDelay: 0.08
+  phosphorGreen: {r: 0.12, g: 1, b: 0.45, a: 1}
+  phosphorBright: {r: 0.3, g: 1, b: 0.6, a: 1}
+  phosphorDim: {r: 0.05, g: 0.45, b: 0.2, a: 1}
+  terminalBg: {r: 0.01, g: 0.02, b: 0.02, a: 1}
+  panelBg: {r: 0.02, g: 0.06, b: 0.04, a: 0.95}
+  borderColor: {r: 0.05, g: 0.55, b: 0.25, a: 0.7}
+  panelBgLight: {r: 0.04, g: 0.10, b: 0.06, a: 0.85}
+  amberBright: {r: 1, g: 0.78, b: 0.15, a: 1}
+  amberDim: {r: 0.6, g: 0.45, b: 0.1, a: 1}
+  cyanInfo: {r: 0.15, g: 0.9, b: 0.95, a: 1}
+  cyanDim: {r: 0.05, g: 0.4, b: 0.45, a: 1}
+  magentaMagic: {r: 0.9, g: 0.25, b: 0.9, a: 1}
   successColor: {r: 0.1, g: 0.9, b: 0.3, a: 1}
   damageColor: {r: 1, g: 0.15, b: 0.1, a: 1}
   warningColor: {r: 1, g: 0.6, b: 0, a: 1}
   inactiveColor: {r: 0.3, g: 0.5, b: 0.3, a: 1}
   bossAccent: {r: 0.85, g: 0.1, b: 0.1, a: 1}
-  buttonBg: {r: 0.05, g: 0.2, b: 0.05, a: 0.9}
-  buttonBgDanger: {r: 0.3, g: 0.05, b: 0.05, a: 0.9}
-  buttonText: {r: 0, g: 1, b: 0.33, a: 1}
-  inputFieldBg: {r: 0.02, g: 0.08, b: 0.02, a: 0.9}
-  inputFieldText: {r: 0, g: 1, b: 0.33, a: 1}
-  inputPlaceholder: {r: 0, g: 0.35, b: 0.12, a: 0.5}
+  buttonBg: {r: 0.03, g: 0.18, b: 0.08, a: 0.95}
+  buttonBgHover: {r: 0.06, g: 0.28, b: 0.12, a: 1}
+  buttonBgDanger: {r: 0.35, g: 0.06, b: 0.06, a: 0.95}
+  buttonText: {r: 0.12, g: 1, b: 0.45, a: 1}
+  buttonBorder: {r: 0.12, g: 0.7, b: 0.35, a: 0.9}
+  inputFieldBg: {r: 0.01, g: 0.05, b: 0.03, a: 0.95}
+  inputFieldText: {r: 0.12, g: 1, b: 0.45, a: 1}
+  inputPlaceholder: {r: 0.05, g: 0.3, b: 0.15, a: 0.5}
   hpBarBg: {r: 0.1, g: 0.15, b: 0.1, a: 1}
   hpBarFill: {r: 0, g: 0.8, b: 0.25, a: 1}
   hpBarLow: {r: 1, g: 0.6, b: 0, a: 1}
@@ -48,11 +69,23 @@ MonoBehaviour:
   damageFlash: {r: 0.8, g: 0.1, b: 0.1, a: 0.4}
   successFlash: {r: 0.1, g: 0.8, b: 0.2, a: 0.4}
   bossIntroFlash: {r: 0.5, g: 0, b: 0, a: 0.3}
-  nodeCompleted: {r: 0, g: 0.5, b: 0.18, a: 1}
-  nodeCurrent: {r: 0, g: 1, b: 0.33, a: 1}
-  nodeFuture: {r: 0.2, g: 0.35, b: 0.2, a: 1}
-  nodeBoss: {r: 0.85, g: 0.1, b: 0.1, a: 1}
-  rarityCommon: {r: 0, g: 0.6, b: 0.2, a: 1}
-  rarityUncommon: {r: 0, g: 0.85, b: 0.85, a: 1}
-  rarityRare: {r: 0.4, g: 0.5, b: 1, a: 1}
-  rarityLegendary: {r: 1, g: 0.75, b: 0, a: 1}
+  nodeCompleted: {r: 0.05, g: 0.5, b: 0.22, a: 1}
+  nodeCurrent: {r: 0.12, g: 1, b: 0.45, a: 1}
+  nodeFuture: {r: 0.2, g: 0.45, b: 0.3, a: 1}
+  nodeBoss: {r: 0.9, g: 0.12, b: 0.12, a: 1}
+  rarityCommon: {r: 0.1, g: 0.65, b: 0.3, a: 1}
+  rarityUncommon: {r: 0.15, g: 0.9, b: 0.95, a: 1}
+  rarityRare: {r: 0.45, g: 0.55, b: 1, a: 1}
+  rarityLegendary: {r: 1, g: 0.78, b: 0.15, a: 1}
+  tileGlowMinAlpha: 0.3
+  tileGlowMaxAlpha: 1
+  dataStreamMinAlpha: 0.12
+  dataStreamMaxAlpha: 0.35
+  dataStreamColumns: 16
+  scanlineAlpha: 0.04
+  vignetteStrength: 0.45
+  cluePulseSpeed: 2
+  heartbeatThreshold: 0.25
+  heartbeatScale: 1.06
+  dramaDuration: 1.2
+  guessCountdownThreshold: 2

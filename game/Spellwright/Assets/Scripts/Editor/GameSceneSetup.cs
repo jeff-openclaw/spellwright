@@ -53,12 +53,70 @@ namespace Spellwright.Editor
             Color bgColor = _theme != null ? _theme.terminalBg : new Color(0.02f, 0.05f, 0.02f, 1f);
             var bg = CreateFullscreenImage(canvasGO.transform, "Background", bgColor);
 
+            // Ambient data stream (Matrix-style, behind everything)
+            var dataStreamGO = new GameObject("AmbientDataStream");
+            dataStreamGO.transform.SetParent(canvasGO.transform, false);
+            var dsRT = dataStreamGO.AddComponent<RectTransform>();
+            dsRT.anchorMin = Vector2.zero;
+            dsRT.anchorMax = Vector2.one;
+            dsRT.offsetMin = Vector2.zero;
+            dsRT.offsetMax = Vector2.zero;
+            dataStreamGO.transform.SetSiblingIndex(1); // Right after background
+            var dataStream = dataStreamGO.AddComponent<AmbientDataStream>();
+            SetSerializedField(dataStream, "theme", _theme);
+
             // ── Panels ──────────────────────────────────────
             var mainMenuPanel = CreateMainMenuPanel(canvasGO.transform);
             var mapPanel = CreateMapPanel(canvasGO.transform);
             var encounterPanel = CreateEncounterPanel(canvasGO.transform);
             var shopPanel = CreateShopPanel(canvasGO.transform);
             var runEndPanel = CreateRunEndPanel(canvasGO.transform);
+
+            // Add CanvasGroup + UIAnimator to each panel for entrance animations
+            AddPanelAnimator(mainMenuPanel);
+            AddPanelAnimator(mapPanel);
+            AddPanelAnimator(encounterPanel);
+            AddPanelAnimator(shopPanel);
+            AddPanelAnimator(runEndPanel);
+
+            // ── Screen Effects Overlay (scanlines + vignette, above panels) ──
+            var overlayGO = new GameObject("ScreenEffectsOverlay");
+            overlayGO.transform.SetParent(canvasGO.transform, false);
+            var overlayRT = overlayGO.AddComponent<RectTransform>();
+            overlayRT.anchorMin = Vector2.zero;
+            overlayRT.anchorMax = Vector2.one;
+            overlayRT.offsetMin = Vector2.zero;
+            overlayRT.offsetMax = Vector2.zero;
+
+            // Scanlines RawImage
+            var scanlinesGO = new GameObject("Scanlines");
+            scanlinesGO.transform.SetParent(overlayGO.transform, false);
+            var scanRT = scanlinesGO.AddComponent<RectTransform>();
+            scanRT.anchorMin = Vector2.zero;
+            scanRT.anchorMax = Vector2.one;
+            scanRT.offsetMin = Vector2.zero;
+            scanRT.offsetMax = Vector2.zero;
+            var scanRaw = scanlinesGO.AddComponent<RawImage>();
+            scanRaw.raycastTarget = false;
+            scanRaw.enabled = false; // Enabled by ScreenEffectsOverlay after texture setup
+
+            // Vignette RawImage
+            var vignetteGO = new GameObject("Vignette");
+            vignetteGO.transform.SetParent(overlayGO.transform, false);
+            var vigRT = vignetteGO.AddComponent<RectTransform>();
+            vigRT.anchorMin = Vector2.zero;
+            vigRT.anchorMax = Vector2.one;
+            vigRT.offsetMin = Vector2.zero;
+            vigRT.offsetMax = Vector2.zero;
+            var vigRaw = vignetteGO.AddComponent<RawImage>();
+            vigRaw.raycastTarget = false;
+            vigRaw.enabled = false; // Enabled by ScreenEffectsOverlay after texture setup
+
+            // ScreenEffectsOverlay component
+            var screenFX = overlayGO.AddComponent<ScreenEffectsOverlay>();
+            SetSerializedField(screenFX, "theme", _theme);
+            SetSerializedField(screenFX, "scanlineImage", scanRaw);
+            SetSerializedField(screenFX, "vignetteImage", vigRaw);
 
             // Start with all panels inactive except main menu
             mapPanel.SetActive(false);
@@ -196,18 +254,19 @@ namespace Spellwright.Editor
             return _theme != null ? getter(_theme) : fallback;
         }
 
-        private static Color PhosphorGreen => ThemeColor(t => t.phosphorGreen, new Color(0f, 1f, 0.33f));
-        private static Color PhosphorBright => ThemeColor(t => t.phosphorBright, new Color(0.2f, 1f, 0.5f));
-        private static Color PhosphorDim => ThemeColor(t => t.phosphorDim, new Color(0f, 0.5f, 0.18f));
-        private static Color TerminalBg => ThemeColor(t => t.terminalBg, new Color(0.02f, 0.05f, 0.02f, 1f));
-        private static Color PanelBg => ThemeColor(t => t.panelBg, new Color(0.03f, 0.08f, 0.03f, 0.95f));
-        private static Color BorderColor => ThemeColor(t => t.borderColor, new Color(0f, 0.6f, 0.2f, 0.8f));
-        private static Color AmberBright => ThemeColor(t => t.amberBright, new Color(1f, 0.75f, 0f));
-        private static Color CyanInfo => ThemeColor(t => t.cyanInfo, new Color(0f, 0.85f, 0.85f));
-        private static Color MagentaMagic => ThemeColor(t => t.magentaMagic, new Color(0.85f, 0.2f, 0.85f));
-        private static Color ButtonBg => ThemeColor(t => t.buttonBg, new Color(0.05f, 0.2f, 0.05f, 0.9f));
-        private static Color ButtonBgDanger => ThemeColor(t => t.buttonBgDanger, new Color(0.3f, 0.05f, 0.05f, 0.9f));
-        private static Color ButtonText => ThemeColor(t => t.buttonText, new Color(0f, 1f, 0.33f));
+        private static Color PhosphorGreen => ThemeColor(t => t.phosphorGreen, new Color(0.12f, 1f, 0.45f));
+        private static Color PhosphorBright => ThemeColor(t => t.phosphorBright, new Color(0.3f, 1f, 0.6f));
+        private static Color PhosphorDim => ThemeColor(t => t.phosphorDim, new Color(0.05f, 0.45f, 0.2f));
+        private static Color TerminalBg => ThemeColor(t => t.terminalBg, new Color(0.01f, 0.02f, 0.02f, 1f));
+        private static Color PanelBg => ThemeColor(t => t.panelBg, new Color(0.02f, 0.06f, 0.04f, 0.95f));
+        private static Color BorderColor => ThemeColor(t => t.borderColor, new Color(0.05f, 0.55f, 0.25f, 0.7f));
+        private static Color ButtonBorderColor => ThemeColor(t => t.buttonBorder, new Color(0.12f, 0.7f, 0.35f, 0.9f));
+        private static Color AmberBright => ThemeColor(t => t.amberBright, new Color(1f, 0.78f, 0.15f));
+        private static Color CyanInfo => ThemeColor(t => t.cyanInfo, new Color(0.15f, 0.9f, 0.95f));
+        private static Color MagentaMagic => ThemeColor(t => t.magentaMagic, new Color(0.9f, 0.25f, 0.9f));
+        private static Color ButtonBg => ThemeColor(t => t.buttonBg, new Color(0.03f, 0.18f, 0.08f, 0.95f));
+        private static Color ButtonBgDanger => ThemeColor(t => t.buttonBgDanger, new Color(0.35f, 0.06f, 0.06f, 0.95f));
+        private static Color ButtonText => ThemeColor(t => t.buttonText, new Color(0.12f, 1f, 0.45f));
         private static Color HpBarBg => ThemeColor(t => t.hpBarBg, new Color(0.1f, 0.15f, 0.1f, 1f));
         private static Color HpBarFill => ThemeColor(t => t.hpBarFill, new Color(0f, 0.8f, 0.25f, 1f));
 
@@ -219,22 +278,82 @@ namespace Spellwright.Editor
             AddPanelBorder(panel);
             var menuUI = panel.AddComponent<MainMenuUI>();
 
-            // Title
-            var title = CreateText(panel.transform, "TitleText", "SPELLWRIGHT",
-                _theme != null ? _theme.titleSize : 48, PhosphorBright,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.5f), new Vector2(0.9f, 0.85f));
+            // ── Corner brackets (decorative frame — larger, brighter) ──
+            Color frameColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.35f);
+            int frameSize = _theme != null ? _theme.headerSize + 8 : 38;
+            CreateText(panel.transform, "CornerTL", "\u250C",
+                frameSize, frameColor,
+                TextAlignmentOptions.TopLeft, new Vector2(0.04f, 0.88f), new Vector2(0.12f, 0.97f));
+            CreateText(panel.transform, "CornerTR", "\u2510",
+                frameSize, frameColor,
+                TextAlignmentOptions.TopRight, new Vector2(0.88f, 0.88f), new Vector2(0.96f, 0.97f));
+            CreateText(panel.transform, "CornerBL", "\u2514",
+                frameSize, frameColor,
+                TextAlignmentOptions.BottomLeft, new Vector2(0.04f, 0.11f), new Vector2(0.12f, 0.20f));
+            CreateText(panel.transform, "CornerBR", "\u2518",
+                frameSize, frameColor,
+                TextAlignmentOptions.BottomRight, new Vector2(0.88f, 0.11f), new Vector2(0.96f, 0.20f));
 
-            // Subtitle
-            CreateText(panel.transform, "SubtitleText", "A Word-Guessing Roguelike",
-                _theme != null ? _theme.bodySize : 18, PhosphorDim,
-                TextAlignmentOptions.Center, new Vector2(0.2f, 0.42f), new Vector2(0.8f, 0.52f));
+            // ── Top decorative border (between corners, brighter) ──
+            CreateText(panel.transform, "TopBorder", new string('\u2500', 50),
+                _theme != null ? _theme.smallSize + 1 : 14, frameColor,
+                TextAlignmentOptions.Center, new Vector2(0.10f, 0.92f), new Vector2(0.90f, 0.96f));
 
-            // Start button
-            var startBtn = CreateButton(panel.transform, "StartButton", "START RUN", ButtonBg,
-                new Vector2(0.3f, 0.2f), new Vector2(0.7f, 0.32f));
+            // ── Bottom decorative border (between corners, brighter) ──
+            CreateText(panel.transform, "BottomBorder", new string('\u2500', 50),
+                _theme != null ? _theme.smallSize + 1 : 14, frameColor,
+                TextAlignmentOptions.Center, new Vector2(0.10f, 0.14f), new Vector2(0.90f, 0.18f));
+
+            // ── Title (VT323, large, with glow + amber-green gradient) ──
+            Color titleTop = new Color(1f, 0.9f, 0.5f); // warm amber-white
+            var title = TerminalUIHelper.CreateDecorativeText(panel.transform, "TitleText", "SPELLWRIGHT",
+                _theme, _theme != null ? _theme.decorativeTitleSize : 64, titleTop,
+                TextAlignmentOptions.Center, new Vector2(0.05f, 0.60f), new Vector2(0.95f, 0.86f), applyGlow: true);
+            TerminalUIHelper.ApplyVerticalGradient(title, titleTop, PhosphorGreen);
+
+            // ── Title underline accent (amber, more visible) ──
+            Color underlineColor = new Color(AmberBright.r, AmberBright.g, AmberBright.b, 0.55f);
+            CreateText(panel.transform, "TitleUnderline", new string('\u2500', 22),
+                _theme != null ? _theme.smallSize + 3 : 16, underlineColor,
+                TextAlignmentOptions.Center, new Vector2(0.28f, 0.58f), new Vector2(0.72f, 0.62f));
+
+            // ── Subtitle (typewriter-revealed by MainMenuUI, larger and brighter) ──
+            Color subtitleColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.65f);
+            var subtitle = CreateText(panel.transform, "SubtitleText", "",
+                _theme != null ? _theme.bodySize + 2 : 20, subtitleColor,
+                TextAlignmentOptions.Center, new Vector2(0.15f, 0.51f), new Vector2(0.85f, 0.58f));
+
+            // ── Blinking cursor ──
+            var cursor = CreateText(panel.transform, "CursorBlink", "_",
+                _theme != null ? _theme.bodySize : 18, PhosphorGreen,
+                TextAlignmentOptions.Center, new Vector2(0.48f, 0.47f), new Vector2(0.52f, 0.52f));
+
+            // ── Separator ──
+            TerminalUIHelper.CreateSeparator(panel.transform, "MenuSeparator",
+                _theme, PhosphorDim, new Vector2(0.30f, 0.43f), new Vector2(0.70f, 0.47f));
+
+            // ── Start button (amber-accented primary action) ──
+            var startBtn = CreatePrimaryButton(panel.transform, "StartButton", "[ START RUN ]",
+                new Vector2(0.34f, 0.28f), new Vector2(0.66f, 0.40f));
+
+            // ── Hint text below button ──
+            Color hintColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.25f);
+            CreateText(panel.transform, "HintText", "Press Enter or click to begin",
+                _theme != null ? _theme.smallSize + 1 : 14,
+                new Color(hintColor.r, hintColor.g, hintColor.b, 0.75f),
+                TextAlignmentOptions.Center, new Vector2(0.25f, 0.22f), new Vector2(0.75f, 0.28f));
+
+            // ── Version text ──
+            var versionText = CreateText(panel.transform, "VersionText", "v0.1.0",
+                _theme != null ? _theme.smallSize : 13, PhosphorDim,
+                TextAlignmentOptions.BottomRight, new Vector2(0.7f, 0.02f), new Vector2(0.96f, 0.08f));
 
             SetSerializedField(menuUI, "titleText", title);
+            SetSerializedField(menuUI, "subtitleText", subtitle);
             SetSerializedField(menuUI, "startButton", startBtn.GetComponent<Button>());
+            SetSerializedField(menuUI, "cursorBlink", cursor);
+            SetSerializedField(menuUI, "versionText", versionText);
+            SetSerializedField(menuUI, "theme", _theme);
 
             return panel;
         }
@@ -245,37 +364,73 @@ namespace Spellwright.Editor
             AddPanelBorder(panel);
             var mapUI = panel.AddComponent<MapUI>();
 
-            // Title
-            var title = CreateText(panel.transform, "MapTitleText", "- YOUR JOURNEY -",
-                _theme != null ? _theme.headerSize : 28, PhosphorBright,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.88f), new Vector2(0.9f, 0.97f));
+            // ── Title (decorative, with glow) ──
+            var title = TerminalUIHelper.CreateSectionHeader(panel.transform, "MapTitleText", "YOUR JOURNEY",
+                _theme, PhosphorBright, new Vector2(0.1f, 0.92f), new Vector2(0.9f, 0.99f), applyGlow: true);
 
-            // Stats
-            var stats = CreateText(panel.transform, "StatsText", "HP: --/-- | Gold: -- | Score: --",
-                _theme != null ? _theme.labelSize : 14, PhosphorGreen,
-                TextAlignmentOptions.Center, new Vector2(0.05f, 0.82f), new Vector2(0.95f, 0.89f));
+            // ── Stats bar container (horizontal chip layout) ──
+            var statsBar = CreateContainer(panel.transform, "StatsBar",
+                new Vector2(0.06f, 0.84f), new Vector2(0.94f, 0.92f));
+            var statsHlg = statsBar.AddComponent<HorizontalLayoutGroup>();
+            statsHlg.spacing = 10;
+            statsHlg.padding = new RectOffset(4, 4, 2, 2);
+            statsHlg.childForceExpandWidth = false;
+            statsHlg.childForceExpandHeight = true;
+            statsHlg.childControlWidth = true;
+            statsHlg.childControlHeight = true;
+            statsHlg.childAlignment = TextAnchor.MiddleCenter;
 
-            // Node container with vertical layout
+            // Wave chip
+            var waveChip = CreateStatChip(statsBar.transform, "WaveChip", "# Wave 1",
+                CyanInfo, new Color(CyanInfo.r * 0.08f, CyanInfo.g * 0.08f, CyanInfo.b * 0.08f, 0.7f));
+            var waveText = waveChip.GetComponentInChildren<TextMeshProUGUI>();
+
+            // HP chip
+            var hpChip = CreateStatChip(statsBar.transform, "HPChip", "HP --/--",
+                PhosphorGreen, new Color(PhosphorGreen.r * 0.06f, PhosphorGreen.g * 0.06f, PhosphorGreen.b * 0.06f, 0.7f));
+            var hpStatText = hpChip.GetComponentInChildren<TextMeshProUGUI>();
+
+            // Gold chip
+            var goldChip = CreateStatChip(statsBar.transform, "GoldChip", "$ --g",
+                AmberBright, new Color(AmberBright.r * 0.08f, AmberBright.g * 0.08f, AmberBright.b * 0.08f, 0.7f));
+            var goldStatText = goldChip.GetComponentInChildren<TextMeshProUGUI>();
+
+            // Score chip
+            var scoreChip = CreateStatChip(statsBar.transform, "ScoreChip", "* --",
+                CyanInfo, new Color(CyanInfo.r * 0.08f, CyanInfo.g * 0.08f, CyanInfo.b * 0.08f, 0.7f));
+            var scoreStatText = scoreChip.GetComponentInChildren<TextMeshProUGUI>();
+
+            // ── Separator ──
+            TerminalUIHelper.CreateSeparator(panel.transform, "MapSeparator",
+                _theme, PhosphorDim, new Vector2(0.05f, 0.81f), new Vector2(0.95f, 0.84f));
+
+            // ── Node container ──
             var container = CreateContainer(panel.transform, "NodeContainer",
-                new Vector2(0.1f, 0.15f), new Vector2(0.9f, 0.8f));
+                new Vector2(0.08f, 0.15f), new Vector2(0.92f, 0.81f));
             var vlg = container.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 4;
+            vlg.spacing = 6;
+            vlg.padding = new RectOffset(0, 0, 6, 6);
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
             vlg.childControlWidth = true;
             vlg.childControlHeight = false;
+            var csf = container.AddComponent<ContentSizeFitter>();
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            // Proceed button
-            var proceedBtn = CreateButton(panel.transform, "ProceedButton", "PROCEED", ButtonBg,
-                new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.12f));
+            // ── Proceed button (amber-accented primary action) ──
+            var proceedBtn = CreatePrimaryButton(panel.transform, "ProceedButton", "[ PROCEED ]",
+                new Vector2(0.3f, 0.04f), new Vector2(0.7f, 0.12f));
 
-            // Language toggle button (small, bottom-left)
+            // ── Language toggle (small, bottom-left) ──
             var langBtn = CreateButton(panel.transform, "LanguageButton", "EN", ButtonBg,
-                new Vector2(0.02f, 0.03f), new Vector2(0.15f, 0.10f));
+                new Vector2(0.02f, 0.04f), new Vector2(0.15f, 0.10f));
             var langLabel = langBtn.GetComponentInChildren<TMP_Text>();
 
             SetSerializedField(mapUI, "mapTitleText", title);
-            SetSerializedField(mapUI, "statsText", stats);
+            SetSerializedField(mapUI, "waveText", waveText);
+            SetSerializedField(mapUI, "hpStatText", hpStatText);
+            SetSerializedField(mapUI, "goldStatText", goldStatText);
+            SetSerializedField(mapUI, "scoreStatText", scoreStatText);
             SetSerializedField(mapUI, "nodeContainer", container.transform);
             SetSerializedField(mapUI, "proceedButton", proceedBtn.GetComponent<Button>());
             SetSerializedField(mapUI, "languageButton", langBtn.GetComponent<Button>());
@@ -286,43 +441,199 @@ namespace Spellwright.Editor
             return panel;
         }
 
+        /// <summary>
+        /// Creates a stat "chip" — a small rounded-feel container with colored bg, border, and label.
+        /// Balatro-inspired: compact, color-coded, with icon prefix.
+        /// </summary>
+        private static GameObject CreateStatChip(Transform parent, string name, string text,
+            Color textColor, Color bgColor)
+        {
+            var chip = new GameObject(name);
+            chip.transform.SetParent(parent, false);
+            chip.AddComponent<RectTransform>();
+
+            var chipBg = chip.AddComponent<Image>();
+            chipBg.color = bgColor;
+
+            var chipOutline = chip.AddComponent<Outline>();
+            chipOutline.effectColor = new Color(textColor.r, textColor.g, textColor.b, 0.35f);
+            chipOutline.effectDistance = new Vector2(1, -1);
+
+            var chipLe = chip.AddComponent<LayoutElement>();
+            chipLe.flexibleWidth = 1;
+            chipLe.minHeight = 28;
+            chipLe.preferredHeight = 28;
+
+            var labelGO = new GameObject("Label");
+            labelGO.transform.SetParent(chip.transform, false);
+            var labelRT = labelGO.AddComponent<RectTransform>();
+            labelRT.anchorMin = Vector2.zero;
+            labelRT.anchorMax = Vector2.one;
+            labelRT.offsetMin = new Vector2(8, 0);
+            labelRT.offsetMax = new Vector2(-8, 0);
+
+            var label = labelGO.AddComponent<TextMeshProUGUI>();
+            label.text = text;
+            if (_theme != null && _theme.primaryFont != null)
+                label.font = _theme.primaryFont;
+            label.fontSize = _theme != null ? _theme.labelSize + 2 : 17;
+            label.color = textColor;
+            label.alignment = TextAlignmentOptions.Center;
+            label.fontStyle = FontStyles.Bold;
+            label.raycastTarget = false;
+
+            return chip;
+        }
+
+        /// <summary>
+        /// Creates a stat chip for the encounter screen. Like CreateStatChip but with a custom
+        /// label name so FindChild can locate it by the expected encounter field name.
+        /// </summary>
+        private static GameObject CreateEncounterStatChip(Transform parent, string chipName, string labelName,
+            string text, Color textColor, Color bgColor, float flexWidth = 1f)
+        {
+            var chip = new GameObject(chipName);
+            chip.transform.SetParent(parent, false);
+            chip.AddComponent<RectTransform>();
+
+            var chipBg = chip.AddComponent<Image>();
+            chipBg.color = bgColor;
+
+            var chipOutline = chip.AddComponent<Outline>();
+            chipOutline.effectColor = new Color(textColor.r, textColor.g, textColor.b, 0.35f);
+            chipOutline.effectDistance = new Vector2(1, -1);
+
+            var chipLe = chip.AddComponent<LayoutElement>();
+            chipLe.flexibleWidth = flexWidth;
+            chipLe.minHeight = 34;
+            chipLe.preferredHeight = 34;
+
+            var labelGO = new GameObject(labelName);
+            labelGO.transform.SetParent(chip.transform, false);
+            var labelRT = labelGO.AddComponent<RectTransform>();
+            labelRT.anchorMin = new Vector2(0, 0.25f);
+            labelRT.anchorMax = Vector2.one;
+            labelRT.offsetMin = new Vector2(8, 0);
+            labelRT.offsetMax = new Vector2(-8, 0);
+
+            var label = labelGO.AddComponent<TextMeshProUGUI>();
+            label.text = text;
+            if (_theme != null && _theme.primaryFont != null)
+                label.font = _theme.primaryFont;
+            label.fontSize = _theme != null ? _theme.labelSize + 2 : 17;
+            label.color = textColor;
+            label.alignment = TextAlignmentOptions.Center;
+            label.fontStyle = FontStyles.Bold;
+            label.raycastTarget = false;
+
+            return chip;
+        }
+
         private static GameObject CreateEncounterPanel(Transform parent)
         {
             var panel = CreatePanel(parent, "EncounterPanel");
             AddPanelBorder(panel);
 
-            // ── NPC Info (top) ──
-            var npcName = CreateText(panel.transform, "NpcNameText", "NPC Name",
-                _theme != null ? _theme.headerSize - 4 : 24, PhosphorBright,
-                TextAlignmentOptions.Center, new Vector2(0.05f, 0.92f), new Vector2(0.95f, 0.98f));
-            var npcArchetype = CreateText(panel.transform, "NpcArchetypeText", "Archetype",
-                _theme != null ? _theme.labelSize : 14, PhosphorDim,
-                TextAlignmentOptions.Center, new Vector2(0.2f, 0.88f), new Vector2(0.8f, 0.93f));
+            // ── Board Frame (WoF-style bordered frame) ──
+            var boardFrame = CreateFullscreenImage(panel.transform, "BoardFrame",
+                new Color(PanelBg.r, PanelBg.g, PanelBg.b, 0.7f));
+            SetAnchors(boardFrame, new Vector2(0.04f, 0.73f), new Vector2(0.96f, 0.97f));
+            var boardFrameOutline = boardFrame.AddComponent<Outline>();
+            boardFrameOutline.effectColor = new Color(PhosphorGreen.r, PhosphorGreen.g, PhosphorGreen.b, 0.6f);
+            boardFrameOutline.effectDistance = new Vector2(2, -2);
 
-            // ── Word Display ──
-            var blanks = CreateText(panel.transform, "BlanksText", "_ _ _ _ _",
-                _theme != null ? _theme.blanksSize : 36, PhosphorGreen,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.78f), new Vector2(0.9f, 0.88f));
+            // ── Tile Board (inside frame, doubled height) ──
+            var boardContainer = CreateContainer(panel.transform, "BoardContainer",
+                new Vector2(0.06f, 0.74f), new Vector2(0.94f, 0.96f));
+            boardContainer.AddComponent<TileBoardUI>();
+            SetSerializedField(boardContainer.GetComponent<TileBoardUI>(), "theme", _theme);
+
+            // ── Guessed Letters (hidden, kept for wiring) ──
+            var guessedContainer = CreateContainer(panel.transform, "GuessedLettersContainer",
+                new Vector2(0.08f, 0.64f), new Vector2(0.92f, 0.64f));
+            guessedContainer.AddComponent<GuessedLettersUI>();
+            SetSerializedField(guessedContainer.GetComponent<GuessedLettersUI>(), "theme", _theme);
+            guessedContainer.SetActive(false);
+
+            // ── NPC Dialog Card (portrait + name + category + clue grouped) ──
+            var dialogBg = CreateFullscreenImage(panel.transform, "DialogBg",
+                new Color(PanelBg.r, PanelBg.g, PanelBg.b, 0.7f));
+            SetAnchors(dialogBg, new Vector2(0.04f, 0.40f), new Vector2(0.96f, 0.64f));
+            var dialogOutline = dialogBg.AddComponent<Outline>();
+            dialogOutline.effectColor = new Color(BorderColor.r, BorderColor.g, BorderColor.b, 0.35f);
+            dialogOutline.effectDistance = new Vector2(1, -1);
+
+            // ── NPC Portrait (inside dialog card, left side) ──
+            var portraitContainer = CreateContainer(panel.transform, "PortraitContainer",
+                new Vector2(0.05f, 0.55f), new Vector2(0.15f, 0.64f));
+            var portraitUI = portraitContainer.AddComponent<NPCPortraitUI>();
+            var portraitText = CreateText(portraitContainer.transform, "PortraitText", "",
+                _theme != null ? _theme.smallSize - 2 : 11, PhosphorGreen,
+                TextAlignmentOptions.TopLeft, new Vector2(0f, 0f), new Vector2(1f, 1f));
+            portraitText.enableWordWrapping = false;
+            portraitText.overflowMode = TextOverflowModes.Overflow;
+            SetSerializedField(portraitUI, "portraitText", portraitText);
+            SetSerializedField(portraitUI, "theme", _theme);
+
+            // ── NPC Name (inside dialog card, right of portrait) ──
+            var npcName = TerminalUIHelper.CreateDecorativeText(panel.transform, "NpcNameText", "NPC Name",
+                _theme, _theme != null ? _theme.decorativeSubheaderSize + 6 : 32, PhosphorBright,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.16f, 0.58f), new Vector2(0.60f, 0.64f));
+
+            // ── Archetype (hidden, kept for wiring) ──
+            var npcArchetype = CreateText(panel.transform, "NpcArchetypeText", "",
+                _theme != null ? _theme.labelSize : 14, PhosphorDim,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.16f, 0.57f), new Vector2(0.60f, 0.58f));
+
+            // ── Category (right of portrait, under name) ──
             var category = CreateText(panel.transform, "CategoryText", "Category: ...",
-                _theme != null ? _theme.labelSize : 14, PhosphorDim,
-                TextAlignmentOptions.Center, new Vector2(0.2f, 0.74f), new Vector2(0.8f, 0.79f));
+                _theme != null ? _theme.bodySize + 2 : 20, AmberBright,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.16f, 0.52f), new Vector2(0.80f, 0.57f));
+            if (_theme != null)
+                TerminalUIHelper.ApplyGlow(category, AmberBright, _theme.subtleGlowOffset, _theme.subtleGlowPower);
 
-            // ── Clue Area ──
-            var clueNum = CreateText(panel.transform, "ClueNumberText", "Clue 1/6",
-                _theme != null ? _theme.labelSize : 14, AmberBright,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.68f), new Vector2(0.3f, 0.74f));
+            // ── NPC separator (inside dialog card) ──
+            TerminalUIHelper.CreateSeparator(panel.transform, "NpcSeparator",
+                _theme, PhosphorDim, new Vector2(0.05f, 0.50f), new Vector2(0.95f, 0.51f));
+
+            // ── Clue Number + Text (inside dialog card, below separator) ──
+            var clueNum = CreateText(panel.transform, "ClueNumberText", "[Clue #1]",
+                _theme != null ? _theme.bodySize : 18, AmberBright,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.06f, 0.46f), new Vector2(0.30f, 0.50f));
+            if (_theme != null)
+                TerminalUIHelper.ApplyGlow(clueNum, AmberBright, _theme.subtleGlowOffset, _theme.subtleGlowPower);
+
             var clue = CreateText(panel.transform, "ClueText", "Waiting for clue...",
-                _theme != null ? _theme.bodySize : 18, PhosphorGreen,
-                TextAlignmentOptions.TopLeft, new Vector2(0.05f, 0.52f), new Vector2(0.95f, 0.68f));
+                _theme != null ? _theme.bodySize + 4 : 22, PhosphorGreen,
+                TextAlignmentOptions.TopLeft, new Vector2(0.06f, 0.41f), new Vector2(0.94f, 0.46f));
 
-            // ── Status Bar ──
-            var hpTextGO = CreateText(panel.transform, "HPText", "HP: 30/30",
-                _theme != null ? _theme.labelSize : 14, PhosphorGreen,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.46f), new Vector2(0.25f, 0.52f));
+            // ── Status Bar (chip layout, equal-width chips, same width as frame/dialog) ──
+            var statsBar = CreateContainer(panel.transform, "EncounterStatsBar",
+                new Vector2(0.04f, 0.34f), new Vector2(0.96f, 0.40f));
+            var statsHlg = statsBar.AddComponent<HorizontalLayoutGroup>();
+            statsHlg.spacing = 6;
+            statsHlg.padding = new RectOffset(0, 0, 0, 0);
+            statsHlg.childForceExpandWidth = false;
+            statsHlg.childForceExpandHeight = true;
+            statsHlg.childControlWidth = true;
+            statsHlg.childControlHeight = true;
+            statsHlg.childAlignment = TextAnchor.MiddleCenter;
 
-            // HP Bar
-            var hpBarBg = CreateFullscreenImage(panel.transform, "HPBarBg", HpBarBg);
-            SetAnchors(hpBarBg, new Vector2(0.25f, 0.47f), new Vector2(0.55f, 0.51f));
+            // HP chip (equal width now)
+            var hpChip = CreateEncounterStatChip(statsBar.transform, "HPChip", "HPText",
+                "HP 30/30", PhosphorGreen,
+                new Color(PhosphorGreen.r * 0.06f, PhosphorGreen.g * 0.06f, PhosphorGreen.b * 0.06f, 0.7f),
+                flexWidth: 1f);
+            // HP bar embedded at bottom of HP chip
+            var hpBarBg = new GameObject("HPBarBg");
+            hpBarBg.transform.SetParent(hpChip.transform, false);
+            var hpBarBgRT = hpBarBg.AddComponent<RectTransform>();
+            hpBarBgRT.anchorMin = new Vector2(0.03f, 0.08f);
+            hpBarBgRT.anchorMax = new Vector2(0.97f, 0.28f);
+            hpBarBgRT.offsetMin = Vector2.zero;
+            hpBarBgRT.offsetMax = Vector2.zero;
+            var hpBarBgImg = hpBarBg.AddComponent<Image>();
+            hpBarBgImg.color = HpBarBg;
             var hpBarFill = CreateFullscreenImage(hpBarBg.transform, "HPBarFill", HpBarFill);
             var hpFillRT = hpBarFill.GetComponent<RectTransform>();
             hpFillRT.anchorMin = Vector2.zero;
@@ -330,48 +641,129 @@ namespace Spellwright.Editor
             hpFillRT.offsetMin = Vector2.zero;
             hpFillRT.offsetMax = Vector2.zero;
 
-            var goldText = CreateText(panel.transform, "GoldText", "Gold: 0",
-                _theme != null ? _theme.labelSize : 14, AmberBright,
-                TextAlignmentOptions.Center, new Vector2(0.58f, 0.46f), new Vector2(0.73f, 0.52f));
-            var guessesText = CreateText(panel.transform, "GuessesText", "Guesses: 6",
-                _theme != null ? _theme.labelSize : 14, PhosphorGreen,
-                TextAlignmentOptions.Center, new Vector2(0.73f, 0.46f), new Vector2(0.88f, 0.52f));
-            var scoreText = CreateText(panel.transform, "ScoreText", "Score: 0",
-                _theme != null ? _theme.labelSize : 14, PhosphorGreen,
-                TextAlignmentOptions.MidlineRight, new Vector2(0.85f, 0.46f), new Vector2(0.95f, 0.52f));
+            // Gold chip
+            CreateEncounterStatChip(statsBar.transform, "GoldChip", "GoldText",
+                "$ 0g", AmberBright,
+                new Color(AmberBright.r * 0.08f, AmberBright.g * 0.08f, AmberBright.b * 0.08f, 0.7f));
 
-            // ── Input Area ──
+            // Guesses chip
+            CreateEncounterStatChip(statsBar.transform, "GuessesChip", "GuessesText",
+                "Guesses: 6", CyanInfo,
+                new Color(CyanInfo.r * 0.08f, CyanInfo.g * 0.08f, CyanInfo.b * 0.08f, 0.7f));
+
+            // Score chip
+            CreateEncounterStatChip(statsBar.transform, "ScoreChip", "ScoreText",
+                "* 0", CyanInfo,
+                new Color(CyanInfo.r * 0.08f, CyanInfo.g * 0.08f, CyanInfo.b * 0.08f, 0.7f));
+
+            // ── Input Area (with background container) ──
+            var inputAreaBg = CreateFullscreenImage(panel.transform, "InputAreaBg",
+                new Color(PanelBg.r * 0.7f, PanelBg.g * 0.7f, PanelBg.b * 0.7f, 0.5f));
+            SetAnchors(inputAreaBg, new Vector2(0.04f, 0.24f), new Vector2(0.96f, 0.34f));
+            var inputAreaOutline = inputAreaBg.AddComponent<Outline>();
+            inputAreaOutline.effectColor = new Color(BorderColor.r, BorderColor.g, BorderColor.b, 0.25f);
+            inputAreaOutline.effectDistance = new Vector2(1, -1);
+
+            var terminalPrompt = CreateText(panel.transform, "TerminalPrompt", ">_",
+                _theme != null ? _theme.bodySize + 2 : 20, PhosphorGreen,
+                TextAlignmentOptions.MidlineRight, new Vector2(0.06f, 0.26f), new Vector2(0.09f, 0.32f));
+
             var inputGO = CreateInputField(panel.transform, "GuessInput",
-                new Vector2(0.05f, 0.38f), new Vector2(0.75f, 0.45f));
-            var submitBtn = CreateButton(panel.transform, "SubmitButton", "GUESS", ButtonBg,
-                new Vector2(0.77f, 0.38f), new Vector2(0.95f, 0.45f));
+                new Vector2(0.09f, 0.26f), new Vector2(0.58f, 0.32f));
+            var submitBtn = CreateButton(panel.transform, "SubmitButton", "[ GUESS ]", ButtonBg,
+                new Vector2(0.60f, 0.26f), new Vector2(0.76f, 0.32f));
+            var solveBtn = CreateButton(panel.transform, "SolveButton", "[ SOLVE ]", ButtonBg,
+                new Vector2(0.78f, 0.26f), new Vector2(0.94f, 0.32f));
 
-            // ── Guess History ──
+            // Input mode text (shows LETTER MODE / SOLVE MODE) — below input area
+            var inputModeText = CreateText(panel.transform, "InputModeText", "LETTER MODE",
+                _theme != null ? _theme.smallSize + 1 : 14, PhosphorDim,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.09f, 0.21f), new Vector2(0.40f, 0.24f));
+
+            // ── History section header (centered, true 50% left) ──
+            CreateText(panel.transform, "HistoryHeader", "\u2500\u2500 History \u2500\u2500",
+                _theme != null ? _theme.smallSize + 1 : 14, PhosphorDim,
+                TextAlignmentOptions.Midline, new Vector2(0.05f, 0.20f), new Vector2(0.48f, 0.24f));
+
+            // ── Tome section header (centered, true 50% right) ──
+            CreateText(panel.transform, "TomeHeader", "\u2500\u2500 Tomes \u2500\u2500",
+                _theme != null ? _theme.smallSize + 1 : 14, MagentaMagic,
+                TextAlignmentOptions.Midline, new Vector2(0.52f, 0.20f), new Vector2(0.95f, 0.24f));
+
+            // ── Guess History (true 50% left column) ──
             var history = CreateText(panel.transform, "HistoryText", "",
-                _theme != null ? _theme.smallSize : 13, PhosphorDim,
-                TextAlignmentOptions.TopLeft, new Vector2(0.05f, 0.1f), new Vector2(0.65f, 0.36f));
+                _theme != null ? _theme.smallSize + 1 : 14, PhosphorDim,
+                TextAlignmentOptions.TopLeft, new Vector2(0.05f, 0.02f), new Vector2(0.48f, 0.20f));
 
-            // ── Tome Info ──
+            // ── Tome Info (true 50% right column) ──
             var tomeInfo = CreateText(panel.transform, "TomeInfoText", "",
-                _theme != null ? _theme.smallSize : 13, MagentaMagic,
-                TextAlignmentOptions.TopLeft, new Vector2(0.67f, 0.1f), new Vector2(0.95f, 0.36f));
+                _theme != null ? _theme.smallSize + 1 : 14, MagentaMagic,
+                TextAlignmentOptions.TopLeft, new Vector2(0.52f, 0.02f), new Vector2(0.95f, 0.20f));
 
             // ── Result Panel (overlay) ──
             var resultPanel = CreateFullscreenImage(panel.transform, "ResultPanel",
                 new Color(TerminalBg.r, TerminalBg.g, TerminalBg.b, 0.9f));
-            var resultTitle = CreateText(resultPanel.transform, "ResultTitleText", "VICTORY!",
-                _theme != null ? _theme.blanksSize : 36, PhosphorBright,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.55f), new Vector2(0.9f, 0.75f));
+
+            // Result banner (ASCII art)
+            var resultBanner = CreateText(resultPanel.transform, "ResultBannerText", "",
+                _theme != null ? _theme.smallSize - 1 : 12, PhosphorGreen,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.72f), new Vector2(0.9f, 0.88f));
+            resultBanner.enableWordWrapping = false;
+            resultBanner.overflowMode = TextOverflowModes.Overflow;
+
+            var resultTitle = TerminalUIHelper.CreateDecorativeText(resultPanel.transform, "ResultTitleText", "VICTORY!",
+                _theme, _theme != null ? _theme.decorativeHeaderSize : 36, PhosphorBright,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.55f), new Vector2(0.9f, 0.72f), applyGlow: true);
+
+            // Result separator bottom
+            CreateText(resultPanel.transform, "ResultBottomBorder", new string('\u2550', 25),
+                _theme != null ? _theme.smallSize : 13, PhosphorDim,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.52f), new Vector2(0.9f, 0.56f));
+
             var resultDetails = CreateText(resultPanel.transform, "ResultDetailsText", "",
                 _theme != null ? _theme.bodySize : 18, PhosphorGreen,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.35f), new Vector2(0.9f, 0.55f));
-            var continueBtn = CreateButton(resultPanel.transform, "ContinueButton", "CONTINUE", ButtonBg,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.35f), new Vector2(0.9f, 0.52f));
+            var continueBtn = CreatePrimaryButton(resultPanel.transform, "ContinueButton", "[ CONTINUE ]",
                 new Vector2(0.3f, 0.15f), new Vector2(0.7f, 0.28f));
             resultPanel.SetActive(false);
+
+            // ── Boss Entrance Overlay ──
+            var bossOverlay = CreateFullscreenImage(panel.transform, "BossEntranceOverlay",
+                new Color(0, 0, 0, 0));
+            var bossEntUI = bossOverlay.AddComponent<BossEntranceUI>();
+            var bossBanner = CreateText(bossOverlay.transform, "BossBannerText", "",
+                _theme != null ? _theme.smallSize - 1 : 12, PhosphorGreen,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.5f), new Vector2(0.9f, 0.75f));
+            bossBanner.enableWordWrapping = false;
+            bossBanner.overflowMode = TextOverflowModes.Overflow;
+            var bossNameLabel = TerminalUIHelper.CreateDecorativeText(bossOverlay.transform, "BossNameText", "",
+                _theme, _theme != null ? _theme.decorativeHeaderSize : 36, PhosphorBright,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.35f), new Vector2(0.9f, 0.50f), applyGlow: true);
+            SetSerializedField(bossEntUI, "overlayPanel", bossOverlay);
+            SetSerializedField(bossEntUI, "overlayBg", bossOverlay.GetComponent<Image>());
+            SetSerializedField(bossEntUI, "bannerText", bossBanner);
+            SetSerializedField(bossEntUI, "bossNameText", bossNameLabel);
+            SetSerializedField(bossEntUI, "theme", _theme);
+            bossOverlay.SetActive(false);
 
             // ── Flash Overlay ──
             var flash = CreateFullscreenImage(panel.transform, "FlashOverlay", new Color(1f, 1f, 1f, 0f));
             flash.GetComponent<Image>().raycastTarget = false;
+
+            // ── TextSpinner + AnimatedCounter ──
+            var spinner = panel.AddComponent<TextSpinner>();
+            SetSerializedField(spinner, "theme", _theme);
+            var counter = panel.AddComponent<AnimatedCounter>();
+            SetSerializedField(counter, "theme", _theme);
+
+            // ── Suspense Effects ──
+            var suspense = panel.AddComponent<SuspenseEffects>();
+            SetSerializedField(suspense, "clueText", FindChild<TextMeshProUGUI>(panel, "ClueText"));
+            SetSerializedField(suspense, "hpBarFill", FindChild<Image>(panel, "HPBarFill"));
+            SetSerializedField(suspense, "guessesText", FindChild<TextMeshProUGUI>(panel, "GuessesText"));
+            SetSerializedField(suspense, "flashOverlay", FindChild<Image>(panel, "FlashOverlay"));
+            SetSerializedField(suspense, "resultPanel", FindChildGO(panel, "ResultPanel"));
+            SetSerializedField(suspense, "theme", _theme);
 
             return panel;
         }
@@ -381,59 +773,102 @@ namespace Spellwright.Editor
             var panel = CreatePanel(parent, "ShopPanel");
             AddPanelBorder(panel);
 
-            // Title
-            CreateText(panel.transform, "ShopTitle", "- ARCANE SHOP -",
-                _theme != null ? _theme.headerSize : 28, PhosphorBright,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.9f), new Vector2(0.9f, 0.98f));
+            // ── Title (decorative, large, amber-green gradient) ──
+            var shopTitle = TerminalUIHelper.CreateDecorativeText(panel.transform, "ShopTitle", "ARCANE SHOP",
+                _theme, _theme != null ? _theme.decorativeHeaderSize + 6 : 42, AmberBright,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.91f), new Vector2(0.9f, 0.99f), applyGlow: true);
+            TerminalUIHelper.ApplyVerticalGradient(shopTitle, AmberBright,
+                new Color(AmberBright.r * 0.7f, AmberBright.g * 0.5f, AmberBright.b * 0.2f));
 
-            // Status
-            var goldText = CreateText(panel.transform, "GoldText", "Gold: 0",
-                _theme != null ? _theme.bodySize : 18, AmberBright,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.84f), new Vector2(0.45f, 0.9f));
-            var hpText = CreateText(panel.transform, "HPText", "HP: 30/30",
-                _theme != null ? _theme.bodySize : 18, PhosphorGreen,
-                TextAlignmentOptions.MidlineRight, new Vector2(0.55f, 0.84f), new Vector2(0.95f, 0.9f));
+            // ── Stats bar (chip layout matching map/encounter) ──
+            var statsBar = CreateContainer(panel.transform, "ShopStatsBar",
+                new Vector2(0.06f, 0.85f), new Vector2(0.94f, 0.92f));
+            var statsHlg = statsBar.AddComponent<HorizontalLayoutGroup>();
+            statsHlg.spacing = 10;
+            statsHlg.padding = new RectOffset(4, 4, 2, 2);
+            statsHlg.childForceExpandWidth = false;
+            statsHlg.childForceExpandHeight = true;
+            statsHlg.childControlWidth = true;
+            statsHlg.childControlHeight = true;
+            statsHlg.childAlignment = TextAnchor.MiddleCenter;
 
-            // Buy section header
-            CreateText(panel.transform, "BuyHeader", "Available Items:",
-                _theme != null ? _theme.labelSize : 16, PhosphorDim,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.78f), new Vector2(0.95f, 0.84f));
+            // Gold chip (amber)
+            var goldChip = CreateStatChip(statsBar.transform, "GoldChip", "$ 0g",
+                AmberBright, new Color(AmberBright.r * 0.08f, AmberBright.g * 0.08f, AmberBright.b * 0.08f, 0.7f));
+            var goldText = goldChip.GetComponentInChildren<TextMeshProUGUI>();
 
-            // Item container
+            // HP chip (green, wider with embedded HP bar)
+            var hpChip = CreateEncounterStatChip(statsBar.transform, "HPChip", "HPLabel",
+                "HP 30/30", PhosphorGreen,
+                new Color(PhosphorGreen.r * 0.06f, PhosphorGreen.g * 0.06f, PhosphorGreen.b * 0.06f, 0.7f),
+                flexWidth: 1.5f);
+            var hpText = hpChip.transform.Find("HPLabel")?.GetComponent<TextMeshProUGUI>();
+            // HP bar at bottom of chip
+            var shopHpBarBg = new GameObject("HPBarBg");
+            shopHpBarBg.transform.SetParent(hpChip.transform, false);
+            var shopHpBarBgRT = shopHpBarBg.AddComponent<RectTransform>();
+            shopHpBarBgRT.anchorMin = new Vector2(0.03f, 0.08f);
+            shopHpBarBgRT.anchorMax = new Vector2(0.97f, 0.28f);
+            shopHpBarBgRT.offsetMin = Vector2.zero;
+            shopHpBarBgRT.offsetMax = Vector2.zero;
+            shopHpBarBg.AddComponent<Image>().color = HpBarBg;
+            var shopHpFill = CreateFullscreenImage(shopHpBarBg.transform, "HPBarFill", HpBarFill);
+            var shopHpFillRT = shopHpFill.GetComponent<RectTransform>();
+            shopHpFillRT.anchorMin = Vector2.zero;
+            shopHpFillRT.anchorMax = Vector2.one;
+            shopHpFillRT.offsetMin = Vector2.zero;
+            shopHpFillRT.offsetMax = Vector2.zero;
+
+            // ── Separator ──
+            TerminalUIHelper.CreateSeparator(panel.transform, "TopSeparator",
+                _theme, PhosphorDim, new Vector2(0.05f, 0.83f), new Vector2(0.95f, 0.85f));
+
+            // ── Buy section header (amber accent) ──
+            CreateText(panel.transform, "BuyHeader", "\u2500\u2500 FOR SALE \u2500\u2500",
+                _theme != null ? _theme.labelSize + 2 : 16, AmberBright,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.78f), new Vector2(0.50f, 0.83f));
+
+            // ── Item container ──
             var itemContainer = CreateContainer(panel.transform, "ItemContainer",
                 new Vector2(0.05f, 0.42f), new Vector2(0.95f, 0.78f));
             var vlg1 = itemContainer.AddComponent<VerticalLayoutGroup>();
-            vlg1.spacing = 4;
+            vlg1.spacing = 6;
+            vlg1.padding = new RectOffset(0, 0, 2, 2);
             vlg1.childForceExpandWidth = true;
             vlg1.childForceExpandHeight = false;
             vlg1.childControlWidth = true;
             vlg1.childControlHeight = false;
 
-            // Sell section header
-            CreateText(panel.transform, "SellHeader", "Your Tomes (sell):",
-                _theme != null ? _theme.labelSize : 16, PhosphorDim,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.36f), new Vector2(0.95f, 0.42f));
+            // ── Separator ──
+            TerminalUIHelper.CreateSeparator(panel.transform, "MidSeparator",
+                _theme, PhosphorDim, new Vector2(0.05f, 0.39f), new Vector2(0.95f, 0.42f));
 
-            // Equipped container
+            // ── Sell section header (magenta accent) ──
+            CreateText(panel.transform, "SellHeader", "\u2500\u2500 YOUR TOMES \u2500\u2500",
+                _theme != null ? _theme.labelSize + 2 : 16, MagentaMagic,
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.35f), new Vector2(0.50f, 0.40f));
+
+            // ── Equipped container ──
             var equippedContainer = CreateContainer(panel.transform, "EquippedContainer",
-                new Vector2(0.05f, 0.13f), new Vector2(0.95f, 0.36f));
+                new Vector2(0.05f, 0.14f), new Vector2(0.95f, 0.35f));
             var vlg2 = equippedContainer.AddComponent<VerticalLayoutGroup>();
-            vlg2.spacing = 4;
+            vlg2.spacing = 6;
+            vlg2.padding = new RectOffset(0, 0, 2, 2);
             vlg2.childForceExpandWidth = true;
             vlg2.childForceExpandHeight = false;
             vlg2.childControlWidth = true;
             vlg2.childControlHeight = false;
 
-            // Feedback text
+            // ── Feedback text ──
             var feedbackText = CreateText(panel.transform, "FeedbackText", "",
                 _theme != null ? _theme.labelSize : 16, AmberBright,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.06f), new Vector2(0.9f, 0.12f));
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.08f), new Vector2(0.9f, 0.13f));
 
-            // Leave button
-            var leaveBtn = CreateButton(panel.transform, "LeaveButton", "LEAVE SHOP", ButtonBgDanger,
-                new Vector2(0.3f, 0.01f), new Vector2(0.7f, 0.06f));
+            // ── Leave button ──
+            var leaveBtn = CreateButton(panel.transform, "LeaveButton", "[ LEAVE SHOP ]", ButtonBg,
+                new Vector2(0.32f, 0.02f), new Vector2(0.68f, 0.08f));
 
-            // Wire ShopUI (will be added by caller who also has shopManager ref)
+            // ── Wire ShopUI ──
             var shopUI = panel.AddComponent<ShopUI>();
             SetSerializedField(shopUI, "itemContainer", itemContainer.transform);
             SetSerializedField(shopUI, "equippedContainer", equippedContainer.transform);
@@ -452,15 +887,63 @@ namespace Spellwright.Editor
             AddPanelBorder(panel);
             var runEndUI = panel.AddComponent<RunEndUI>();
 
-            var title = CreateText(panel.transform, "TitleText", "RUN OVER",
-                _theme != null ? _theme.titleSize - 6 : 42, PhosphorBright,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.6f), new Vector2(0.9f, 0.85f));
+            // ── Corner brackets (decorative frame, matching main menu) ──
+            Color frameColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.35f);
+            int frameSize = _theme != null ? _theme.headerSize + 8 : 38;
+            CreateText(panel.transform, "CornerTL", "\u250C",
+                frameSize, frameColor,
+                TextAlignmentOptions.TopLeft, new Vector2(0.04f, 0.88f), new Vector2(0.12f, 0.97f));
+            CreateText(panel.transform, "CornerTR", "\u2510",
+                frameSize, frameColor,
+                TextAlignmentOptions.TopRight, new Vector2(0.88f, 0.88f), new Vector2(0.96f, 0.97f));
+            CreateText(panel.transform, "CornerBL", "\u2514",
+                frameSize, frameColor,
+                TextAlignmentOptions.BottomLeft, new Vector2(0.04f, 0.05f), new Vector2(0.12f, 0.14f));
+            CreateText(panel.transform, "CornerBR", "\u2518",
+                frameSize, frameColor,
+                TextAlignmentOptions.BottomRight, new Vector2(0.88f, 0.05f), new Vector2(0.96f, 0.14f));
+
+            // ── Top decorative border ──
+            CreateText(panel.transform, "TopBorder", new string('\u2500', 50),
+                _theme != null ? _theme.smallSize + 1 : 14, frameColor,
+                TextAlignmentOptions.Center, new Vector2(0.10f, 0.92f), new Vector2(0.90f, 0.96f));
+
+            // ── ASCII Banner (above title) ──
+            var banner = CreateText(panel.transform, "BannerText", "",
+                _theme != null ? _theme.smallSize - 1 : 12, PhosphorGreen,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.78f), new Vector2(0.9f, 0.92f));
+            banner.enableWordWrapping = false;
+            banner.overflowMode = TextOverflowModes.Overflow;
+
+            // ── Title (VT323 with glow) ──
+            var title = TerminalUIHelper.CreateDecorativeText(panel.transform, "TitleText", "RUN OVER",
+                _theme, _theme != null ? _theme.decorativeTitleSize - 12 : 52, PhosphorBright,
+                TextAlignmentOptions.Center, new Vector2(0.1f, 0.62f), new Vector2(0.9f, 0.78f), applyGlow: true);
+
+            // ── Separator above stats (amber for visual hierarchy) ──
+            Color sepAmber = new Color(AmberBright.r, AmberBright.g, AmberBright.b, 0.35f);
+            TerminalUIHelper.CreateSeparator(panel.transform, "StatsSepTop",
+                _theme, sepAmber, new Vector2(0.20f, 0.59f), new Vector2(0.80f, 0.62f));
+
+            // ── Stats ──
             var stats = CreateText(panel.transform, "StatsText", "Score: 0\nEncounters: 0",
                 _theme != null ? _theme.bodySize + 2 : 20, PhosphorGreen,
-                TextAlignmentOptions.Center, new Vector2(0.15f, 0.3f), new Vector2(0.85f, 0.6f));
-            var playAgainBtn = CreateButton(panel.transform, "PlayAgainButton", "PLAY AGAIN", ButtonBg,
-                new Vector2(0.3f, 0.12f), new Vector2(0.7f, 0.25f));
+                TextAlignmentOptions.Center, new Vector2(0.15f, 0.30f), new Vector2(0.85f, 0.59f));
 
+            // ── Separator below stats ──
+            TerminalUIHelper.CreateSeparator(panel.transform, "StatsSepBottom",
+                _theme, sepAmber, new Vector2(0.20f, 0.27f), new Vector2(0.80f, 0.30f));
+
+            // ── Play again button (amber-accented primary action) ──
+            var playAgainBtn = CreatePrimaryButton(panel.transform, "PlayAgainButton", "[ PLAY AGAIN ]",
+                new Vector2(0.3f, 0.14f), new Vector2(0.7f, 0.25f));
+
+            // ── Bottom decorative border ──
+            CreateText(panel.transform, "BottomBorder", new string('\u2500', 50),
+                _theme != null ? _theme.smallSize + 1 : 14, frameColor,
+                TextAlignmentOptions.Center, new Vector2(0.10f, 0.08f), new Vector2(0.90f, 0.12f));
+
+            SetSerializedField(runEndUI, "bannerText", banner);
             SetSerializedField(runEndUI, "titleText", title);
             SetSerializedField(runEndUI, "statsText", stats);
             SetSerializedField(runEndUI, "playAgainButton", playAgainBtn.GetComponent<Button>());
@@ -553,16 +1036,19 @@ namespace Spellwright.Editor
 
         private static void WireEncounterUI(EncounterUI encUI, GameObject panel)
         {
-            // Find all the child elements by name
             var so = new SerializedObject(encUI);
             so.FindProperty("npcNameText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "NpcNameText");
             so.FindProperty("npcArchetypeText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "NpcArchetypeText");
-            so.FindProperty("blanksText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "BlanksText");
+            so.FindProperty("npcPortraitUI").objectReferenceValue = FindChild<NPCPortraitUI>(panel, "PortraitContainer");
+            so.FindProperty("tileBoardUI").objectReferenceValue = FindChild<TileBoardUI>(panel, "BoardContainer");
+            so.FindProperty("guessedLettersUI").objectReferenceValue = FindChild<GuessedLettersUI>(panel, "GuessedLettersContainer");
             so.FindProperty("categoryText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "CategoryText");
             so.FindProperty("clueText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "ClueText");
             so.FindProperty("clueNumberText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "ClueNumberText");
             so.FindProperty("guessInput").objectReferenceValue = FindChild<TMP_InputField>(panel, "GuessInput");
             so.FindProperty("submitButton").objectReferenceValue = FindChild<Button>(panel, "SubmitButton");
+            so.FindProperty("solveButton").objectReferenceValue = FindChild<Button>(panel, "SolveButton");
+            so.FindProperty("inputModeText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "InputModeText");
             so.FindProperty("hpText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "HPText");
             so.FindProperty("hpBarFill").objectReferenceValue = FindChild<Image>(panel, "HPBarFill");
             so.FindProperty("goldText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "GoldText");
@@ -571,10 +1057,15 @@ namespace Spellwright.Editor
             so.FindProperty("historyText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "HistoryText");
             so.FindProperty("tomeInfoText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "TomeInfoText");
             so.FindProperty("resultPanel").objectReferenceValue = FindChildGO(panel, "ResultPanel");
+            so.FindProperty("resultBannerText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "ResultBannerText");
             so.FindProperty("resultTitleText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "ResultTitleText");
             so.FindProperty("resultDetailsText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "ResultDetailsText");
             so.FindProperty("continueButton").objectReferenceValue = FindChild<Button>(panel, "ContinueButton");
             so.FindProperty("flashOverlay").objectReferenceValue = FindChild<Image>(panel, "FlashOverlay");
+            so.FindProperty("terminalPrompt").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "TerminalPrompt");
+            so.FindProperty("suspenseEffects").objectReferenceValue = panel.GetComponent<SuspenseEffects>();
+            so.FindProperty("textSpinner").objectReferenceValue = panel.GetComponent<TextSpinner>();
+            so.FindProperty("animatedCounter").objectReferenceValue = panel.GetComponent<AnimatedCounter>();
             so.FindProperty("theme").objectReferenceValue = _theme;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -648,6 +1139,14 @@ namespace Spellwright.Editor
             return go;
         }
 
+        private static void AddPanelAnimator(GameObject panel)
+        {
+            if (panel.GetComponent<CanvasGroup>() == null)
+                panel.AddComponent<CanvasGroup>();
+            if (panel.GetComponent<UIAnimator>() == null)
+                panel.AddComponent<UIAnimator>();
+        }
+
         private static void AddPanelBorder(GameObject panel)
         {
             // Add a background Image for the panel
@@ -703,13 +1202,25 @@ namespace Spellwright.Editor
             var img = go.AddComponent<Image>();
             img.color = bgColor;
 
-            // Terminal border
+            // Button border — brighter than panel borders for visual presence
             var outline = go.AddComponent<Outline>();
-            outline.effectColor = BorderColor;
-            outline.effectDistance = new Vector2(1, -1);
+            outline.effectColor = ButtonBorderColor;
+            outline.effectDistance = new Vector2(2, -2);
 
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = img;
+
+            // Disable built-in color tinting (we handle hover via ButtonHoverEffect)
+            var colors = btn.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = Color.white;
+            colors.pressedColor = Color.white;
+            colors.selectedColor = Color.white;
+            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+            btn.colors = colors;
+
+            // Enhanced hover effect
+            go.AddComponent<ButtonHoverEffect>();
 
             // TMP Label
             var labelGO = new GameObject("Label");
@@ -726,8 +1237,83 @@ namespace Spellwright.Editor
                 tmp.font = _theme.primaryFont;
             tmp.fontSize = _theme != null ? _theme.bodySize : 18;
             tmp.color = ButtonText;
+            tmp.fontStyle = FontStyles.Bold;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.raycastTarget = false;
+
+            return go;
+        }
+
+        /// <summary>
+        /// Creates an amber-accented primary action button with warmer bg and amber border.
+        /// Used for main calls-to-action: START RUN, PROCEED, PLAY AGAIN, CONTINUE.
+        /// </summary>
+        private static GameObject CreatePrimaryButton(Transform parent, string name, string label,
+            Vector2 anchorMin, Vector2 anchorMax)
+        {
+            // Bold amber-tinted background - unmistakably distinct from dark green panel
+            Color primaryBg = new Color(0.30f, 0.22f, 0.06f, 0.92f);
+            Color amberBorder = new Color(AmberBright.r, AmberBright.g, AmberBright.b, 0.9f);
+
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            var img = go.AddComponent<Image>();
+            img.color = primaryBg;
+
+            // Amber border for visual distinction
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = amberBorder;
+            outline.effectDistance = new Vector2(2, -2);
+
+            // Outer amber glow (second shadow component)
+            var shadow = go.AddComponent<Shadow>();
+            shadow.effectColor = new Color(AmberBright.r, AmberBright.g, AmberBright.b, 0.25f);
+            shadow.effectDistance = new Vector2(3, -3);
+
+            var btn = go.AddComponent<Button>();
+            btn.targetGraphic = img;
+
+            // Disable built-in color tinting
+            var colors = btn.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = Color.white;
+            colors.pressedColor = Color.white;
+            colors.selectedColor = Color.white;
+            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+            btn.colors = colors;
+
+            go.AddComponent<ButtonHoverEffect>();
+
+            // Label in warm amber
+            var labelGO = new GameObject("Label");
+            labelGO.transform.SetParent(go.transform, false);
+            var labelRT = labelGO.AddComponent<RectTransform>();
+            labelRT.anchorMin = Vector2.zero;
+            labelRT.anchorMax = Vector2.one;
+            labelRT.offsetMin = Vector2.zero;
+            labelRT.offsetMax = Vector2.zero;
+
+            Color labelColor = Color.Lerp(AmberBright, new Color(1f, 0.95f, 0.7f), 0.3f);
+            var tmp = labelGO.AddComponent<TextMeshProUGUI>();
+            tmp.text = label;
+            if (_theme != null && _theme.primaryFont != null)
+                tmp.font = _theme.primaryFont;
+            tmp.fontSize = _theme != null ? _theme.bodySize + 2 : 20;
+            tmp.color = labelColor;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false;
+
+            // Apply glow to label for warmth
+            if (_theme != null)
+                TerminalUIHelper.ApplyGlow(tmp, AmberBright, _theme.subtleGlowOffset, _theme.subtleGlowPower);
 
             return go;
         }
