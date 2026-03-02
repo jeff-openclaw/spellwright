@@ -6,7 +6,7 @@ using Spellwright.Data;
 namespace Spellwright.Tomes.Effects
 {
     /// <summary>
-    /// On wrong guess, shows which letters from the guess also appear in the target word.
+    /// On wrong guess, reveals tiles for letters shared between the guess and the target word.
     /// </summary>
     public class EchoChamberEffect : ITomeEffect
     {
@@ -18,7 +18,7 @@ namespace Spellwright.Tomes.Effects
         {
             _targetLetters = string.IsNullOrEmpty(evt.TargetWord)
                 ? new HashSet<char>()
-                : new HashSet<char>(evt.TargetWord.ToLowerInvariant());
+                : new HashSet<char>(evt.TargetWord.ToLowerInvariant().Where(c => c != ' '));
         }
 
         public void OnWrongGuess(GuessSubmittedEvent evt)
@@ -26,11 +26,21 @@ namespace Spellwright.Tomes.Effects
             if (_targetLetters == null || _targetLetters.Count == 0) return;
             if (string.IsNullOrEmpty(evt.Guess)) return;
 
-            var guessLetters = new HashSet<char>(evt.Guess.ToLowerInvariant());
+            var guessLetters = new HashSet<char>(evt.Guess.ToLowerInvariant().Where(c => c != ' '));
             var overlap = guessLetters.Where(c => _targetLetters.Contains(c)).OrderBy(c => c).ToList();
 
+            if (overlap.Count > 0)
+            {
+                // Request board reveal of shared letters
+                EventBus.Instance.Publish(new TomeRevealRequestEvent
+                {
+                    Type = RevealType.SpecificLetters,
+                    Letters = overlap
+                });
+            }
+
             string info = overlap.Count > 0
-                ? $"Shared letters: {string.Join(", ", overlap.Select(c => c.ToString().ToUpperInvariant()))}"
+                ? $"Shared letters revealed: {string.Join(", ", overlap.Select(c => c.ToString().ToUpperInvariant()))}"
                 : "No shared letters";
 
             EventBus.Instance.Publish(new TomeTriggeredEvent

@@ -119,7 +119,18 @@ namespace Spellwright.LLM
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine($"The secret word is \"{targetWord}\" (category: {category}, {targetWord.Length} letters).");
+            bool isPhrase = targetWord != null && targetWord.Contains(' ');
+            if (isPhrase)
+            {
+                int wordCount = targetWord.Split(' ').Length;
+                int letterCount = targetWord.Replace(" ", "").Length;
+                sb.AppendLine($"The secret phrase is \"{targetWord}\" (category: {category}, {wordCount} words, {letterCount} letters).");
+                sb.AppendLine("NEVER reveal which individual words make up the phrase.");
+            }
+            else
+            {
+                sb.AppendLine($"The secret word is \"{targetWord}\" (category: {category}, {targetWord.Length} letters).");
+            }
 
             if (previousGuesses != null && previousGuesses.Count > 0)
             {

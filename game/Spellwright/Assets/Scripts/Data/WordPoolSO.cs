@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Spellwright.Data;
 
@@ -45,12 +46,15 @@ namespace Spellwright.ScriptableObjects
                 if (!int.TryParse(parts[1].Trim(), out int difficulty))
                     continue;
 
+                int spaceCount = word.Count(c => c == ' ');
                 _cachedEntries.Add(new WordEntry
                 {
                     Word = word,
                     Category = category,
                     Difficulty = difficulty,
-                    LetterCount = word.Length
+                    LetterCount = word.Length - spaceCount,
+                    IsPhrase = spaceCount > 0,
+                    WordCount = spaceCount + 1
                 });
             }
 

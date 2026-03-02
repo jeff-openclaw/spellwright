@@ -5,7 +5,7 @@ using Spellwright.Data;
 namespace Spellwright.Tomes.Effects
 {
     /// <summary>
-    /// On wrong guess, reveals which positions in the target word contain vowels.
+    /// On wrong guess, reveals all vowel tiles on the board.
     /// </summary>
     public class VowelLensEffect : ITomeEffect
     {
@@ -23,6 +23,13 @@ namespace Spellwright.Tomes.Effects
         {
             if (string.IsNullOrEmpty(_targetWord)) return;
 
+            // Request vowel reveal on the board
+            EventBus.Instance.Publish(new TomeRevealRequestEvent
+            {
+                Type = RevealType.Vowels
+            });
+
+            // Build info string for history
             var positions = new List<int>();
             for (int i = 0; i < _targetWord.Length; i++)
             {
@@ -31,7 +38,7 @@ namespace Spellwright.Tomes.Effects
             }
 
             string info = positions.Count > 0
-                ? $"Vowels at positions: {string.Join(", ", positions)}"
+                ? $"Vowels revealed at positions: {string.Join(", ", positions)}"
                 : "No vowels in the target word";
 
             EventBus.Instance.Publish(new TomeTriggeredEvent

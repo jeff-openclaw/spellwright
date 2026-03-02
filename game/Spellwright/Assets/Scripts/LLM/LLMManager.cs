@@ -155,12 +155,25 @@ namespace Spellwright.LLM
                 return _fallbackService.GetClue(word, clueNumber);
             }
 
-            // Last resort: generic clue
+            // Last resort: generic clue (phrase-aware)
             Debug.LogWarning($"[LLMManager] No clue source available for \"{word}\". Using generic clue.");
             var lang = gameConfig != null ? gameConfig.language : Data.GameLanguage.English;
-            var lastResortClue = lang == Data.GameLanguage.Romanian
-                ? $"Gandeste-te la categoria \"{category}\" — raspunsul are {word.Length} litere."
-                : $"Think about the category \"{category}\" — the answer has {word.Length} letters.";
+            bool isPhrase = word.Contains(' ');
+            int letterCount = word.Replace(" ", "").Length;
+            string lastResortClue;
+            if (isPhrase)
+            {
+                int wordCount = word.Split(' ').Length;
+                lastResortClue = lang == Data.GameLanguage.Romanian
+                    ? $"Gandeste-te la categoria \"{category}\" — raspunsul este o expresie cu {wordCount} cuvinte si {letterCount} litere."
+                    : $"Think about the category \"{category}\" — the answer is a phrase with {wordCount} words and {letterCount} letters.";
+            }
+            else
+            {
+                lastResortClue = lang == Data.GameLanguage.Romanian
+                    ? $"Gandeste-te la categoria \"{category}\" — raspunsul are {word.Length} litere."
+                    : $"Think about the category \"{category}\" — the answer has {word.Length} letters.";
+            }
             return new ClueResponse
             {
                 Clue = lastResortClue,

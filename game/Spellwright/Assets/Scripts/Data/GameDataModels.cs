@@ -61,6 +61,22 @@ namespace Spellwright.Data
         Meta
     }
 
+    /// <summary>Whether a guess is a single letter or a full phrase attempt.</summary>
+    public enum GuessType
+    {
+        Letter,
+        Phrase
+    }
+
+    /// <summary>Type of board reveal requested by a Tome effect.</summary>
+    public enum RevealType
+    {
+        FirstLetter,
+        Vowels,
+        SpecificLetters,
+        Random
+    }
+
     // ── Data Classes ───────────────────────────────────────
 
     /// <summary>Parsed response from the LLM clue generation.</summary>
@@ -80,6 +96,11 @@ namespace Spellwright.Data
         public bool IsValidWord { get; set; }
         public string Feedback { get; set; }
         public int LettersCorrect { get; set; }
+        public GuessType GuessType { get; set; }
+        public char GuessedLetter { get; set; }
+        public int LetterOccurrences { get; set; }
+        public bool IsLetterInPhrase { get; set; }
+        public bool IsLetterAlreadyGuessed { get; set; }
     }
 
     /// <summary>Mutable state of an in-progress run.</summary>
@@ -125,6 +146,8 @@ namespace Spellwright.Data
         public string Category { get; set; }
         public int Difficulty { get; set; }
         public int LetterCount { get; set; }
+        public bool IsPhrase { get; set; }
+        public int WordCount { get; set; } = 1;
     }
 
     // ── Event Payloads ─────────────────────────────────────
@@ -135,6 +158,9 @@ namespace Spellwright.Data
         public string TargetWord { get; set; }
         public string Category { get; set; }
         public NPCPromptData NPC { get; set; }
+        public bool IsPhrase { get; set; }
+        public int WordCount { get; set; }
+        public int LetterCount { get; set; }
     }
 
     /// <summary>Fired when the player submits a guess.</summary>
@@ -235,5 +261,22 @@ namespace Spellwright.Data
     {
         public int NodeIndex { get; set; }
         public NodeType NodeType { get; set; }
+    }
+
+    /// <summary>Fired when letter tiles are revealed on the board.</summary>
+    public class LetterRevealedEvent
+    {
+        public List<int> RevealedPositions { get; set; }
+        public char RevealedLetter { get; set; }
+        /// <summary>"clue", "guess", "consolation", or "tome"</summary>
+        public string Source { get; set; }
+    }
+
+    /// <summary>Fired by Tome effects to request board reveals via EncounterManager.</summary>
+    public class TomeRevealRequestEvent
+    {
+        public RevealType Type { get; set; }
+        public List<char> Letters { get; set; }
+        public int Count { get; set; }
     }
 }

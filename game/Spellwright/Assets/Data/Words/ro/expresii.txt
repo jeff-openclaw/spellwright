@@ -1,0 +1,30 @@
+luna plina	2
+cal negru	2
+apa rece	1
+aer liber	2
+timp liber	2
+loc de munca	3
+drum lung	2
+pat cald	1
+mar verde	2
+lapte cald	1
+soare rosu	2
+cer senin	2
+camp verde	2
+lac albastru	2
+deal inalt	2
+foc de tabara	3
+rasarit de soare	3
+vis frumos	2
+tara veche	2
+pas mare	2
+drum drept	2
+lemn tare	2
+om bun	1
+zi buna	1
+piatra alba	2
+floare rosie	2
+leu puternic	2
+urs mare	2
+cal alb	1
+ceas vechi	2

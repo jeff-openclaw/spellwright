@@ -24,8 +24,14 @@ namespace Spellwright.ScriptableObjects
         [Header("Encounter")]
         public int maxGuessesPerEncounter = 6;
         public int hpLostPerWrongGuess = 4;
+        public int hpLostPerWrongLetter = 2;
+        public int hpLostPerWrongPhrase = 5;
         public int baseScorePerCorrectGuess = 100;
         public int maxBossClueWords = 3;
+        [Tooltip("Number of random letters revealed per clue received")]
+        public int lettersRevealedPerClue = 1;
+        [Tooltip("Reveal a random letter as consolation when a letter guess misses")]
+        public bool consolationRevealOnWrongLetter = true;
 
         [Header("Economy")]
         [Tooltip("Base gold reward for winning an encounter")]
