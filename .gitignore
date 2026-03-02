@@ -62,6 +62,9 @@ crashlytics-build.properties
 # NuGet packages (restored automatically)
 **/[Aa]ssets/[Pp]ackages/
 
+# Screenshots
+**/[Aa]ssets/[Ss]creenshots/
+
 # OS
 .DS_Store
 Thumbs.db
