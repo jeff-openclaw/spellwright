@@ -1,12 +1,15 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Rendering.RenderGraphModule;
+using UnityEngine.Rendering.RenderGraphModule.Util;
 
 namespace Spellwright.Rendering
 {
     /// <summary>
     /// URP Renderer Feature that applies a CRT post-processing effect.
     /// Add this to the URP Renderer asset (PC_Renderer or Mobile_Renderer).
+    /// Uses URP 17 Render Graph API.
     /// </summary>
     public class CRTRenderFeature : ScriptableRendererFeature
     {
@@ -39,32 +42,26 @@ namespace Spellwright.Rendering
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
             if (_pass == null || _material == null) return;
-
-            // Check if CRT is enabled via CRTSettings singleton
             if (CRTSettings.Instance == null || !CRTSettings.Instance.crtEnabled) return;
 
-            // Apply settings to material
             CRTSettings.Instance.ApplyToMaterial(_material);
-
             renderer.EnqueuePass(_pass);
         }
 
         protected override void Dispose(bool disposing)
         {
-            _pass?.Dispose();
             if (_material != null)
                 CoreUtils.Destroy(_material);
         }
     }
 
     /// <summary>
-    /// Render pass that blits the screen through the CRT shader.
+    /// Render pass that blits the screen through the CRT shader using Render Graph.
     /// </summary>
     public class CRTRenderPass : ScriptableRenderPass
     {
         private readonly Material _material;
-        private RTHandle _tempTexture;
-        private static readonly int TempTexId = Shader.PropertyToID("_CRTTemp");
+        private static readonly int ResolutionId = Shader.PropertyToID("_Resolution");
 
         public CRTRenderPass(Material material)
         {
@@ -72,39 +69,36 @@ namespace Spellwright.Rendering
             profilingSampler = new ProfilingSampler("CRT Effect");
         }
 
-        public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
-        {
-            var desc = renderingData.cameraData.cameraTargetDescriptor;
-            desc.depthBufferBits = 0;
-            RenderingUtils.ReAllocateHandleIfNeeded(ref _tempTexture, desc, name: "_CRTTemp");
-        }
-
-        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
+        public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
         {
             if (_material == null) return;
 
-            var cmd = CommandBufferPool.Get("CRT Effect");
+            var resourceData = frameData.Get<UniversalResourceData>();
 
-            using (new ProfilingScope(cmd, profilingSampler))
-            {
-                var source = renderingData.cameraData.renderer.cameraColorTargetHandle;
+            if (resourceData.isActiveTargetBackBuffer)
+                return;
 
-                // Set resolution for phosphor grid calculation
-                var desc = renderingData.cameraData.cameraTargetDescriptor;
-                _material.SetVector("_Resolution", new Vector4(desc.width, desc.height, 0, 0));
+            var source = resourceData.activeColorTexture;
+            if (!source.IsValid()) return;
 
-                Blitter.BlitCameraTexture(cmd, source, _tempTexture, _material, 0);
-                Blitter.BlitCameraTexture(cmd, _tempTexture, source);
-            }
+            // Set resolution for phosphor grid calculation
+            var cameraData = frameData.Get<UniversalCameraData>();
+            var camDesc = cameraData.cameraTargetDescriptor;
+            _material.SetVector(ResolutionId, new Vector4(camDesc.width, camDesc.height, 0, 0));
 
-            context.ExecuteCommandBuffer(cmd);
-            cmd.Clear();
-            CommandBufferPool.Release(cmd);
-        }
+            // Create temp texture matching source
+            var desc = renderGraph.GetTextureDesc(source);
+            desc.name = "_CRTTemp";
+            desc.clearBuffer = false;
+            var destination = renderGraph.CreateTexture(desc);
 
-        public void Dispose()
-        {
-            _tempTexture?.Release();
+            // Blit source -> destination through CRT material
+            renderGraph.AddBlitPass(
+                new RenderGraphUtils.BlitMaterialParameters(source, destination, _material, 0),
+                passName: "CRT Effect");
+
+            // Redirect URP's color output to our processed texture
+            resourceData.cameraColor = destination;
         }
     }
 }
