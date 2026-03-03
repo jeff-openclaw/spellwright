@@ -137,7 +137,7 @@ namespace Spellwright.Shop
                 rarityColor = theme != null ? theme.phosphorGreen : Color.white;
 
             var (card, content, right) = TerminalUIHelper.CreateItemCard(
-                itemContainer, $"ShopItem_{index}", theme, rarityColor, 60);
+                itemContainer, $"ShopItem_{index}", theme, rarityColor, 78);
 
             // Dim sold items
             if (item.IsSold)
@@ -154,11 +154,12 @@ namespace Spellwright.Shop
             var nameTmp = nameGO.AddComponent<TextMeshProUGUI>();
             if (theme != null && theme.primaryFont != null)
                 nameTmp.font = theme.primaryFont;
-            nameTmp.fontSize = theme != null ? theme.labelSize + 2 : 16;
+            nameTmp.fontSize = theme != null ? theme.labelSize + 2 : 24;
+            nameTmp.fontStyle = FontStyles.Bold;
             nameTmp.raycastTarget = false;
             var nameLe = nameGO.AddComponent<LayoutElement>();
-            nameLe.preferredHeight = 24;
-            nameLe.minHeight = 20;
+            nameLe.preferredHeight = 28;
+            nameLe.minHeight = 24;
 
             if (item.IsHealItem)
             {
@@ -182,8 +183,11 @@ namespace Spellwright.Shop
             var descTmp = descGO.AddComponent<TextMeshProUGUI>();
             if (theme != null && theme.primaryFont != null)
                 descTmp.font = theme.primaryFont;
-            descTmp.fontSize = theme != null ? theme.smallSize : 13;
-            descTmp.color = theme != null ? theme.phosphorDim : new Color(0f, 0.5f, 0.18f);
+            descTmp.fontSize = theme != null ? theme.labelSize : 22;
+            Color descColor = theme != null
+                ? new Color(theme.phosphorGreen.r, theme.phosphorGreen.g, theme.phosphorGreen.b, 0.65f)
+                : new Color(0.08f, 0.65f, 0.30f);
+            descTmp.color = descColor;
             descTmp.raycastTarget = false;
             descTmp.alignment = TextAlignmentOptions.MidlineLeft;
             var descLe = descGO.AddComponent<LayoutElement>();
@@ -215,7 +219,8 @@ namespace Spellwright.Shop
                 priceTmp.text = $"{item.Price}g";
                 if (theme != null && theme.primaryFont != null)
                     priceTmp.font = theme.primaryFont;
-                priceTmp.fontSize = theme != null ? theme.labelSize : 14;
+                priceTmp.fontSize = theme != null ? theme.bodySize : 26;
+                priceTmp.fontStyle = FontStyles.Bold;
                 priceTmp.color = theme != null ? theme.amberBright : new Color(1f, 0.75f, 0f);
                 priceTmp.alignment = TextAlignmentOptions.Center;
                 priceTmp.raycastTarget = false;
@@ -228,7 +233,7 @@ namespace Spellwright.Shop
                 labelTmp.text = "[ BUY ]";
                 if (theme != null && theme.primaryFont != null)
                     labelTmp.font = theme.primaryFont;
-                labelTmp.fontSize = theme != null ? theme.smallSize : 13;
+                labelTmp.fontSize = theme != null ? theme.labelSize : 22;
                 labelTmp.color = theme != null ? theme.buttonText : new Color(0f, 1f, 0.33f);
                 labelTmp.alignment = TextAlignmentOptions.Center;
                 labelTmp.raycastTarget = false;
@@ -254,7 +259,7 @@ namespace Spellwright.Shop
             Color rarityColor = theme != null ? theme.GetRarityColor(tome.Rarity) : Color.white;
 
             var (card, content, right) = TerminalUIHelper.CreateItemCard(
-                equippedContainer, $"Equipped_{tome.TomeId}", theme, rarityColor, 50);
+                equippedContainer, $"Equipped_{tome.TomeId}", theme, rarityColor, 62);
 
             // ── Content: name ──
             var nameGO = new GameObject("Name");
@@ -297,7 +302,7 @@ namespace Spellwright.Shop
             btnLabel.text = "[ SELL ]";
             if (theme != null && theme.primaryFont != null)
                 btnLabel.font = theme.primaryFont;
-            btnLabel.fontSize = theme != null ? theme.smallSize : 13;
+            btnLabel.fontSize = theme != null ? theme.labelSize : 22;
             btnLabel.color = theme != null ? theme.buttonText : new Color(0f, 1f, 0.33f);
             btnLabel.alignment = TextAlignmentOptions.Center;
             btnLabel.raycastTarget = false;

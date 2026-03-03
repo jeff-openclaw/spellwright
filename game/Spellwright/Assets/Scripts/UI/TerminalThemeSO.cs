@@ -93,11 +93,11 @@ namespace Spellwright.UI
         [Header("Map Node Colors")]
         public Color nodeCompleted = new Color(0.05f, 0.5f, 0.22f);
         public Color nodeCurrent = new Color(0.12f, 1f, 0.45f);
-        public Color nodeFuture = new Color(0.2f, 0.45f, 0.3f);
+        public Color nodeFuture = new Color(0.25f, 0.60f, 0.40f);
         public Color nodeBoss = new Color(0.9f, 0.12f, 0.12f);
 
         [Header("Shop Rarity Colors")]
-        public Color rarityCommon = new Color(0.1f, 0.65f, 0.3f);
+        public Color rarityCommon = new Color(0.15f, 0.80f, 0.40f);
         public Color rarityUncommon = new Color(0.15f, 0.9f, 0.95f);
         public Color rarityRare = new Color(0.45f, 0.55f, 1f);
         public Color rarityLegendary = new Color(1f, 0.78f, 0.15f);

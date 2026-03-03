@@ -280,7 +280,7 @@ namespace Spellwright.Editor
 
             // ── Corner brackets (decorative frame — larger, brighter) ──
             Color frameColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.35f);
-            int frameSize = _theme != null ? _theme.headerSize + 8 : 38;
+            int frameSize = _theme != null ? _theme.decorativeTitleSize - 10 : 62;
             CreateText(panel.transform, "CornerTL", "\u250C",
                 frameSize, frameColor,
                 TextAlignmentOptions.TopLeft, new Vector2(0.04f, 0.88f), new Vector2(0.12f, 0.97f));
@@ -312,13 +312,13 @@ namespace Spellwright.Editor
             TerminalUIHelper.ApplyVerticalGradient(title, titleTop, PhosphorGreen);
 
             // ── Title underline accent (amber, more visible) ──
-            Color underlineColor = new Color(AmberBright.r, AmberBright.g, AmberBright.b, 0.55f);
+            Color underlineColor = new Color(AmberBright.r, AmberBright.g, AmberBright.b, 0.70f);
             CreateText(panel.transform, "TitleUnderline", new string('\u2500', 22),
-                _theme != null ? _theme.smallSize + 3 : 16, underlineColor,
+                _theme != null ? _theme.labelSize + 2 : 24, underlineColor,
                 TextAlignmentOptions.Center, new Vector2(0.28f, 0.58f), new Vector2(0.72f, 0.62f));
 
             // ── Subtitle (typewriter-revealed by MainMenuUI, larger and brighter) ──
-            Color subtitleColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.65f);
+            Color subtitleColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.85f);
             var subtitle = CreateText(panel.transform, "SubtitleText", "",
                 _theme != null ? _theme.bodySize + 2 : 20, subtitleColor,
                 TextAlignmentOptions.Center, new Vector2(0.15f, 0.51f), new Vector2(0.85f, 0.58f));
@@ -329,23 +329,25 @@ namespace Spellwright.Editor
                 TextAlignmentOptions.Center, new Vector2(0.48f, 0.47f), new Vector2(0.52f, 0.52f));
 
             // ── Separator ──
+            Color sepColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.35f);
             TerminalUIHelper.CreateSeparator(panel.transform, "MenuSeparator",
-                _theme, PhosphorDim, new Vector2(0.30f, 0.43f), new Vector2(0.70f, 0.47f));
+                _theme, sepColor, new Vector2(0.30f, 0.43f), new Vector2(0.70f, 0.47f));
 
             // ── Start button (amber-accented primary action) ──
             var startBtn = CreatePrimaryButton(panel.transform, "StartButton", "[ START RUN ]",
                 new Vector2(0.34f, 0.28f), new Vector2(0.66f, 0.40f));
 
             // ── Hint text below button ──
-            Color hintColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.25f);
+            Color hintColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.40f);
             CreateText(panel.transform, "HintText", "Press Enter or click to begin",
-                _theme != null ? _theme.smallSize + 1 : 14,
-                new Color(hintColor.r, hintColor.g, hintColor.b, 0.75f),
+                _theme != null ? _theme.labelSize : 22,
+                new Color(hintColor.r, hintColor.g, hintColor.b, 0.88f),
                 TextAlignmentOptions.Center, new Vector2(0.25f, 0.22f), new Vector2(0.75f, 0.28f));
 
             // ── Version text ──
+            Color versionColor = new Color(PhosphorGreen.r, PhosphorGreen.g, PhosphorGreen.b, 0.55f);
             var versionText = CreateText(panel.transform, "VersionText", "v0.1.0",
-                _theme != null ? _theme.smallSize : 13, PhosphorDim,
+                _theme != null ? _theme.smallSize : 13, versionColor,
                 TextAlignmentOptions.BottomRight, new Vector2(0.7f, 0.02f), new Vector2(0.96f, 0.08f));
 
             SetSerializedField(menuUI, "titleText", title);
@@ -461,8 +463,8 @@ namespace Spellwright.Editor
 
             var chipLe = chip.AddComponent<LayoutElement>();
             chipLe.flexibleWidth = 1;
-            chipLe.minHeight = 28;
-            chipLe.preferredHeight = 28;
+            chipLe.minHeight = 34;
+            chipLe.preferredHeight = 34;
 
             var labelGO = new GameObject("Label");
             labelGO.transform.SetParent(chip.transform, false);
@@ -476,7 +478,7 @@ namespace Spellwright.Editor
             label.text = text;
             if (_theme != null && _theme.primaryFont != null)
                 label.font = _theme.primaryFont;
-            label.fontSize = _theme != null ? _theme.labelSize + 2 : 17;
+            label.fontSize = _theme != null ? _theme.bodySize : 26;
             label.color = textColor;
             label.alignment = TextAlignmentOptions.Center;
             label.fontStyle = FontStyles.Bold;
@@ -505,8 +507,8 @@ namespace Spellwright.Editor
 
             var chipLe = chip.AddComponent<LayoutElement>();
             chipLe.flexibleWidth = flexWidth;
-            chipLe.minHeight = 34;
-            chipLe.preferredHeight = 34;
+            chipLe.minHeight = 38;
+            chipLe.preferredHeight = 38;
 
             var labelGO = new GameObject(labelName);
             labelGO.transform.SetParent(chip.transform, false);
@@ -520,7 +522,7 @@ namespace Spellwright.Editor
             label.text = text;
             if (_theme != null && _theme.primaryFont != null)
                 label.font = _theme.primaryFont;
-            label.fontSize = _theme != null ? _theme.labelSize + 2 : 17;
+            label.fontSize = _theme != null ? _theme.bodySize : 26;
             label.color = textColor;
             label.alignment = TextAlignmentOptions.Center;
             label.fontStyle = FontStyles.Bold;
@@ -534,19 +536,36 @@ namespace Spellwright.Editor
             var panel = CreatePanel(parent, "EncounterPanel");
             AddPanelBorder(panel);
 
-            // ── Board Frame (WoF-style bordered frame) ──
+            // ── Board Frame (WoF-style bordered frame with glow) ──
             var boardFrame = CreateFullscreenImage(panel.transform, "BoardFrame",
-                new Color(PanelBg.r, PanelBg.g, PanelBg.b, 0.7f));
+                new Color(0.02f, 0.06f, 0.03f, 0.85f));
             SetAnchors(boardFrame, new Vector2(0.04f, 0.73f), new Vector2(0.96f, 0.97f));
             var boardFrameOutline = boardFrame.AddComponent<Outline>();
-            boardFrameOutline.effectColor = new Color(PhosphorGreen.r, PhosphorGreen.g, PhosphorGreen.b, 0.6f);
-            boardFrameOutline.effectDistance = new Vector2(2, -2);
+            boardFrameOutline.effectColor = new Color(PhosphorGreen.r, PhosphorGreen.g, PhosphorGreen.b, 0.8f);
+            boardFrameOutline.effectDistance = new Vector2(3, -3);
+            // Second outline for glow effect
+            var boardFrameGlow = boardFrame.AddComponent<Outline>();
+            boardFrameGlow.effectColor = new Color(PhosphorGreen.r, PhosphorGreen.g, PhosphorGreen.b, 0.3f);
+            boardFrameGlow.effectDistance = new Vector2(5, -5);
 
-            // ── Tile Board (inside frame, doubled height) ──
+            // ── Tile Board (inside frame) ──
             var boardContainer = CreateContainer(panel.transform, "BoardContainer",
                 new Vector2(0.06f, 0.74f), new Vector2(0.94f, 0.96f));
             boardContainer.AddComponent<TileBoardUI>();
             SetSerializedField(boardContainer.GetComponent<TileBoardUI>(), "theme", _theme);
+
+            // ── Category Banner (styled banner below board) ──
+            var categoryBanner = CreateFullscreenImage(panel.transform, "CategoryBanner",
+                new Color(0.02f, 0.06f, 0.03f, 0.80f));
+            SetAnchors(categoryBanner, new Vector2(0.20f, 0.67f), new Vector2(0.80f, 0.73f));
+            var categoryBannerOutline = categoryBanner.AddComponent<Outline>();
+            categoryBannerOutline.effectColor = new Color(AmberBright.r, AmberBright.g, AmberBright.b, 0.5f);
+            categoryBannerOutline.effectDistance = new Vector2(1, -1);
+            var category = CreateText(categoryBanner.transform, "CategoryText", "Category: ...",
+                _theme != null ? _theme.bodySize : 20, AmberBright,
+                TextAlignmentOptions.Center, new Vector2(0.05f, 0f), new Vector2(0.95f, 1f));
+            if (_theme != null)
+                TerminalUIHelper.ApplyGlow(category, AmberBright, _theme.subtleGlowOffset, _theme.subtleGlowPower);
 
             // ── Guessed Letters (hidden, kept for wiring) ──
             var guessedContainer = CreateContainer(panel.transform, "GuessedLettersContainer",
@@ -555,17 +574,17 @@ namespace Spellwright.Editor
             SetSerializedField(guessedContainer.GetComponent<GuessedLettersUI>(), "theme", _theme);
             guessedContainer.SetActive(false);
 
-            // ── NPC Dialog Card (portrait + name + category + clue grouped) ──
+            // ── NPC Dialog Card (portrait + name + clue grouped) ──
             var dialogBg = CreateFullscreenImage(panel.transform, "DialogBg",
                 new Color(PanelBg.r, PanelBg.g, PanelBg.b, 0.7f));
-            SetAnchors(dialogBg, new Vector2(0.04f, 0.40f), new Vector2(0.96f, 0.64f));
+            SetAnchors(dialogBg, new Vector2(0.04f, 0.40f), new Vector2(0.96f, 0.66f));
             var dialogOutline = dialogBg.AddComponent<Outline>();
             dialogOutline.effectColor = new Color(BorderColor.r, BorderColor.g, BorderColor.b, 0.35f);
             dialogOutline.effectDistance = new Vector2(1, -1);
 
             // ── NPC Portrait (inside dialog card, left side) ──
             var portraitContainer = CreateContainer(panel.transform, "PortraitContainer",
-                new Vector2(0.05f, 0.55f), new Vector2(0.15f, 0.64f));
+                new Vector2(0.05f, 0.57f), new Vector2(0.15f, 0.66f));
             var portraitUI = portraitContainer.AddComponent<NPCPortraitUI>();
             var portraitText = CreateText(portraitContainer.transform, "PortraitText", "",
                 _theme != null ? _theme.smallSize - 2 : 11, PhosphorGreen,
@@ -578,23 +597,16 @@ namespace Spellwright.Editor
             // ── NPC Name (inside dialog card, right of portrait) ──
             var npcName = TerminalUIHelper.CreateDecorativeText(panel.transform, "NpcNameText", "NPC Name",
                 _theme, _theme != null ? _theme.decorativeSubheaderSize + 6 : 32, PhosphorBright,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.16f, 0.58f), new Vector2(0.60f, 0.64f));
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.16f, 0.60f), new Vector2(0.60f, 0.66f));
 
             // ── Archetype (hidden, kept for wiring) ──
             var npcArchetype = CreateText(panel.transform, "NpcArchetypeText", "",
                 _theme != null ? _theme.labelSize : 14, PhosphorDim,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.16f, 0.57f), new Vector2(0.60f, 0.58f));
-
-            // ── Category (right of portrait, under name) ──
-            var category = CreateText(panel.transform, "CategoryText", "Category: ...",
-                _theme != null ? _theme.bodySize + 2 : 20, AmberBright,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.16f, 0.52f), new Vector2(0.80f, 0.57f));
-            if (_theme != null)
-                TerminalUIHelper.ApplyGlow(category, AmberBright, _theme.subtleGlowOffset, _theme.subtleGlowPower);
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.16f, 0.59f), new Vector2(0.60f, 0.60f));
 
             // ── NPC separator (inside dialog card) ──
             TerminalUIHelper.CreateSeparator(panel.transform, "NpcSeparator",
-                _theme, PhosphorDim, new Vector2(0.05f, 0.50f), new Vector2(0.95f, 0.51f));
+                _theme, PhosphorDim, new Vector2(0.05f, 0.53f), new Vector2(0.95f, 0.54f));
 
             // ── Clue Number + Text (inside dialog card, below separator) ──
             var clueNum = CreateText(panel.transform, "ClueNumberText", "[Clue #1]",
@@ -676,28 +688,31 @@ namespace Spellwright.Editor
                 new Vector2(0.78f, 0.26f), new Vector2(0.94f, 0.32f));
 
             // Input mode text (shows LETTER MODE / SOLVE MODE) — below input area
+            Color inputModeColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.5f);
             var inputModeText = CreateText(panel.transform, "InputModeText", "LETTER MODE",
-                _theme != null ? _theme.smallSize + 1 : 14, PhosphorDim,
+                _theme != null ? _theme.labelSize : 22, inputModeColor,
                 TextAlignmentOptions.MidlineLeft, new Vector2(0.09f, 0.21f), new Vector2(0.40f, 0.24f));
 
             // ── History section header (centered, true 50% left) ──
+            Color historyHeaderColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.4f);
             CreateText(panel.transform, "HistoryHeader", "\u2500\u2500 History \u2500\u2500",
-                _theme != null ? _theme.smallSize + 1 : 14, PhosphorDim,
+                _theme != null ? _theme.labelSize : 22, historyHeaderColor,
                 TextAlignmentOptions.Midline, new Vector2(0.05f, 0.20f), new Vector2(0.48f, 0.24f));
 
             // ── Tome section header (centered, true 50% right) ──
             CreateText(panel.transform, "TomeHeader", "\u2500\u2500 Tomes \u2500\u2500",
-                _theme != null ? _theme.smallSize + 1 : 14, MagentaMagic,
+                _theme != null ? _theme.labelSize : 22, MagentaMagic,
                 TextAlignmentOptions.Midline, new Vector2(0.52f, 0.20f), new Vector2(0.95f, 0.24f));
 
             // ── Guess History (true 50% left column) ──
+            Color historyColor = new Color(PhosphorGreen.r, PhosphorGreen.g, PhosphorGreen.b, 0.65f);
             var history = CreateText(panel.transform, "HistoryText", "",
-                _theme != null ? _theme.smallSize + 1 : 14, PhosphorDim,
+                _theme != null ? _theme.labelSize : 22, historyColor,
                 TextAlignmentOptions.TopLeft, new Vector2(0.05f, 0.02f), new Vector2(0.48f, 0.20f));
 
             // ── Tome Info (true 50% right column) ──
             var tomeInfo = CreateText(panel.transform, "TomeInfoText", "",
-                _theme != null ? _theme.smallSize + 1 : 14, MagentaMagic,
+                _theme != null ? _theme.labelSize : 22, MagentaMagic,
                 TextAlignmentOptions.TopLeft, new Vector2(0.52f, 0.02f), new Vector2(0.95f, 0.20f));
 
             // ── Result Panel (overlay) ──

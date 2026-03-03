@@ -187,7 +187,10 @@ namespace Spellwright.Run
             if (theme != null && theme.primaryFont != null)
                 connTMP.font = theme.primaryFont;
             connTMP.fontSize = theme != null ? theme.labelSize : 14;
-            connTMP.color = theme != null ? theme.phosphorDim : new Color(0.05f, 0.45f, 0.2f);
+            Color connColor = theme != null
+                ? new Color(theme.phosphorDim.r, theme.phosphorDim.g, theme.phosphorDim.b, 0.5f)
+                : new Color(0.05f, 0.45f, 0.2f, 0.5f);
+            connTMP.color = connColor;
             connTMP.alignment = TextAlignmentOptions.Center;
             connTMP.raycastTarget = false;
             var connLe = connGO.AddComponent<LayoutElement>();
@@ -219,7 +222,7 @@ namespace Spellwright.Run
             var label = labelGO.AddComponent<TextMeshProUGUI>();
             if (theme != null && theme.primaryFont != null)
                 label.font = theme.primaryFont;
-            label.fontSize = isBoss ? (theme != null ? theme.bodySize : 18) : (theme != null ? theme.labelSize : 14);
+            label.fontSize = isBoss ? (theme != null ? theme.bodySize : 26) : (theme != null ? theme.labelSize + 2 : 24);
             label.color = theme != null ? theme.phosphorGreen : Color.white;
             label.alignment = TextAlignmentOptions.MidlineLeft;
             label.raycastTarget = false;
@@ -235,7 +238,7 @@ namespace Spellwright.Run
             var statusTMP = statusGO.AddComponent<TextMeshProUGUI>();
             if (theme != null && theme.primaryFont != null)
                 statusTMP.font = theme.primaryFont;
-            statusTMP.fontSize = theme != null ? theme.smallSize : 13;
+            statusTMP.fontSize = theme != null ? theme.labelSize : 22;
             statusTMP.color = theme != null ? theme.phosphorDim : new Color(0.05f, 0.45f, 0.2f);
             statusTMP.alignment = TextAlignmentOptions.Center;
             statusTMP.raycastTarget = false;

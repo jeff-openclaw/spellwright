@@ -129,8 +129,8 @@ namespace Spellwright.Run
             string fullText = "A Word-Guessing Roguelike";
             // Use a brighter color for readability
             Color subtitleColor = theme != null
-                ? Color.Lerp(theme.phosphorDim, theme.phosphorGreen, 0.65f)
-                : new Color(0.08f, 0.75f, 0.35f);
+                ? Color.Lerp(theme.phosphorDim, theme.phosphorGreen, 0.85f)
+                : new Color(0.10f, 0.90f, 0.40f);
             if (subtitleText != null)
                 subtitleText.color = subtitleColor;
 

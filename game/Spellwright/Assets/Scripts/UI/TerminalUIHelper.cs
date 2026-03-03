@@ -318,7 +318,7 @@ namespace Spellwright.UI
             content.AddComponent<RectTransform>();
             var contentLayout = content.AddComponent<VerticalLayoutGroup>();
             contentLayout.spacing = 2;
-            contentLayout.padding = new RectOffset(10, 4, 4, 4);
+            contentLayout.padding = new RectOffset(10, 4, 6, 6);
             contentLayout.childForceExpandWidth = true;
             contentLayout.childForceExpandHeight = false;
             contentLayout.childControlWidth = true;
@@ -332,15 +332,15 @@ namespace Spellwright.UI
             right.AddComponent<RectTransform>();
             var rightLayout = right.AddComponent<VerticalLayoutGroup>();
             rightLayout.spacing = 2;
-            rightLayout.padding = new RectOffset(4, 8, 4, 4);
+            rightLayout.padding = new RectOffset(6, 10, 6, 6);
             rightLayout.childForceExpandWidth = true;
             rightLayout.childForceExpandHeight = false;
             rightLayout.childControlWidth = true;
             rightLayout.childControlHeight = true;
             rightLayout.childAlignment = TextAnchor.MiddleCenter;
             var rightLe = right.AddComponent<LayoutElement>();
-            rightLe.minWidth = 80;
-            rightLe.preferredWidth = 80;
+            rightLe.minWidth = 90;
+            rightLe.preferredWidth = 90;
             rightLe.flexibleWidth = 0;
 
             return (card, content, right);
