@@ -9,9 +9,9 @@ using UnityEngine.UI;
 namespace Spellwright.Encounter
 {
     /// <summary>
-    /// Renders a Wheel-of-Fortune-style tile board with fixed-grid layout.
-    /// Hidden = patterned dark-green bg with diamond overlay. Revealed = white/cream bg, dark letter.
-    /// Spaces = one tile-width gap to maintain grid structure.
+    /// Renders a Wheel-of-Fortune-style tile board with a fixed grid of slots.
+    /// Active tiles show hidden/revealed letters. Spare tiles fill the remaining
+    /// grid positions as dim empty boxes, giving the classic WoF look.
     /// </summary>
     public class TileBoardUI : MonoBehaviour
     {
@@ -23,11 +23,13 @@ namespace Spellwright.Encounter
         [SerializeField] private float tileSpacing = 5f;
         [SerializeField] private float rowSpacing = 10f;
         [SerializeField] private float revealFlashDuration = 0.3f;
+        [SerializeField] private int minRows = 4;
 
         private readonly List<GameObject> _tileObjects = new List<GameObject>();
         private readonly List<Image> _tileBgs = new List<Image>();
         private readonly List<TextMeshProUGUI> _tileTexts = new List<TextMeshProUGUI>();
         private readonly List<TextMeshProUGUI> _tilePatterns = new List<TextMeshProUGUI>();
+        private readonly List<GameObject> _emptyTiles = new List<GameObject>();
         private RectTransform _container;
 
         // WoF-style colors
@@ -39,6 +41,8 @@ namespace Spellwright.Encounter
             ? new Color(theme.borderColor.r, theme.borderColor.g, theme.borderColor.b, 0.5f)
             : new Color(0f, 0.6f, 0.2f, 0.5f);
         private Color RevealedBorder => new Color(0.15f, 0.70f, 0.35f, 0.8f);
+        private Color EmptyBg => new Color(0.02f, 0.06f, 0.03f, 0.6f);
+        private Color EmptyBorder => new Color(0f, 0.15f, 0.06f, 0.3f);
 
         private void Awake()
         {
@@ -46,8 +50,9 @@ namespace Spellwright.Encounter
         }
 
         /// <summary>
-        /// Creates tile GameObjects from a BoardState. Lays out tiles in a fixed-grid style
-        /// with word-wrapping at spaces. Space gaps are one tile wide for grid consistency.
+        /// Creates a WoF-style grid: 4 rows with edge rows (top/bottom) narrower
+        /// than middle rows. Content is vertically centered. Grid is horizontally
+        /// centered within the container with natural padding.
         /// </summary>
         public void InitializeBoard(BoardState board)
         {
@@ -59,46 +64,60 @@ namespace Spellwright.Encounter
             float containerWidth = _container.rect.width;
             if (containerWidth <= 0) containerWidth = 800f;
 
-            // Space gap = one tile width for grid-like structure
-            float wordSpacing = tileWidth + tileSpacing;
+            // WoF grid: cap middle rows at 14 columns, edge rows get 2 fewer
+            int dynamicMax = Mathf.FloorToInt((containerWidth + tileSpacing) / (tileWidth + tileSpacing));
+            int middleCols = Mathf.Clamp(dynamicMax, 8, 14);
+            int edgeCols = middleCols - 2;
 
+            // Pack words into content rows (using middle row width)
             var words = SplitIntoWords(tiles);
-
-            const int GAP_SENTINEL = -1;
-            var rows = new List<List<int>>();
-            var row = new List<int>();
-            float rowWidth = 0f;
+            const int GAP = -1;
+            var contentRows = new List<List<int>>();
+            var currentRow = new List<int>();
+            int currentCols = 0;
 
             foreach (var word in words)
             {
-                float wordWidth = word.Count * (tileWidth + tileSpacing) - tileSpacing;
-
-                if (rowWidth > 0 && rowWidth + wordSpacing + wordWidth > containerWidth)
+                int gap = currentCols > 0 ? 1 : 0;
+                if (currentCols > 0 && currentCols + gap + word.Count > middleCols)
                 {
-                    rows.Add(row);
-                    row = new List<int>();
-                    rowWidth = 0f;
+                    contentRows.Add(currentRow);
+                    currentRow = new List<int>();
+                    currentCols = 0;
+                    gap = 0;
                 }
-
-                if (rowWidth > 0)
-                {
-                    row.Add(GAP_SENTINEL);
-                    rowWidth += wordSpacing;
-                }
-
-                foreach (int idx in word)
-                {
-                    row.Add(idx);
-                    rowWidth += tileWidth + tileSpacing;
-                }
-                rowWidth -= tileSpacing;
+                if (gap > 0) { currentRow.Add(GAP); currentCols++; }
+                foreach (int idx in word) { currentRow.Add(idx); currentCols++; }
             }
-            if (row.Count > 0) rows.Add(row);
+            if (currentRow.Count > 0) contentRows.Add(currentRow);
 
-            float totalHeight = rows.Count * (tileHeight + rowSpacing) - rowSpacing;
-            float startY = totalHeight / 2f - tileHeight / 2f;
+            // Build row structure: edge/middle/middle/edge (expandable)
+            int totalRows = Mathf.Max(minRows, contentRows.Count);
+            int[] rowColCounts = new int[totalRows];
+            for (int i = 0; i < totalRows; i++)
+                rowColCounts[i] = (i == 0 || i == totalRows - 1) ? edgeCols : middleCols;
 
-            // Pre-fill lists with nulls
+            // Vertically center content rows within the grid
+            int startRow = Mathf.Max(0, (totalRows - contentRows.Count) / 2);
+
+            // Dynamically scale tiles to fit container with padding
+            float containerHeight = _container.rect.height;
+            if (containerHeight <= 0) containerHeight = 300f;
+            float pad = 16f;
+            float usableHeight = containerHeight - pad * 2;
+            float neededHeight = totalRows * (tileHeight + rowSpacing) - rowSpacing;
+            float scale = (neededHeight > usableHeight) ? usableHeight / neededHeight : 1f;
+
+            float tw = tileWidth * scale;
+            float th = tileHeight * scale;
+            float ts = tileSpacing * scale;
+            float rs = rowSpacing * scale;
+
+            // Layout dimensions
+            float totalHeight = totalRows * (th + rs) - rs;
+            float startY = totalHeight / 2f - th / 2f;
+
+            // Pre-fill tile lists
             for (int i = 0; i < tiles.Length; i++)
             {
                 _tileObjects.Add(null);
@@ -107,43 +126,61 @@ namespace Spellwright.Encounter
                 _tilePatterns.Add(null);
             }
 
-            for (int r = 0; r < rows.Count; r++)
+            for (int r = 0; r < totalRows; r++)
             {
-                var rowItems = rows[r];
-                float totalRowWidth = 0f;
-                foreach (int item in rowItems)
-                {
-                    if (item == GAP_SENTINEL)
-                        totalRowWidth += wordSpacing;
-                    else
-                        totalRowWidth += tileWidth + tileSpacing;
-                }
-                totalRowWidth -= tileSpacing;
+                int cols = rowColCounts[r];
+                float rowGridWidth = cols * (tw + ts) - ts;
+                float yPos = startY - r * (th + rs);
 
-                float xOffset = -totalRowWidth / 2f;
-                float yPos = startY - r * (tileHeight + rowSpacing);
+                int contentRowIdx = r - startRow;
+                bool hasContent = contentRowIdx >= 0 && contentRowIdx < contentRows.Count;
 
-                foreach (int item in rowItems)
+                if (hasContent)
                 {
-                    if (item == GAP_SENTINEL)
+                    var rowContent = contentRows[contentRowIdx];
+                    int contentWidth = rowContent.Count;
+                    int effectiveCols = Mathf.Max(cols, contentWidth);
+                    float effectiveWidth = effectiveCols * (tw + ts) - ts;
+                    int leftPad = (effectiveCols - contentWidth) / 2;
+
+                    for (int c = 0; c < effectiveCols; c++)
                     {
-                        xOffset += wordSpacing;
-                        continue;
+                        float xPos = -effectiveWidth / 2f + c * (tw + ts) + tw / 2f;
+                        int ci = c - leftPad;
+
+                        if (ci >= 0 && ci < rowContent.Count)
+                        {
+                            int item = rowContent[ci];
+                            if (item == GAP)
+                            {
+                                PlaceEmptyTile(xPos, yPos, tw, th);
+                            }
+                            else
+                            {
+                                var tileGO = CreateTileObject(tiles[item], item, tw, th);
+                                var rt = tileGO.GetComponent<RectTransform>();
+                                rt.anchoredPosition = new Vector2(xPos, yPos);
+
+                                _tileObjects[item] = tileGO;
+                                _tileBgs[item] = tileGO.GetComponent<Image>();
+                                _tileTexts[item] = tileGO.transform.Find("Letter")?.GetComponent<TextMeshProUGUI>();
+                                _tilePatterns[item] = tileGO.transform.Find("Pattern")?.GetComponent<TextMeshProUGUI>();
+                                UpdateTileVisual(item, tiles[item].State == TileState.Revealed);
+                            }
+                        }
+                        else
+                        {
+                            PlaceEmptyTile(xPos, yPos, tw, th);
+                        }
                     }
-
-                    var tileGO = CreateTileObject(tiles[item], item);
-                    var rt = tileGO.GetComponent<RectTransform>();
-                    rt.anchoredPosition = new Vector2(xOffset + tileWidth / 2f, yPos);
-                    rt.sizeDelta = new Vector2(tileWidth, tileHeight);
-
-                    _tileObjects[item] = tileGO;
-                    _tileBgs[item] = tileGO.GetComponent<Image>();
-                    _tileTexts[item] = tileGO.transform.Find("Letter")?.GetComponent<TextMeshProUGUI>();
-                    _tilePatterns[item] = tileGO.transform.Find("Pattern")?.GetComponent<TextMeshProUGUI>();
-
-                    UpdateTileVisual(item, tiles[item].State == TileState.Revealed);
-
-                    xOffset += tileWidth + tileSpacing;
+                }
+                else
+                {
+                    for (int c = 0; c < cols; c++)
+                    {
+                        float xPos = -rowGridWidth / 2f + c * (tw + ts) + tw / 2f;
+                        PlaceEmptyTile(xPos, yPos, tw, th);
+                    }
                 }
             }
         }
@@ -182,21 +219,50 @@ namespace Spellwright.Encounter
                     Destroy(go);
                 }
             }
+            foreach (var go in _emptyTiles)
+            {
+                if (go != null)
+                    Destroy(go);
+            }
             _tileObjects.Clear();
             _tileBgs.Clear();
             _tileTexts.Clear();
             _tilePatterns.Clear();
+            _emptyTiles.Clear();
         }
 
         // ── Internal ────────────────────────────────────────
 
-        private GameObject CreateTileObject(Tile tile, int index)
+        private void PlaceEmptyTile(float x, float y, float w = 0, float h = 0)
         {
+            if (w <= 0) w = tileWidth;
+            if (h <= 0) h = tileHeight;
+            var go = new GameObject("EmptyTile");
+            go.transform.SetParent(_container, false);
+
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchoredPosition = new Vector2(x, y);
+            rt.sizeDelta = new Vector2(w, h);
+
+            var img = go.AddComponent<Image>();
+            img.color = EmptyBg;
+
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = EmptyBorder;
+            outline.effectDistance = new Vector2(2, -2);
+
+            _emptyTiles.Add(go);
+        }
+
+        private GameObject CreateTileObject(Tile tile, int index, float w = 0, float h = 0)
+        {
+            if (w <= 0) w = tileWidth;
+            if (h <= 0) h = tileHeight;
             var go = new GameObject($"Tile_{index}");
             go.transform.SetParent(_container, false);
 
             var rt = go.AddComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(tileWidth, tileHeight);
+            rt.sizeDelta = new Vector2(w, h);
 
             var img = go.AddComponent<Image>();
             img.color = HiddenBg;

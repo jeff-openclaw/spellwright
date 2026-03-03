@@ -19,7 +19,7 @@ namespace Spellwright.Encounter
         [SerializeField] private TextMeshProUGUI portraitText;
         [SerializeField] private TerminalThemeSO theme;
 
-        private NPCArchetype _archetype;
+        private string _npcId;
         private bool _isBoss;
         private NPCExpression _baseExpression = NPCExpression.Neutral;
         private NPCExpression _currentExpression = NPCExpression.Neutral;
@@ -54,9 +54,9 @@ namespace Spellwright.Encounter
         /// <summary>
         /// Called by EncounterUI when a new encounter starts.
         /// </summary>
-        public void SetNPC(NPCArchetype archetype, bool isBoss)
+        public void SetNPC(string npcId, bool isBoss)
         {
-            _archetype = archetype;
+            _npcId = npcId;
             _isBoss = isBoss;
             _baseExpression = NPCExpression.Neutral;
             SetExpression(NPCExpression.Neutral, punch: false);
@@ -65,7 +65,7 @@ namespace Spellwright.Encounter
         private void OnEncounterStarted(EncounterStartedEvent evt)
         {
             if (evt.NPC != null)
-                SetNPC(evt.NPC.Archetype, evt.NPC.IsBoss);
+                SetNPC(evt.NPC.DisplayName, evt.NPC.IsBoss);
         }
 
         private void OnGuessSubmitted(GuessSubmittedEvent evt)
@@ -123,7 +123,7 @@ namespace Spellwright.Encounter
 
             if (portraitText != null)
             {
-                string art = NPCPortraitData.GetPortrait(_archetype, expression, _isBoss);
+                string art = NPCPortraitData.GetPortrait(_npcId, expression);
                 portraitText.text = art;
 
                 // Color the portrait based on expression

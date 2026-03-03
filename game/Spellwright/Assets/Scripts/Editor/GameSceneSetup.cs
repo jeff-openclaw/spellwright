@@ -542,28 +542,25 @@ namespace Spellwright.Editor
             SetAnchors(boardFrame, new Vector2(0.04f, 0.73f), new Vector2(0.96f, 0.97f));
             var boardFrameOutline = boardFrame.AddComponent<Outline>();
             boardFrameOutline.effectColor = new Color(PhosphorGreen.r, PhosphorGreen.g, PhosphorGreen.b, 0.8f);
-            boardFrameOutline.effectDistance = new Vector2(3, -3);
-            // Second outline for glow effect
-            var boardFrameGlow = boardFrame.AddComponent<Outline>();
-            boardFrameGlow.effectColor = new Color(PhosphorGreen.r, PhosphorGreen.g, PhosphorGreen.b, 0.3f);
-            boardFrameGlow.effectDistance = new Vector2(5, -5);
+            boardFrameOutline.effectDistance = new Vector2(1, -1);
 
             // ── Tile Board (inside frame) ──
             var boardContainer = CreateContainer(panel.transform, "BoardContainer",
-                new Vector2(0.06f, 0.74f), new Vector2(0.94f, 0.96f));
+                new Vector2(0.06f, 0.76f), new Vector2(0.94f, 0.94f));
             boardContainer.AddComponent<TileBoardUI>();
             SetSerializedField(boardContainer.GetComponent<TileBoardUI>(), "theme", _theme);
 
-            // ── Category Banner (styled banner below board) ──
+            // ── Category Banner (WoF-style strip below board) ──
             var categoryBanner = CreateFullscreenImage(panel.transform, "CategoryBanner",
                 new Color(0.02f, 0.06f, 0.03f, 0.80f));
-            SetAnchors(categoryBanner, new Vector2(0.20f, 0.67f), new Vector2(0.80f, 0.73f));
+            SetAnchors(categoryBanner, new Vector2(0.04f, 0.66f), new Vector2(0.96f, 0.73f));
             var categoryBannerOutline = categoryBanner.AddComponent<Outline>();
             categoryBannerOutline.effectColor = new Color(AmberBright.r, AmberBright.g, AmberBright.b, 0.5f);
             categoryBannerOutline.effectDistance = new Vector2(1, -1);
-            var category = CreateText(categoryBanner.transform, "CategoryText", "Category: ...",
+            var category = CreateText(categoryBanner.transform, "CategoryText", "...",
                 _theme != null ? _theme.bodySize : 20, AmberBright,
-                TextAlignmentOptions.Center, new Vector2(0.05f, 0f), new Vector2(0.95f, 1f));
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0f), new Vector2(0.95f, 1f));
+            category.characterSpacing = 12f;
             if (_theme != null)
                 TerminalUIHelper.ApplyGlow(category, AmberBright, _theme.subtleGlowOffset, _theme.subtleGlowPower);
 
@@ -584,7 +581,7 @@ namespace Spellwright.Editor
 
             // ── NPC Portrait (inside dialog card, left side) ──
             var portraitContainer = CreateContainer(panel.transform, "PortraitContainer",
-                new Vector2(0.05f, 0.57f), new Vector2(0.15f, 0.66f));
+                new Vector2(0.05f, 0.55f), new Vector2(0.16f, 0.65f));
             var portraitUI = portraitContainer.AddComponent<NPCPortraitUI>();
             var portraitText = CreateText(portraitContainer.transform, "PortraitText", "",
                 _theme != null ? _theme.smallSize - 2 : 11, PhosphorGreen,
@@ -594,15 +591,15 @@ namespace Spellwright.Editor
             SetSerializedField(portraitUI, "portraitText", portraitText);
             SetSerializedField(portraitUI, "theme", _theme);
 
-            // ── NPC Name (inside dialog card, right of portrait) ──
+            // ── NPC Name (bottom-aligned with portrait, same row) ──
             var npcName = TerminalUIHelper.CreateDecorativeText(panel.transform, "NpcNameText", "NPC Name",
                 _theme, _theme != null ? _theme.decorativeSubheaderSize + 6 : 32, PhosphorBright,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.16f, 0.60f), new Vector2(0.60f, 0.66f));
+                TextAlignmentOptions.BaselineLeft, new Vector2(0.17f, 0.55f), new Vector2(0.60f, 0.60f));
 
-            // ── Archetype (hidden, kept for wiring) ──
+            // ── Archetype (hidden, kept for wiring only) ──
             var npcArchetype = CreateText(panel.transform, "NpcArchetypeText", "",
                 _theme != null ? _theme.labelSize : 14, PhosphorDim,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.16f, 0.59f), new Vector2(0.60f, 0.60f));
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.17f, 0.54f), new Vector2(0.17f, 0.54f));
 
             // ── NPC separator (inside dialog card) ──
             TerminalUIHelper.CreateSeparator(panel.transform, "NpcSeparator",
@@ -611,13 +608,13 @@ namespace Spellwright.Editor
             // ── Clue Number + Text (inside dialog card, below separator) ──
             var clueNum = CreateText(panel.transform, "ClueNumberText", "[Clue #1]",
                 _theme != null ? _theme.bodySize : 18, AmberBright,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.06f, 0.46f), new Vector2(0.30f, 0.50f));
+                TextAlignmentOptions.MidlineLeft, new Vector2(0.06f, 0.49f), new Vector2(0.30f, 0.53f));
             if (_theme != null)
                 TerminalUIHelper.ApplyGlow(clueNum, AmberBright, _theme.subtleGlowOffset, _theme.subtleGlowPower);
 
             var clue = CreateText(panel.transform, "ClueText", "Waiting for clue...",
                 _theme != null ? _theme.bodySize + 4 : 22, PhosphorGreen,
-                TextAlignmentOptions.TopLeft, new Vector2(0.06f, 0.41f), new Vector2(0.94f, 0.46f));
+                TextAlignmentOptions.TopLeft, new Vector2(0.06f, 0.41f), new Vector2(0.94f, 0.49f));
 
             // ── Status Bar (chip layout, equal-width chips, same width as frame/dialog) ──
             var statsBar = CreateContainer(panel.transform, "EncounterStatsBar",

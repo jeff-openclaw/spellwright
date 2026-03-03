@@ -246,15 +246,16 @@ namespace Spellwright.Encounter
 
             // Portrait
             if (npcPortraitUI != null)
-                npcPortraitUI.SetNPC(evt.NPC.Archetype, evt.NPC.IsBoss);
+                npcPortraitUI.SetNPC(evt.NPC.DisplayName, evt.NPC.IsBoss);
 
             // Category (with spinner)
             if (categoryText != null)
             {
+                string catUpper = evt.Category.ToUpperInvariant();
                 if (textSpinner != null)
-                    textSpinner.SpinToValue(categoryText, evt.Category, "\u2500\u2500 Category: ");
+                    textSpinner.SpinToValue(categoryText, catUpper, "");
                 else
-                    categoryText.text = $"Category: {evt.Category}";
+                    categoryText.text = catUpper;
             }
 
             // Initialize tile board

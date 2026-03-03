@@ -19,9 +19,9 @@ namespace Spellwright.UI
 
         private static readonly string[] DecoyCategories = new[]
         {
-            "Animals", "Science", "Nature", "Food", "Mythology",
-            "Tools", "Emotions", "Everyday", "History", "Geography",
-            "Music", "Sports", "Technology", "Art", "Literature"
+            "ANIMALS", "SCIENCE", "NATURE", "FOOD", "MYTHOLOGY",
+            "TOOLS", "EMOTIONS", "EVERYDAY", "HISTORY", "GEOGRAPHY",
+            "MUSIC", "SPORTS", "TECHNOLOGY", "ART", "LITERATURE"
         };
 
         private static readonly string[] SpinSymbols = new[]
@@ -33,7 +33,7 @@ namespace Spellwright.UI
         /// <summary>
         /// Spin the target text to reveal the actual value with a slot-machine effect.
         /// </summary>
-        public void SpinToValue(TextMeshProUGUI text, string realValue, string prefix = "Category: ")
+        public void SpinToValue(TextMeshProUGUI text, string realValue, string prefix = "")
         {
             _targetText = text;
             if (_spinCoroutine != null)
