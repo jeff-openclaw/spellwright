@@ -142,6 +142,57 @@
     margin-top: 1px;
 }
 
+/* ── Crucible ── */
+
+.map-screen__crucible-header {
+    color: var(--color-magenta);
+    margin-top: var(--space-sm);
+}
+
+.map-screen__crucible-header--locked {
+    color: var(--color-phosphor-dim);
+}
+
+.map-screen__crucible-desc {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+    margin-bottom: 2px;
+}
+
+.map-screen__crucible-options {
+    flex-direction: column;
+}
+
+.map-screen__crucible-btn {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor);
+    background-color: transparent;
+    border-width: 0;
+    padding: 1px var(--space-xs);
+    -unity-text-align: middle-left;
+    cursor: link;
+    transition: color 200ms ease-out;
+}
+
+.map-screen__crucible-btn:hover {
+    color: var(--color-magenta);
+}
+
+.map-screen__crucible-btn--selected {
+    color: var(--color-magenta);
+    border-left-width: 2px;
+    border-left-color: var(--color-magenta);
+}
+
+.map-screen__crucible-result {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-magenta);
+    margin-top: var(--space-xs);
+}
+
 /* ── Bottom Status Bar ── */
 
 .map-screen__status-bar {

@@ -106,6 +106,10 @@ namespace Spellwright.Editor
             var sacrificeGO = new GameObject("LetterSacrificeSystem");
             sacrificeGO.AddComponent<LetterSacrificeSystem>();
 
+            // TomeCrucible (tome fusion on map screen)
+            var crucibleGO = new GameObject("TomeCrucible");
+            crucibleGO.AddComponent<Tomes.TomeCrucible>();
+
             // ShopManager (on shopPanel for convenience)
             var shopMgr = shopPanel.AddComponent<ShopManager>();
             WireShopManager(shopMgr);

@@ -406,4 +406,14 @@ namespace Spellwright.Data
         public float RewardMultiplier { get; set; }
         public int DamageBonus { get; set; }
     }
+
+    // ── Crucible (Tome Fusion) ──────────────────────────
+
+    /// <summary>Fired when two Tomes are fused in the crucible.</summary>
+    public class CrucibleFusedEvent
+    {
+        public TomeInstance InputA { get; set; }
+        public TomeInstance InputB { get; set; }
+        public TomeInstance Result { get; set; }
+    }
 }

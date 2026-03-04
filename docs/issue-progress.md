@@ -27,8 +27,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 28 | Gold-for-Intel Economy | journey | ✅ Done | 95125d0 |
 | 29 | Pre-Encounter Gold Wagering | journey | ✅ Done | c17cb7c |
 | 30 | Dual-Pane Norton Commander Layout | journey | ✅ Done | 2897074 |
-| 31 | Boss Wiretap — Progressive Intel | journey | ✅ Done | PENDING |
-| 32 | Tome Crucible — Sacrifice Two Tomes | journey | ⏳ Queued | — |
+| 31 | Boss Wiretap — Progressive Intel | journey | ✅ Done | 5052a28 |
+| 32 | Tome Crucible — Sacrifice Two Tomes | journey | ✅ Done | PENDING |
 | 33 | Inline Shop as Terminal Overlay | journey | ⏳ Queued | — |
 | 34 | Signal Strength Oscilloscope | journey | ⏳ Queued | — |
 | 35 | Ghost Input Echo — Phosphor Atmosphere | journey | ⏳ Queued | — |
@@ -38,7 +38,17 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=31 | NEXT=32 | QUEUE_TOTAL=28
+LAST_COMPLETED=32 | NEXT=33 | QUEUE_TOTAL=28
+
+## Implementation Notes — #32
+- Created TomeCrucible.cs: singleton MonoBehaviour, FuseTomes(idA, idB) removes both input tomes and equips a fused tome with the rarer effect and bumped rarity. Limited to one fusion per wave via _lastFusionWave tracking
+- Fused tome naming: "{PrimaryTomeName} †" with upgraded rarity (capped at Legendary)
+- Fusion picks the rarer tome's effect to preserve, creating a stronger version of the better input
+- Added CrucibleFusedEvent to GameDataModels (InputA, InputB, Result TomeInstances)
+- Extended MapController.RefreshTomeLoadout() with BuildCrucibleUI(): shows "> CRUCIBLE" section with clickable tome buttons. Two-click selection flow: first click selects (magenta highlight), second click on different tome triggers fusion
+- OnCrucibleTomeClicked handles selection state, calls TomeCrucible.FuseTomes, shows result label, auto-refreshes after 1.5s delay
+- Added crucible USS: header (magenta), locked state, option buttons with hover/selected states, result text
+- Updated GameSceneSetup: creates TomeCrucible GameObject
 
 ## Implementation Notes — #31
 - Enhanced RefreshBossWiretap() to use actual boss NPC data: PreviewNPCForNode for boss name, PreviewCategoryForNode for category, difficultyModifier for threat level, bossConstraint for tactic

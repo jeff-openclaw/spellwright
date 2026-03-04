@@ -43,6 +43,10 @@ namespace Spellwright.UI
         private int _currentGlowNodeIndex = -1;
         private int _lastWiretapFragments = -1;
 
+        // Crucible state
+        private string _crucibleSelectedA;
+        private VisualElement _crucibleContainer;
+
         private void OnEnable()
         {
             if (uiDocument == null) return;
@@ -399,6 +403,7 @@ namespace Spellwright.UI
         {
             if (_tomeLoadoutContainer == null) return;
             _tomeLoadoutContainer.Clear();
+            _crucibleSelectedA = null;
 
             var tomeManager = TomeManager.Instance;
             if (tomeManager == null || tomeManager.TomeSystem == null)
@@ -439,6 +444,92 @@ namespace Spellwright.UI
                 }
 
                 _tomeLoadoutContainer.Add(row);
+            }
+
+            // Crucible section
+            BuildCrucibleUI(equipped);
+        }
+
+        private void BuildCrucibleUI(IReadOnlyList<TomeInstance> equipped)
+        {
+            if (_tomeLoadoutContainer == null) return;
+
+            var crucible = TomeCrucible.Instance;
+            bool canFuse = crucible != null && crucible.CanFuse;
+
+            // Crucible header
+            var header = new Label(canFuse ? "> CRUCIBLE" : "> CRUCIBLE [LOCKED]");
+            header.AddToClassList("map-screen__section-header");
+            header.AddToClassList("map-screen__crucible-header");
+            if (!canFuse) header.AddToClassList("map-screen__crucible-header--locked");
+            _tomeLoadoutContainer.Add(header);
+
+            if (!canFuse || equipped.Count < 2)
+            {
+                string reason = equipped.Count < 2 ? "Need 2+ tomes" : "Used this wave";
+                var info = new Label($"  ({reason})");
+                info.AddToClassList("map-screen__tome-empty");
+                _tomeLoadoutContainer.Add(info);
+                return;
+            }
+
+            var desc = new Label("  Select 2 tomes to fuse:");
+            desc.AddToClassList("map-screen__crucible-desc");
+            _tomeLoadoutContainer.Add(desc);
+
+            _crucibleContainer = new VisualElement();
+            _crucibleContainer.AddToClassList("map-screen__crucible-options");
+
+            for (int i = 0; i < equipped.Count; i++)
+            {
+                var tome = equipped[i];
+                var btn = new Button();
+                btn.text = $"  [{tome.TomeName}]";
+                btn.AddToClassList("map-screen__crucible-btn");
+                btn.clicked += () => OnCrucibleTomeClicked(tome.TomeId, btn);
+                _crucibleContainer.Add(btn);
+            }
+
+            _tomeLoadoutContainer.Add(_crucibleContainer);
+        }
+
+        private void OnCrucibleTomeClicked(string tomeId, Button btn)
+        {
+            if (_crucibleSelectedA == null)
+            {
+                // First selection
+                _crucibleSelectedA = tomeId;
+                btn.AddToClassList("map-screen__crucible-btn--selected");
+            }
+            else if (_crucibleSelectedA == tomeId)
+            {
+                // Deselect
+                _crucibleSelectedA = null;
+                btn.RemoveFromClassList("map-screen__crucible-btn--selected");
+            }
+            else
+            {
+                // Second selection — fuse
+                var crucible = TomeCrucible.Instance;
+                if (crucible == null) return;
+
+                var result = crucible.FuseTomes(_crucibleSelectedA, tomeId);
+                if (result != null)
+                {
+                    // Show result briefly, then refresh
+                    _crucibleSelectedA = null;
+
+                    if (_crucibleContainer != null)
+                    {
+                        _crucibleContainer.Clear();
+                        var resultLabel = new Label($"  \u25B6 FORGED: {result.TomeName} ({result.Rarity})");
+                        resultLabel.AddToClassList("map-screen__crucible-result");
+                        _crucibleContainer.Add(resultLabel);
+                    }
+
+                    // Refresh after delay
+                    _root?.schedule.Execute(RefreshRightPane).ExecuteLater(1500);
+                }
             }
         }
 
