@@ -1,14 +1,15 @@
 using System.Text;
-using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Spellwright.UI
 {
     /// <summary>
     /// Matrix-style falling character columns with color variety.
-    /// More visible than before, with occasional amber/cyan accent characters
-    /// mixed in with the primary green. Creates a living, atmospheric background.
+    /// Uses UI Toolkit Labels instead of TextMeshProUGUI.
+    /// Creates a living, atmospheric background behind game panels.
     /// </summary>
+    [RequireComponent(typeof(UIDocument))]
     public class AmbientDataStream : MonoBehaviour
     {
         [SerializeField] private TerminalThemeSO theme;
@@ -23,7 +24,7 @@ namespace Spellwright.UI
         [Header("Color Variety")]
         [SerializeField] [Range(0f, 0.3f)] private float accentChance = 0.08f;
 
-        private TextMeshProUGUI[] _columns;
+        private Label[] _columns;
         private float[] _scrollOffsets;
         private float[] _columnSpeeds;
         private Color[] _columnBaseColors;
@@ -33,7 +34,7 @@ namespace Spellwright.UI
 
         private static readonly string AccentGlyphs = "#$@&*~^!?";
 
-        private void Start()
+        private void OnEnable()
         {
             if (theme != null)
             {
@@ -59,10 +60,9 @@ namespace Spellwright.UI
                     {
                         _columns[i].text = GenerateColumn();
 
-                        // Occasionally shift alpha slightly for organic feel
                         float alpha = Random.Range(minAlpha, maxAlpha);
                         var baseColor = _columnBaseColors[i];
-                        _columns[i].color = new Color(baseColor.r, baseColor.g, baseColor.b, alpha);
+                        _columns[i].style.color = new Color(baseColor.r, baseColor.g, baseColor.b, alpha);
                     }
                 }
             }
@@ -70,39 +70,41 @@ namespace Spellwright.UI
 
         private void CreateColumns()
         {
-            _columns = new TextMeshProUGUI[columnCount];
+            var doc = GetComponent<UIDocument>();
+            if (doc == null || doc.rootVisualElement == null) return;
+
+            var root = doc.rootVisualElement;
+            root.pickingMode = PickingMode.Ignore;
+            root.style.position = Position.Absolute;
+            root.style.left = 0;
+            root.style.top = 0;
+            root.style.right = 0;
+            root.style.bottom = 0;
+            root.style.flexDirection = FlexDirection.Row;
+            root.style.overflow = Overflow.Hidden;
+
+            _columns = new Label[columnCount];
             _scrollOffsets = new float[columnCount];
             _columnSpeeds = new float[columnCount];
             _columnBaseColors = new Color[columnCount];
-
-            var parentRT = GetComponent<RectTransform>();
-            if (parentRT == null) return;
 
             Color greenBase = theme != null ? theme.phosphorGreen : new Color(0.12f, 1f, 0.45f);
             Color amberBase = theme != null ? theme.amberBright : new Color(1f, 0.78f, 0.15f);
             Color cyanBase = theme != null ? theme.cyanInfo : new Color(0.15f, 0.9f, 0.95f);
             int fontSize = theme != null ? theme.smallSize : 13;
 
-            float colWidth = 1f / columnCount;
-
             for (int i = 0; i < columnCount; i++)
             {
-                var go = new GameObject($"DataStream_{i}");
-                go.transform.SetParent(transform, false);
+                var label = new Label(GenerateColumn());
+                label.name = $"DataStream_{i}";
+                label.pickingMode = PickingMode.Ignore;
+                label.style.flexGrow = 1;
+                label.style.fontSize = fontSize;
+                label.style.whiteSpace = WhiteSpace.PreWrap;
+                label.style.overflow = Overflow.Hidden;
+                label.style.unityTextAlign = TextAnchor.UpperCenter;
 
-                var rt = go.AddComponent<RectTransform>();
-                rt.anchorMin = new Vector2(colWidth * i, 0f);
-                rt.anchorMax = new Vector2(colWidth * (i + 1), 1f);
-                rt.offsetMin = Vector2.zero;
-                rt.offsetMax = Vector2.zero;
-
-                var tmp = go.AddComponent<TextMeshProUGUI>();
-                tmp.text = GenerateColumn();
-                if (theme != null && theme.primaryFont != null)
-                    tmp.font = theme.primaryFont;
-                tmp.fontSize = fontSize;
-
-                // Most columns green, occasional amber or cyan column
+                // Most columns green, occasional amber or cyan
                 float roll = Random.value;
                 Color baseColor;
                 if (roll < 0.08f)
@@ -115,19 +117,15 @@ namespace Spellwright.UI
                 _columnBaseColors[i] = baseColor;
 
                 float alpha = Random.Range(minAlpha, maxAlpha);
-                // Edge columns slightly dimmer for vignette feel
-                float edgeFade = 1f;
-                float normalizedX = (float)i / (columnCount - 1);
-                float distFromCenter = Mathf.Abs(normalizedX - 0.5f) * 2f; // 0 at center, 1 at edges
-                edgeFade = Mathf.Lerp(1f, 0.4f, distFromCenter * distFromCenter);
+                // Edge columns dimmer for vignette feel
+                float normalizedX = columnCount > 1 ? (float)i / (columnCount - 1) : 0.5f;
+                float distFromCenter = Mathf.Abs(normalizedX - 0.5f) * 2f;
+                float edgeFade = Mathf.Lerp(1f, 0.4f, distFromCenter * distFromCenter);
 
-                tmp.color = new Color(baseColor.r, baseColor.g, baseColor.b, alpha * edgeFade);
-                tmp.alignment = TextAlignmentOptions.Top;
-                tmp.enableWordWrapping = false;
-                tmp.overflowMode = TextOverflowModes.Overflow;
-                tmp.raycastTarget = false;
+                label.style.color = new Color(baseColor.r, baseColor.g, baseColor.b, alpha * edgeFade);
 
-                _columns[i] = tmp;
+                root.Add(label);
+                _columns[i] = label;
                 _scrollOffsets[i] = Random.value;
                 _columnSpeeds[i] = scrollSpeed * Random.Range(0.4f, 1.6f);
             }
@@ -149,11 +147,9 @@ namespace Spellwright.UI
 
         private void OnDisable()
         {
-            if (_columns != null)
-            {
-                foreach (var col in _columns)
-                    if (col != null) Destroy(col.gameObject);
-            }
+            var doc = GetComponent<UIDocument>();
+            if (doc != null && doc.rootVisualElement != null)
+                doc.rootVisualElement.Clear();
             _columns = null;
         }
     }

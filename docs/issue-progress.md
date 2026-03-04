@@ -13,8 +13,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 43 | UI Toolkit Migration: MapUI (Journey Screen) | ui | ✅ Done | bfc5a1f |
 | 44 | UI Toolkit Migration: ShopUI | ui | ✅ Done | f8afedb |
 | 45 | UI Toolkit Migration: ResultUI | ui | ✅ Done | b1068aa |
-| 46 | UI Toolkit Migration: EncounterUI | ui | ✅ Done | PENDING |
-| 48 | Remove Legacy uGUI Dependencies | ui | ⏳ Queued | — |
+| 46 | UI Toolkit Migration: EncounterUI | ui | ✅ Done | 96671bb |
+| 48 | Remove Legacy uGUI Dependencies | ui | 🔄 In progress | — |
 | 19 | AI Visibility: Design North Star | ai-visibility | ⏳ Queued | — |
 | 20 | NPC Adaptive Difficulty (Mercy/Cruelty) | ai-visibility | ⏳ Queued | — |
 | 21 | NPC Ultimatum (Endgame Showdown) | ai-visibility | ⏳ Queued | — |
