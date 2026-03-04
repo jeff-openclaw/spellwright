@@ -30,15 +30,26 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 31 | Boss Wiretap — Progressive Intel | journey | ✅ Done | 5052a28 |
 | 32 | Tome Crucible — Sacrifice Two Tomes | journey | ✅ Done | e4e85d4 |
 | 33 | Inline Shop as Terminal Overlay | journey | ✅ Done | 53a97b5 |
-| 34 | Signal Strength Oscilloscope | journey | ✅ Done | PENDING |
-| 35 | Ghost Input Echo — Phosphor Atmosphere | journey | ⏳ Queued | — |
+| 34 | Signal Strength Oscilloscope | journey | ✅ Done | d15a54b |
+| 35 | Ghost Input Echo — Phosphor Atmosphere | journey | ✅ Done | PENDING |
 | 36 | Intercept Transmission Events & Dead Drops | journey | ⏳ Queued | — |
 
 ## Blocked
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=34 | NEXT=35 | QUEUE_TOTAL=28
+LAST_COMPLETED=35 | NEXT=36 | QUEUE_TOTAL=28
+
+## Implementation Notes — #35
+- Added GhostLetter struct and GhostLetters list to RunManager — tracks (Letter, Correct) from all guesses via GuessSubmittedEvent subscription
+- Letter guesses record single chars; phrase guesses record all letters from the guessed word
+- Ghost pool of 10 absolutely-positioned Labels on map root, recycled round-robin
+- Spawns one ghost every ~800ms at random screen position (5-90% x, 5-85% y)
+- Correct guesses: brighter green (0.25 opacity), linger 1.5s before 400ms fade
+- Wrong guesses: dim amber (0.15 opacity), fast 600ms + 400ms fade
+- Suppressed during shop overlay open or dossier expansion (no visual competition)
+- Ghost letters cleared on StartRun, pool cleaned up on StopGhostEcho/OnDisable
+- USS: absolute positioned, large font size, transition on opacity, correct/wrong color classes
 
 ## Implementation Notes — #34
 - Added SignalLabel to each dungeon node row between file permissions and outcome text

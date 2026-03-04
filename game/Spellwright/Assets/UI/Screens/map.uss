@@ -590,6 +590,25 @@
     opacity: 1;
 }
 
+/* ── Ghost Input Echo ── */
+
+.map-screen__ghost-letter {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-lg);
+    color: var(--color-phosphor-dim);
+    opacity: 0;
+    position: absolute;
+    transition: opacity 400ms ease-out;
+}
+
+.map-screen__ghost-letter--correct {
+    color: var(--color-phosphor);
+}
+
+.map-screen__ghost-letter--wrong {
+    color: var(--color-amber-dim);
+}
+
 /* ── Shop Overlay ── */
 
 .map-screen__shop-overlay {

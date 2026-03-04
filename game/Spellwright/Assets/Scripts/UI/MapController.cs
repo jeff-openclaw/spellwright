@@ -64,6 +64,12 @@ namespace Spellwright.UI
         private IVisualElementScheduledItem _signalSchedule;
         private int _signalTick;
 
+        // Ghost input echo
+        private IVisualElementScheduledItem _ghostSchedule;
+        private readonly List<Label> _ghostPool = new();
+        private int _ghostNextIndex;
+        private const int GhostPoolSize = 10;
+
         private void OnEnable()
         {
             if (uiDocument == null) return;
@@ -90,6 +96,7 @@ namespace Spellwright.UI
             UnsubscribeEventBus();
             StopGlow();
             StopSignalAnimation();
+            StopGhostEcho();
         }
 
         private void CacheElements()
@@ -191,6 +198,7 @@ namespace Spellwright.UI
             RefreshRightPane();
             PlayEntranceAnimation();
             StartSignalAnimation();
+            StartGhostEcho();
         }
 
         private void AddPipeConnector()
@@ -1236,6 +1244,87 @@ namespace Spellwright.UI
                 }
             }
             return new string(chars);
+        }
+
+        // ── Ghost Input Echo ──────────────────────────────────
+
+        private void StartGhostEcho()
+        {
+            StopGhostEcho();
+            if (_root == null) return;
+
+            var ghosts = Run.RunManager.Instance?.GhostLetters;
+            if (ghosts == null || ghosts.Count == 0) return;
+
+            // Create ghost label pool
+            for (int i = 0; i < GhostPoolSize; i++)
+            {
+                var label = new Label("");
+                label.AddToClassList("map-screen__ghost-letter");
+                label.style.position = Position.Absolute;
+                label.style.display = DisplayStyle.None;
+                _root.Add(label);
+                _ghostPool.Add(label);
+            }
+
+            _ghostNextIndex = 0;
+
+            // Spawn a ghost every 600-1000ms
+            _ghostSchedule = _root.schedule.Execute(SpawnGhostLetter).Every(800);
+        }
+
+        private void StopGhostEcho()
+        {
+            _ghostSchedule?.Pause();
+            _ghostSchedule = null;
+
+            foreach (var label in _ghostPool)
+                label.RemoveFromHierarchy();
+            _ghostPool.Clear();
+        }
+
+        private void SpawnGhostLetter()
+        {
+            // Don't spawn during shop overlay or dossier expansion
+            if (_shopOpen || _expandedDossierIndex >= 0) return;
+
+            var ghosts = Run.RunManager.Instance?.GhostLetters;
+            if (ghosts == null || ghosts.Count == 0 || _ghostPool.Count == 0) return;
+
+            var rng = new System.Random();
+            var ghost = ghosts[rng.Next(ghosts.Count)];
+            var label = _ghostPool[_ghostNextIndex % _ghostPool.Count];
+            _ghostNextIndex++;
+
+            label.text = ghost.Letter.ToString();
+
+            // Position randomly within the root bounds
+            float x = rng.Next(5, 90);
+            float y = rng.Next(5, 85);
+            label.style.left = new StyleLength(new Length(x, LengthUnit.Percent));
+            label.style.top = new StyleLength(new Length(y, LengthUnit.Percent));
+
+            // Style based on correctness
+            label.RemoveFromClassList("map-screen__ghost-letter--correct");
+            label.RemoveFromClassList("map-screen__ghost-letter--wrong");
+            label.AddToClassList(ghost.Correct
+                ? "map-screen__ghost-letter--correct"
+                : "map-screen__ghost-letter--wrong");
+
+            // Show and fade
+            label.style.display = DisplayStyle.Flex;
+            label.style.opacity = ghost.Correct ? 0.25f : 0.15f;
+
+            // Fade out after delay
+            long fadeDelay = ghost.Correct ? 1500 : 600;
+            _root.schedule.Execute(() =>
+            {
+                label.style.opacity = 0f;
+                _root.schedule.Execute(() =>
+                {
+                    label.style.display = DisplayStyle.None;
+                }).ExecuteLater(400);
+            }).ExecuteLater(fadeDelay);
         }
 
         // ── Shop Overlay ─────────────────────────────────────

@@ -27,6 +27,19 @@ namespace Spellwright.Run
         private float _wagerMultiplier = 1f;
         private int _wagerDamageBonus;
 
+        // Guess history for atmospheric effects
+        private readonly List<GhostLetter> _ghostLetters = new();
+
+        /// <summary>Letter from a past guess, used for ghost phosphor atmosphere.</summary>
+        public struct GhostLetter
+        {
+            public char Letter;
+            public bool Correct;
+        }
+
+        /// <summary>Letters from past guesses in this run, for atmospheric effects.</summary>
+        public IReadOnlyList<GhostLetter> GhostLetters => _ghostLetters;
+
         // ── Properties ───────────────────────────────────────
 
         public bool IsRunActive => _state.IsRunActive;
@@ -83,6 +96,7 @@ namespace Spellwright.Run
             EventBus.Instance.Subscribe<EncounterEndedEvent>(OnEncounterEnded);
             EventBus.Instance.Subscribe<HPChangedEvent>(OnHPChanged);
             EventBus.Instance.Subscribe<RivalDefeatedEvent>(OnRivalDefeated);
+            EventBus.Instance.Subscribe<GuessSubmittedEvent>(OnGuessSubmitted);
         }
 
         private void OnDisable()
@@ -90,6 +104,7 @@ namespace Spellwright.Run
             EventBus.Instance.Unsubscribe<EncounterEndedEvent>(OnEncounterEnded);
             EventBus.Instance.Unsubscribe<HPChangedEvent>(OnHPChanged);
             EventBus.Instance.Unsubscribe<RivalDefeatedEvent>(OnRivalDefeated);
+            EventBus.Instance.Unsubscribe<GuessSubmittedEvent>(OnGuessSubmitted);
         }
 
         private void OnDestroy()
@@ -119,6 +134,7 @@ namespace Spellwright.Run
             _waveNumber = 1;
             _nodeOutcomes.Clear();
             _nodeIntel.Clear();
+            _ghostLetters.Clear();
 
             // Generate wave 1: (E-S)×5 + B
             _state.NodeSequence.Clear();
@@ -234,6 +250,34 @@ namespace Spellwright.Run
             Debug.Log($"[RunManager] Encounter ended — Score: +{evt.Score} (total: {_state.Score}), Used words: {_state.UsedWords.Count}");
 
             EventBus.Instance.Publish(new RunStateChangedEvent { State = _state });
+        }
+
+        private void OnGuessSubmitted(GuessSubmittedEvent evt)
+        {
+            if (!_state.IsRunActive || evt.Result == null) return;
+
+            if (evt.Result.GuessType == GuessType.Letter && evt.Result.GuessedLetter != '\0')
+            {
+                _ghostLetters.Add(new GhostLetter
+                {
+                    Letter = char.ToUpper(evt.Result.GuessedLetter),
+                    Correct = evt.Result.IsLetterInPhrase
+                });
+            }
+            else if (evt.Result.GuessType == GuessType.Phrase && !string.IsNullOrEmpty(evt.Result.GuessedWord))
+            {
+                foreach (char c in evt.Result.GuessedWord)
+                {
+                    if (char.IsLetter(c))
+                    {
+                        _ghostLetters.Add(new GhostLetter
+                        {
+                            Letter = char.ToUpper(c),
+                            Correct = evt.Result.IsCorrect
+                        });
+                    }
+                }
+            }
         }
 
         /// <summary>Adds gold and publishes a GoldChangedEvent.</summary>
