@@ -20,9 +20,9 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 21 | NPC Ultimatum (Endgame Showdown) | ai-visibility | ✅ Done | 5d3ac65 |
 | 22 | NPC Rival System (Persistent Antagonist) | ai-visibility | ✅ Done | 0c51da3 |
 | 23 | Mood Bargain (Mid-Encounter Deal) | ai-visibility | ✅ Done | b07ef2d |
-| 24 | Letter Sacrifice (Strategic Tile Trade) | ai-visibility | ✅ Done | PENDING |
-| 25 | Journey Screen Redesign: Design North Star | journey | ⏳ Queued | — |
-| 26 | ASCII Dungeon Map with Pipe-Connected Nodes | journey | ⏳ Queued | — |
+| 24 | Letter Sacrifice (Strategic Tile Trade) | ai-visibility | ✅ Done | b8cdb6b |
+| 25 | Journey Screen Redesign: Design North Star | journey | ⏭️ Epic tracker (skip) | — |
+| 26 | ASCII Dungeon Map with Pipe-Connected Nodes | journey | ✅ Done | PENDING |
 | 27 | Expandable NPC Dossier Panels | journey | ⏳ Queued | — |
 | 28 | Gold-for-Intel Economy | journey | ⏳ Queued | — |
 | 29 | Pre-Encounter Gold Wagering | journey | ⏳ Queued | — |
@@ -38,7 +38,13 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=24 | NEXT=25 | QUEUE_TOTAL=28
+LAST_COMPLETED=26 | NEXT=27 | QUEUE_TOTAL=28
+
+## Implementation Notes — #26
+- Completely redesigned Map.uxml: ASCII box-drawing frame (╔═╗║╚═╝╠╣) wrapping status bars and dungeon nodes. Stats rendered inline in frame rows (WAVE, HP block bar, GOLD, SCORE, RIVAL). Node container as ScrollView inside frame
+- Rewrote map.uss: dungeon-row layout with pipe characters (║) on sides, node state modifiers (completed/current/future/boss/current-boss), HP block bar with █/░ characters, stagger entrance animations (slide-in from left), breathing glow for current node
+- Rewrote MapController.cs: CreateDungeonNode builds row with left pipe + node content (indicator + room label + outcome) + right pipe. AddPipeConnector creates vertical pipe between nodes. UpdateNodeStates uses [✓]/[▶]/[ ]/[☠] indicators, shows outcome summaries ("SOLVED 4/6 +12g") for completed nodes using RunManager.NodeOutcomes. BuildHPBar renders █░ block bar. Stagger animation targets Row elements
+- Modified RunManager: added NodeOutcome struct (NodeIndex, Won, GuessCount, GoldEarned) and _nodeOutcomes list. Populated in OnEncounterEnded, cleared on StartRun. Exposed as IReadOnlyList<NodeOutcome> NodeOutcomes property
 
 ## Implementation Notes — #24
 - Created LetterSacrificeSystem.cs: MonoBehaviour tracking sacrifice state (used/active), toggles sacrifice mode, calls BoardState.RehideTile on tile click, publishes LetterSacrificedEvent and SacrificeModeToggledEvent. Limited to one sacrifice per encounter

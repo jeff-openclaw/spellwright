@@ -1,32 +1,47 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="../Screens/map.uss" />
     <ui:VisualElement name="map-root" class="screen-root map-screen">
-        <!-- Header: title + stats bar -->
-        <ui:VisualElement class="map-screen__header">
-            <ui:Label name="title" text="YOUR JOURNEY" class="text-header map-screen__title" />
-            <ui:VisualElement class="map-screen__stats">
-                <ui:Label name="wave" text="# Wave 1" class="text-stat map-screen__stat map-screen__stat--wave" />
-                <ui:Label name="hp" text="HP --/--" class="text-stat map-screen__stat map-screen__stat--hp" />
-                <ui:Label name="gold" text="$ --g" class="text-stat map-screen__stat map-screen__stat--gold" />
-                <ui:Label name="score" text="* --" class="text-stat map-screen__stat map-screen__stat--score" />
-                <ui:Label name="rival-info" text="" class="text-stat map-screen__stat map-screen__stat--rival" />
+        <!-- ASCII Frame -->
+        <ui:VisualElement class="map-screen__frame">
+            <!-- Top border -->
+            <ui:Label text="╔══════════════════════════════════╗" class="map-screen__border-text" />
+
+            <!-- Stats status bar -->
+            <ui:VisualElement class="map-screen__status-row">
+                <ui:Label text="║" class="map-screen__border-char" />
+                <ui:VisualElement class="map-screen__status-content">
+                    <ui:Label name="wave" text="WAVE 01" class="text-stat map-screen__stat-inline map-screen__stat-inline--wave" />
+                    <ui:Label name="hp" text="HP ██████████ 30/30" class="text-stat map-screen__stat-inline map-screen__stat-inline--hp" />
+                </ui:VisualElement>
+                <ui:Label text="║" class="map-screen__border-char" />
             </ui:VisualElement>
+            <ui:VisualElement class="map-screen__status-row">
+                <ui:Label text="║" class="map-screen__border-char" />
+                <ui:VisualElement class="map-screen__status-content">
+                    <ui:Label name="gold" text="GOLD: 0g" class="text-stat map-screen__stat-inline map-screen__stat-inline--gold" />
+                    <ui:Label name="score" text="SCORE: 0" class="text-stat map-screen__stat-inline map-screen__stat-inline--score" />
+                    <ui:Label name="rival-info" text="" class="text-stat map-screen__stat-inline map-screen__stat-inline--rival" />
+                </ui:VisualElement>
+                <ui:Label text="║" class="map-screen__border-char" />
+            </ui:VisualElement>
+
+            <!-- Mid border -->
+            <ui:Label text="╠══════════════════════════════════╣" class="map-screen__border-text" />
+
+            <!-- Node container (dynamically populated by C#) -->
+            <ui:ScrollView name="node-container" class="map-screen__dungeon-scroll">
+                <!-- Nodes inserted here by MapController -->
+            </ui:ScrollView>
+
+            <!-- Bottom border -->
+            <ui:Label text="╚══════════════════════════════════╝" class="map-screen__border-text" />
         </ui:VisualElement>
-
-        <!-- Separator -->
-        <ui:VisualElement class="divider" />
-
-        <!-- Node list container (populated dynamically by C#) -->
-        <ui:ScrollView name="node-container" class="map-screen__nodes" />
-
-        <!-- Separator -->
-        <ui:VisualElement class="divider" />
 
         <!-- Footer: language toggle + proceed button -->
         <ui:VisualElement class="map-screen__footer">
             <ui:Button name="lang-toggle" text="EN" class="btn btn-small map-screen__lang-btn" />
             <ui:VisualElement class="grow" />
-            <ui:Button name="proceed" text="[ PROCEED ]" class="btn btn-large map-screen__proceed-btn" />
+            <ui:Button name="proceed" text="[ P R O C E E D ]" class="btn btn-large map-screen__proceed-btn" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

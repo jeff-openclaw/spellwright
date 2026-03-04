@@ -1,191 +1,229 @@
 /* =============================================================
    Spellwright — Map Screen Styles
-   Screen-specific overrides and layout for the journey map
+   ASCII dungeon map with pipe-connected nodes
    ============================================================= */
 
 .map-screen {
     flex-direction: column;
-    padding: var(--space-xl);
+    padding: var(--space-md);
+    flex-grow: 1;
 }
 
-/* ── Header ── */
+/* ── ASCII Frame ── */
 
-.map-screen__header {
+.map-screen__frame {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.map-screen__border-text {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-sm);
+    color: var(--color-phosphor-dim);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
+.map-screen__border-char {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-sm);
+    color: var(--color-phosphor-dim);
+    min-width: 16px;
+    -unity-text-align: middle-center;
+}
+
+/* ── Status Rows ── */
+
+.map-screen__status-row {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-xs) 0;
+}
+
+.map-screen__status-content {
+    flex-grow: 1;
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
-    padding-bottom: var(--space-md);
+    padding: 0 var(--space-sm);
 }
 
-.map-screen__title {
-    color: var(--color-phosphor-bright);
-    letter-spacing: 4px;
+.map-screen__stat-inline {
+    font-size: var(--font-size-sm);
 }
 
-.map-screen__stats {
-    flex-direction: row;
-}
-
-.map-screen__stat {
-    margin-left: var(--space-lg);
-    padding: var(--space-xs) var(--space-md);
-    background-color: rgba(5, 15, 10, 0.7);
-    border-width: var(--border-width);
-    border-color: var(--color-border);
-    border-radius: var(--border-radius);
-}
-
-.map-screen__stat--wave {
+.map-screen__stat-inline--wave {
     color: var(--color-cyan);
-    border-color: rgba(38, 230, 242, 0.3);
 }
 
-.map-screen__stat--hp {
+.map-screen__stat-inline--hp {
     color: var(--color-phosphor);
-    border-color: rgba(30, 255, 115, 0.3);
 }
 
-.map-screen__stat--gold {
+.map-screen__stat-inline--gold {
     color: var(--color-amber);
-    border-color: rgba(255, 199, 38, 0.3);
 }
 
-.map-screen__stat--score {
+.map-screen__stat-inline--score {
     color: var(--color-cyan);
-    border-color: rgba(38, 230, 242, 0.3);
 }
 
-.map-screen__stat--rival {
+.map-screen__stat-inline--rival {
     color: var(--color-danger);
-    border-color: rgba(255, 60, 60, 0.3);
 }
 
-/* ── Node container ── */
+/* ── Dungeon Scroll Area ── */
 
-.map-screen__nodes {
+.map-screen__dungeon-scroll {
     flex-grow: 1;
-    margin-top: var(--space-md);
-    margin-bottom: var(--space-md);
+    margin: 0;
 }
 
-/* ── Node entry card ── */
+/* ── Dungeon Node Row ── */
 
-.map-screen__node {
+.map-screen__dungeon-row {
     flex-direction: row;
     align-items: center;
-    padding: var(--space-sm) var(--space-md);
-    margin-bottom: var(--space-sm);
-    background-color: rgba(5, 15, 10, 0.7);
-    border-width: var(--border-width);
-    border-color: var(--color-border);
-    border-radius: var(--border-radius);
-    transition: background-color 150ms ease-out,
-                border-color 150ms ease-out,
-                opacity 300ms ease-out;
+    padding: 0;
 }
 
-.map-screen__node--boss {
-    min-height: 56px;
-}
-
-/* Node state modifiers */
-.map-screen__node--completed {
-    border-color: var(--color-node-completed);
-    opacity: 0.7;
-}
-
-.map-screen__node--current {
-    border-color: var(--color-node-current);
-    background-color: rgba(30, 255, 115, 0.04);
-    border-width: var(--border-width-thick);
-}
-
-.map-screen__node--current-boss {
-    border-color: var(--color-node-boss);
-    background-color: rgba(217, 26, 26, 0.04);
-    border-width: var(--border-width-thick);
-}
-
-.map-screen__node--future {
-    border-color: var(--color-node-future);
-    opacity: 0.65;
-}
-
-.map-screen__node--future-boss {
-    border-color: var(--color-node-boss);
-    opacity: 0.65;
-}
-
-/* Node sub-elements */
-.map-screen__node-stripe {
-    width: 4px;
-    align-self: stretch;
-    border-radius: 2px;
-    margin-right: var(--space-sm);
-}
-
-.map-screen__node-connector {
-    width: 36px;
+.map-screen__dungeon-pipe {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-sm);
+    color: var(--color-phosphor-dim);
+    min-width: 16px;
     -unity-text-align: middle-center;
+}
+
+.map-screen__dungeon-node {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    padding: var(--space-xs) var(--space-sm);
+    margin: 0 var(--space-xs);
+    transition: opacity 300ms ease-out;
+}
+
+/* Node indicator (checkbox-style) */
+.map-screen__node-indicator {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-sm);
+    min-width: 28px;
+    -unity-text-align: middle-center;
+}
+
+/* Node room label */
+.map-screen__node-room {
+    font-size: var(--font-size-sm);
+    color: var(--color-phosphor);
+    min-width: 80px;
+}
+
+/* Node outcome text */
+.map-screen__node-outcome {
+    flex-grow: 1;
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
+    -unity-text-align: middle-right;
 }
 
-.map-screen__node-icon {
-    width: 32px;
+/* Pipe connector between nodes */
+.map-screen__dungeon-connector {
+    flex-direction: row;
+    align-items: center;
+    height: 16px;
+}
+
+.map-screen__connector-pipe {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-sm);
+    color: var(--color-phosphor-dim);
+    min-width: 16px;
     -unity-text-align: middle-center;
-    font-size: var(--font-size-md);
 }
 
-.map-screen__node-label {
+.map-screen__connector-line {
     flex-grow: 1;
-    -unity-text-align: middle-left;
-    font-size: var(--font-size-sm);
-    color: var(--color-phosphor);
 }
 
-.map-screen__node-label--boss {
-    font-size: var(--font-size-md);
-    -unity-font-style: bold;
+/* ── Node State Modifiers ── */
+
+/* Completed node */
+.map-screen__dungeon-node--completed {
+    opacity: 0.6;
 }
 
-.map-screen__node-status {
-    width: 50px;
-    -unity-text-align: middle-center;
-    font-size: var(--font-size-sm);
-}
-
-/* Node color helpers (applied via C# to stripe, icon, label, status) */
-.node-color--completed {
+.map-screen__dungeon-node--completed .map-screen__node-indicator {
     color: var(--color-node-completed);
 }
 
-.node-color--current {
+.map-screen__dungeon-node--completed .map-screen__node-room {
+    color: var(--color-node-completed);
+}
+
+.map-screen__dungeon-node--completed .map-screen__node-outcome {
+    color: var(--color-phosphor-dim);
+}
+
+/* Current node */
+.map-screen__dungeon-node--current {
+    background-color: rgba(30, 255, 115, 0.04);
+    border-width: var(--border-width);
+    border-color: var(--color-node-current);
+}
+
+.map-screen__dungeon-node--current .map-screen__node-indicator {
     color: var(--color-node-current);
 }
 
-.node-color--future {
+.map-screen__dungeon-node--current .map-screen__node-room {
+    color: var(--color-phosphor-bright);
+}
+
+.map-screen__dungeon-node--current .map-screen__node-outcome {
+    color: var(--color-phosphor);
+}
+
+/* Future node */
+.map-screen__dungeon-node--future {
+    opacity: 0.45;
+}
+
+.map-screen__dungeon-node--future .map-screen__node-indicator {
     color: var(--color-node-future);
 }
 
-.node-color--boss {
+.map-screen__dungeon-node--future .map-screen__node-room {
+    color: var(--color-node-future);
+}
+
+.map-screen__dungeon-node--future .map-screen__node-outcome {
+    color: var(--color-phosphor-dim);
+}
+
+/* Boss node */
+.map-screen__dungeon-node--boss .map-screen__node-indicator {
     color: var(--color-node-boss);
 }
 
-.node-stripe--completed {
-    background-color: var(--color-node-completed);
+.map-screen__dungeon-node--boss .map-screen__node-room {
+    color: var(--color-node-boss);
+    -unity-font-style: bold;
 }
 
-.node-stripe--current {
-    background-color: var(--color-node-current);
+/* Current boss */
+.map-screen__dungeon-node--current-boss {
+    background-color: rgba(217, 26, 26, 0.04);
+    border-width: var(--border-width);
+    border-color: var(--color-node-boss);
 }
 
-.node-stripe--future {
-    background-color: var(--color-node-future);
+.map-screen__dungeon-node--current-boss .map-screen__node-indicator {
+    color: var(--color-node-boss);
 }
 
-.node-stripe--boss {
-    background-color: var(--color-node-boss);
+.map-screen__dungeon-node--current-boss .map-screen__node-room {
+    color: var(--color-danger);
+    -unity-font-style: bold;
 }
 
 /* ── Footer ── */
@@ -194,6 +232,7 @@
     flex-direction: row;
     align-items: center;
     padding-top: var(--space-md);
+    justify-content: center;
 }
 
 .map-screen__lang-btn {
@@ -210,6 +249,7 @@
     min-width: 200px;
     color: var(--color-amber);
     border-color: var(--color-amber-dim);
+    letter-spacing: 4px;
 }
 
 .map-screen__proceed-btn:hover {
@@ -222,27 +262,28 @@
     color: var(--color-bg);
 }
 
-/* ── Entrance animations ── */
+/* ── Breathing glow for current node ── */
 
-.map-screen__content {
-    opacity: 0;
-    translate: 0 20px;
-}
-
-.map-screen__content--visible {
-    opacity: 1;
-    translate: 0 0;
-    transition: opacity 400ms ease-out,
-                translate 400ms ease-out;
-}
-
-/* Breathing glow for current node (toggled by C#) */
-.map-screen__node--glow-bright {
+.map-screen__dungeon-node--glow-bright {
     opacity: 1;
     transition: opacity 550ms ease-in-out;
 }
 
-.map-screen__node--glow-dim {
+.map-screen__dungeon-node--glow-dim {
     opacity: 0.75;
     transition: opacity 550ms ease-in-out;
+}
+
+/* ── Entrance animations ── */
+
+.stagger-item {
+    opacity: 0;
+    translate: -10px 0;
+}
+
+.stagger-visible {
+    opacity: 1;
+    translate: 0 0;
+    transition: opacity 300ms ease-out,
+                translate 300ms ease-out;
 }

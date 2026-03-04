@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Spellwright.Core;
 using Spellwright.Data;
 using Spellwright.ScriptableObjects;
@@ -8,10 +9,8 @@ using UnityEngine.UIElements;
 namespace Spellwright.UI
 {
     /// <summary>
-    /// UI Toolkit-based map screen controller. Replaces the uGUI MapUI.
-    /// Renders the run map as a vertical node list with staggered entrance
-    /// animations, a breathing glow on the current node, stat chips, and
-    /// language toggle.
+    /// UI Toolkit-based map screen controller. Renders an ASCII dungeon map
+    /// with pipe-connected room nodes, HP block bar, and outcome summaries.
     /// </summary>
     public class MapController : MonoBehaviour
     {
@@ -23,7 +22,6 @@ namespace Spellwright.UI
         [SerializeField] private float glowIntervalMs = 550f;
 
         private VisualElement _root;
-        private Label _titleLabel;
         private Label _waveLabel;
         private Label _hpLabel;
         private Label _goldLabel;
@@ -33,7 +31,7 @@ namespace Spellwright.UI
         private Button _proceedButton;
         private Button _langToggleButton;
 
-        private readonly List<NodeEntry> _nodeEntries = new();
+        private readonly List<DungeonNodeEntry> _nodeEntries = new();
         private IVisualElementScheduledItem _glowSchedule;
         private bool _glowBright = true;
         private int _currentGlowNodeIndex = -1;
@@ -60,7 +58,6 @@ namespace Spellwright.UI
 
         private void CacheElements()
         {
-            _titleLabel = _root.Q<Label>("title");
             _waveLabel = _root.Q<Label>("wave");
             _hpLabel = _root.Q<Label>("hp");
             _goldLabel = _root.Q<Label>("gold");
@@ -115,18 +112,17 @@ namespace Spellwright.UI
             ClearNodes();
 
             if (Run.RunManager.Instance == null || !Run.RunManager.Instance.IsRunActive)
-            {
-                if (_titleLabel != null)
-                    _titleLabel.text = "No active run";
                 return;
-            }
-
-            if (_titleLabel != null)
-                _titleLabel.text = "\u2550\u2550 YOUR JOURNEY \u2550\u2550";
 
             var sequence = Run.RunManager.Instance.NodeSequence;
             for (int i = 0; i < sequence.Count; i++)
-                CreateNodeEntry(i, sequence[i], i == sequence.Count - 1);
+            {
+                // Add pipe connector between nodes
+                if (i > 0)
+                    AddPipeConnector();
+
+                CreateDungeonNode(i, sequence[i], i == sequence.Count - 1);
+            }
 
             UpdateNodeStates();
             UpdateStats();
@@ -134,56 +130,79 @@ namespace Spellwright.UI
             PlayEntranceAnimation();
         }
 
-        private void CreateNodeEntry(int index, NodeType nodeType, bool isLast)
+        private void AddPipeConnector()
+        {
+            var connector = new VisualElement();
+            connector.AddToClassList("map-screen__dungeon-connector");
+
+            var pipe = new Label("\u2502");
+            pipe.AddToClassList("map-screen__border-char");
+
+            var spacer = new Label("\u2551");
+            spacer.AddToClassList("map-screen__connector-pipe");
+
+            connector.Add(spacer);
+
+            _nodeContainer.Add(connector);
+        }
+
+        private void CreateDungeonNode(int index, NodeType nodeType, bool isLast)
         {
             bool isBoss = nodeType == NodeType.Boss;
 
-            // Card root
-            var card = new VisualElement();
-            card.AddToClassList("map-screen__node");
-            if (isBoss)
-                card.AddToClassList("map-screen__node--boss");
+            var row = new VisualElement();
+            row.AddToClassList("map-screen__dungeon-row");
+            row.AddToClassList("stagger-item");
 
-            // Left color stripe
-            var stripe = new VisualElement();
-            stripe.AddToClassList("map-screen__node-stripe");
-            card.Add(stripe);
+            // Left pipe
+            var leftPipe = new Label("\u2551");
+            leftPipe.AddToClassList("map-screen__dungeon-pipe");
+            row.Add(leftPipe);
 
-            // Tree connector
-            var connector = new Label(isLast ? "\u2514\u2500\u2500" : "\u251C\u2500\u2500");
-            connector.AddToClassList("map-screen__node-connector");
-            card.Add(connector);
+            // Node content
+            var node = new VisualElement();
+            node.AddToClassList("map-screen__dungeon-node");
 
-            // Icon badge
-            var icon = new Label(GetNodeIcon(nodeType));
-            icon.AddToClassList("map-screen__node-icon");
-            card.Add(icon);
+            // Indicator [✓] [▶] [ ] [☠]
+            var indicator = new Label("[ ]");
+            indicator.AddToClassList("map-screen__node-indicator");
+            node.Add(indicator);
 
-            // Label
-            var label = new Label(GetNodeTypeName(nodeType));
-            label.AddToClassList("map-screen__node-label");
-            if (isBoss)
-                label.AddToClassList("map-screen__node-label--boss");
-            card.Add(label);
+            // Room label
+            string roomText = isBoss
+                ? "B O S S"
+                : $"ROOM {index + 1:D2}";
+            var roomLabel = new Label(roomText);
+            roomLabel.AddToClassList("map-screen__node-room");
+            node.Add(roomLabel);
 
-            // Status indicator
-            var status = new Label("-");
-            status.AddToClassList("map-screen__node-status");
-            card.Add(status);
+            // Separator
+            var sep = new Label("\u2500\u2500");
+            sep.AddToClassList("map-screen__node-indicator");
+            sep.style.color = new StyleColor(new Color(0.12f, 1f, 0.45f, 0.3f));
+            node.Add(sep);
 
-            // Start invisible for staggered entrance
-            card.AddToClassList("stagger-item");
+            // Outcome text
+            var outcome = new Label(isBoss ? "??????????????" : "\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591");
+            outcome.AddToClassList("map-screen__node-outcome");
+            node.Add(outcome);
 
-            _nodeContainer.Add(card);
+            row.Add(node);
 
-            _nodeEntries.Add(new NodeEntry
+            // Right pipe
+            var rightPipe = new Label("\u2551");
+            rightPipe.AddToClassList("map-screen__dungeon-pipe");
+            row.Add(rightPipe);
+
+            _nodeContainer.Add(row);
+
+            _nodeEntries.Add(new DungeonNodeEntry
             {
-                Card = card,
-                Stripe = stripe,
-                Connector = connector,
-                Icon = icon,
-                Label = label,
-                Status = status,
+                Row = row,
+                Node = node,
+                Indicator = indicator,
+                RoomLabel = roomLabel,
+                OutcomeLabel = outcome,
                 Index = index,
                 Type = nodeType
             });
@@ -197,6 +216,7 @@ namespace Spellwright.UI
 
             StopGlow();
             int currentIndex = Run.RunManager.Instance.CurrentNodeIndex;
+            var outcomes = Run.RunManager.Instance.NodeOutcomes;
 
             foreach (var entry in _nodeEntries)
             {
@@ -205,45 +225,36 @@ namespace Spellwright.UI
                 // Remove all state classes
                 RemoveStateClasses(entry);
 
-                string colorClass;
-                string stripeClass;
-                string stateClass;
-                string statusIcon;
-
                 if (entry.Index < currentIndex)
                 {
                     // Completed
-                    colorClass = "node-color--completed";
-                    stripeClass = "node-stripe--completed";
-                    stateClass = "map-screen__node--completed";
-                    statusIcon = "+";
+                    entry.Node.AddToClassList("map-screen__dungeon-node--completed");
+                    entry.Indicator.text = "[\u2713]"; // ✓
+
+                    // Find outcome for this node
+                    var nodeOutcome = outcomes.FirstOrDefault(o => o.NodeIndex == entry.Index);
+                    if (nodeOutcome.Won)
+                        entry.OutcomeLabel.text = $"SOLVED {nodeOutcome.GuessCount}/6 +{nodeOutcome.GoldEarned}g";
+                    else
+                        entry.OutcomeLabel.text = "FAILED";
                 }
                 else if (entry.Index == currentIndex)
                 {
                     // Current
-                    colorClass = isBoss ? "node-color--boss" : "node-color--current";
-                    stripeClass = isBoss ? "node-stripe--boss" : "node-stripe--current";
-                    stateClass = isBoss ? "map-screen__node--current-boss" : "map-screen__node--current";
-                    statusIcon = ">";
+                    string stateClass = isBoss ? "map-screen__dungeon-node--current-boss" : "map-screen__dungeon-node--current";
+                    entry.Node.AddToClassList(stateClass);
+                    if (isBoss) entry.Node.AddToClassList("map-screen__dungeon-node--boss");
+                    entry.Indicator.text = "[\u25B6]"; // ▶
+                    entry.OutcomeLabel.text = isBoss ? "??????????????" : "\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588";
                 }
                 else
                 {
                     // Future
-                    colorClass = isBoss ? "node-color--boss" : "node-color--future";
-                    stripeClass = isBoss ? "node-stripe--boss" : "node-stripe--future";
-                    stateClass = isBoss ? "map-screen__node--future-boss" : "map-screen__node--future";
-                    statusIcon = "-";
+                    entry.Node.AddToClassList("map-screen__dungeon-node--future");
+                    if (isBoss) entry.Node.AddToClassList("map-screen__dungeon-node--boss");
+                    entry.Indicator.text = isBoss ? "[\u2620]" : "[ ]"; // ☠ or empty
+                    entry.OutcomeLabel.text = isBoss ? "??????????????" : "\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591";
                 }
-
-                entry.Card.AddToClassList(stateClass);
-                entry.Stripe.AddToClassList(stripeClass);
-                entry.Connector.AddToClassList(entry.Index <= currentIndex ? colorClass : "node-color--future");
-                entry.Icon.AddToClassList(colorClass);
-                entry.Label.AddToClassList(colorClass);
-                entry.Status.AddToClassList(colorClass);
-
-                entry.Label.text = isBoss ? $"<< {GetNodeTypeName(entry.Type)} >>" : GetNodeTypeName(entry.Type);
-                entry.Status.text = statusIcon;
             }
 
             // Start breathing glow on current node
@@ -262,13 +273,19 @@ namespace Spellwright.UI
             if (Run.RunManager.Instance == null) return;
 
             if (_waveLabel != null)
-                _waveLabel.text = $"# Wave {Run.RunManager.Instance.WaveNumber}";
+                _waveLabel.text = $"WAVE {Run.RunManager.Instance.WaveNumber:D2}";
+
             if (_hpLabel != null)
-                _hpLabel.text = $"HP {Run.RunManager.Instance.CurrentHP}/{Run.RunManager.Instance.MaxHP}";
+            {
+                int hp = Run.RunManager.Instance.CurrentHP;
+                int maxHP = Run.RunManager.Instance.MaxHP;
+                _hpLabel.text = $"HP {BuildHPBar(hp, maxHP)} {hp}/{maxHP}";
+            }
+
             if (_goldLabel != null)
-                _goldLabel.text = $"$ {Run.RunManager.Instance.Gold}g";
+                _goldLabel.text = $"GOLD: {Run.RunManager.Instance.Gold}g";
             if (_scoreLabel != null)
-                _scoreLabel.text = $"* {Run.RunManager.Instance.Score}";
+                _scoreLabel.text = $"SCORE: {Run.RunManager.Instance.Score:N0}";
 
             // Rival info
             if (_rivalInfoLabel != null)
@@ -278,6 +295,15 @@ namespace Spellwright.UI
                     ? $"RIVAL: {rival.RivalDisplayName}"
                     : "";
             }
+        }
+
+        /// <summary>Builds an HP block bar using █ and ░ characters.</summary>
+        private static string BuildHPBar(int current, int max)
+        {
+            const int barWidth = 10;
+            int filled = max > 0 ? Mathf.RoundToInt((float)current / max * barWidth) : 0;
+            filled = Mathf.Clamp(filled, 0, barWidth);
+            return new string('\u2588', filled) + new string('\u2591', barWidth - filled);
         }
 
         // ── Language Toggle ─────────────────────────────────
@@ -333,7 +359,7 @@ namespace Spellwright.UI
 
                 _root.schedule.Execute(() =>
                 {
-                    entry.Card.AddToClassList("stagger-visible");
+                    entry.Row.AddToClassList("stagger-visible");
                 }).ExecuteLater(delay);
             }
         }
@@ -343,21 +369,21 @@ namespace Spellwright.UI
             if (_currentGlowNodeIndex < 0 || _currentGlowNodeIndex >= _nodeEntries.Count)
                 return;
 
-            var card = _nodeEntries[_currentGlowNodeIndex].Card;
-            card.AddToClassList("map-screen__node--glow-bright");
+            var node = _nodeEntries[_currentGlowNodeIndex].Node;
+            node.AddToClassList("map-screen__dungeon-node--glow-bright");
 
             _glowSchedule = _root.schedule.Execute(() =>
             {
                 _glowBright = !_glowBright;
                 if (_glowBright)
                 {
-                    card.RemoveFromClassList("map-screen__node--glow-dim");
-                    card.AddToClassList("map-screen__node--glow-bright");
+                    node.RemoveFromClassList("map-screen__dungeon-node--glow-dim");
+                    node.AddToClassList("map-screen__dungeon-node--glow-bright");
                 }
                 else
                 {
-                    card.RemoveFromClassList("map-screen__node--glow-bright");
-                    card.AddToClassList("map-screen__node--glow-dim");
+                    node.RemoveFromClassList("map-screen__dungeon-node--glow-bright");
+                    node.AddToClassList("map-screen__dungeon-node--glow-dim");
                 }
             }).Every((long)glowIntervalMs);
         }
@@ -369,9 +395,9 @@ namespace Spellwright.UI
 
             if (_currentGlowNodeIndex >= 0 && _currentGlowNodeIndex < _nodeEntries.Count)
             {
-                var card = _nodeEntries[_currentGlowNodeIndex].Card;
-                card.RemoveFromClassList("map-screen__node--glow-bright");
-                card.RemoveFromClassList("map-screen__node--glow-dim");
+                var node = _nodeEntries[_currentGlowNodeIndex].Node;
+                node.RemoveFromClassList("map-screen__dungeon-node--glow-bright");
+                node.RemoveFromClassList("map-screen__dungeon-node--glow-dim");
             }
             _currentGlowNodeIndex = -1;
         }
@@ -384,63 +410,22 @@ namespace Spellwright.UI
             _nodeEntries.Clear();
         }
 
-        private static void RemoveStateClasses(NodeEntry entry)
+        private static void RemoveStateClasses(DungeonNodeEntry entry)
         {
-            // Card state
-            entry.Card.RemoveFromClassList("map-screen__node--completed");
-            entry.Card.RemoveFromClassList("map-screen__node--current");
-            entry.Card.RemoveFromClassList("map-screen__node--current-boss");
-            entry.Card.RemoveFromClassList("map-screen__node--future");
-            entry.Card.RemoveFromClassList("map-screen__node--future-boss");
-
-            // Color classes
-            string[] colorClasses = { "node-color--completed", "node-color--current", "node-color--future", "node-color--boss" };
-            foreach (var cls in colorClasses)
-            {
-                entry.Connector.RemoveFromClassList(cls);
-                entry.Icon.RemoveFromClassList(cls);
-                entry.Label.RemoveFromClassList(cls);
-                entry.Status.RemoveFromClassList(cls);
-            }
-
-            // Stripe classes
-            string[] stripeClasses = { "node-stripe--completed", "node-stripe--current", "node-stripe--future", "node-stripe--boss" };
-            foreach (var cls in stripeClasses)
-                entry.Stripe.RemoveFromClassList(cls);
+            entry.Node.RemoveFromClassList("map-screen__dungeon-node--completed");
+            entry.Node.RemoveFromClassList("map-screen__dungeon-node--current");
+            entry.Node.RemoveFromClassList("map-screen__dungeon-node--current-boss");
+            entry.Node.RemoveFromClassList("map-screen__dungeon-node--future");
+            entry.Node.RemoveFromClassList("map-screen__dungeon-node--boss");
         }
 
-        private static string GetNodeIcon(NodeType type)
+        private class DungeonNodeEntry
         {
-            return type switch
-            {
-                NodeType.Encounter => ">",
-                NodeType.Shop => "$",
-                NodeType.Boss => "!",
-                NodeType.Rest => "~",
-                _ => "-"
-            };
-        }
-
-        private static string GetNodeTypeName(NodeType type)
-        {
-            return type switch
-            {
-                NodeType.Encounter => "Encounter",
-                NodeType.Shop => "Shop",
-                NodeType.Boss => "BOSS",
-                NodeType.Rest => "Rest",
-                _ => "Unknown"
-            };
-        }
-
-        private class NodeEntry
-        {
-            public VisualElement Card;
-            public VisualElement Stripe;
-            public Label Connector;
-            public Label Icon;
-            public Label Label;
-            public Label Status;
+            public VisualElement Row;
+            public VisualElement Node;
+            public Label Indicator;
+            public Label RoomLabel;
+            public Label OutcomeLabel;
             public int Index;
             public NodeType Type;
         }

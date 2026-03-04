@@ -18,6 +18,7 @@ namespace Spellwright.Run
 
         private RunState _state = new RunState();
         private int _waveNumber;
+        private readonly List<NodeOutcome> _nodeOutcomes = new();
 
         // ── Properties ───────────────────────────────────────
 
@@ -30,6 +31,7 @@ namespace Spellwright.Run
         public int CurrentNodeIndex => _state.CurrentNodeIndex;
         public IReadOnlyList<NodeType> NodeSequence => _state.NodeSequence;
         public int WaveNumber => _waveNumber;
+        public IReadOnlyList<NodeOutcome> NodeOutcomes => _nodeOutcomes;
 
         /// <summary>The NodeType at the current index, or Encounter if out of range.</summary>
         public NodeType CurrentNodeType =>
@@ -39,6 +41,15 @@ namespace Spellwright.Run
 
         /// <summary>Total number of encounters won in this run.</summary>
         public int EncountersWon { get; private set; }
+
+        /// <summary>Per-node encounter outcome for map display.</summary>
+        public struct NodeOutcome
+        {
+            public int NodeIndex;
+            public bool Won;
+            public int GuessCount;
+            public int GoldEarned;
+        }
 
         // ── Lifecycle ────────────────────────────────────────
 
@@ -92,6 +103,7 @@ namespace Spellwright.Run
 
             EncountersWon = 0;
             _waveNumber = 1;
+            _nodeOutcomes.Clear();
 
             // Generate wave 1: (E-S)×5 + B
             _state.NodeSequence.Clear();
@@ -184,6 +196,25 @@ namespace Spellwright.Run
                     : 8 + 2 * guessesRemaining;
                 AddGold(reward);
             }
+
+            // Track per-node outcome for map display
+            int goldReward = 0;
+            if (evt.Won)
+            {
+                int guessesRem = gameConfig != null
+                    ? gameConfig.maxGuessesPerEncounter - evt.GuessCount
+                    : 6 - evt.GuessCount;
+                goldReward = gameConfig != null
+                    ? gameConfig.CalculateGoldReward(guessesRem)
+                    : 8 + 2 * guessesRem;
+            }
+            _nodeOutcomes.Add(new NodeOutcome
+            {
+                NodeIndex = _state.CurrentNodeIndex,
+                Won = evt.Won,
+                GuessCount = evt.GuessCount,
+                GoldEarned = goldReward
+            });
 
             // Track used words
             if (!string.IsNullOrEmpty(evt.TargetWord))
