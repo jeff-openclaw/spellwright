@@ -246,6 +246,120 @@ namespace Spellwright.Editor
                 Debug.LogWarning($"{failed} check(s) failed. Review errors above.");
         }
 
+        [MenuItem("Spellwright/Tests/Verify Map UI Toolkit")]
+        public static void VerifyMapUIToolkit()
+        {
+            int passed = 0;
+            int failed = 0;
+
+            // Check Map.uxml exists and loads
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Screens/Map.uxml");
+            if (uxml != null)
+            {
+                Debug.Log("[PASS] Map.uxml loaded");
+                passed++;
+            }
+            else
+            {
+                Debug.LogError("[FAIL] Map.uxml not found at Assets/UI/Screens/Map.uxml");
+                failed++;
+            }
+
+            // Check map.uss loads
+            var uss = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/UI/Screens/map.uss");
+            if (uss != null)
+            {
+                Debug.Log("[PASS] map.uss loaded");
+                passed++;
+            }
+            else
+            {
+                Debug.LogError("[FAIL] map.uss not found");
+                failed++;
+            }
+
+            // Instantiate UXML and verify expected elements exist
+            if (uxml != null)
+            {
+                var root = new VisualElement();
+                uxml.CloneTree(root);
+
+                string[] expectedNames = { "title", "wave", "hp", "gold", "score", "node-container", "proceed", "lang-toggle" };
+                foreach (var name in expectedNames)
+                {
+                    var el = root.Q(name);
+                    if (el != null)
+                    {
+                        Debug.Log($"[PASS] Element '{name}' found in Map.uxml");
+                        passed++;
+                    }
+                    else
+                    {
+                        Debug.LogError($"[FAIL] Element '{name}' NOT found in Map.uxml");
+                        failed++;
+                    }
+                }
+
+                // Verify proceed is a Button
+                var btn = root.Q<Button>("proceed");
+                if (btn != null)
+                {
+                    Debug.Log("[PASS] proceed is a Button element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] proceed is not a Button element");
+                    failed++;
+                }
+
+                // Verify lang-toggle is a Button
+                var langBtn = root.Q<Button>("lang-toggle");
+                if (langBtn != null)
+                {
+                    Debug.Log("[PASS] lang-toggle is a Button element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] lang-toggle is not a Button element");
+                    failed++;
+                }
+
+                // Verify node-container is a ScrollView
+                var nodeContainer = root.Q<ScrollView>("node-container");
+                if (nodeContainer != null)
+                {
+                    Debug.Log("[PASS] node-container is a ScrollView element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] node-container is not a ScrollView element");
+                    failed++;
+                }
+
+                // Verify CSS classes are applied
+                var mapRoot = root.Q(className: "map-screen");
+                if (mapRoot != null)
+                {
+                    Debug.Log("[PASS] .map-screen class found on root element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] .map-screen class not found");
+                    failed++;
+                }
+            }
+
+            Debug.Log($"\n=== Map UI Toolkit Verification: {passed} passed, {failed} failed ===");
+            if (failed == 0)
+                Debug.Log("All Map UI Toolkit checks passed!");
+            else
+                Debug.LogWarning($"{failed} check(s) failed. Review errors above.");
+        }
+
         [MenuItem("Spellwright/Tests/Preview Theme Test")]
         public static void PreviewThemeTest()
         {

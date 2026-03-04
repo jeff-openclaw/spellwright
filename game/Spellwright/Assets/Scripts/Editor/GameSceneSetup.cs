@@ -18,6 +18,8 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using Button = UnityEngine.UI.Button;
+using Image = UnityEngine.UI.Image;
 
 namespace Spellwright.Editor
 {
@@ -76,8 +78,7 @@ namespace Spellwright.Editor
             var runEndPanel = CreateRunEndPanel(canvasGO.transform);
 
             // Add CanvasGroup + UIAnimator to each uGUI panel for entrance animations
-            // MainMenuPanel uses UI Toolkit (USS handles animations)
-            AddPanelAnimator(mapPanel);
+            // MainMenuPanel and MapPanel use UI Toolkit (USS handles animations)
             AddPanelAnimator(encounterPanel);
             AddPanelAnimator(shopPanel);
             AddPanelAnimator(runEndPanel);
@@ -331,85 +332,27 @@ namespace Spellwright.Editor
 
         private static GameObject CreateMapPanel(Transform parent)
         {
-            var panel = CreatePanel(parent, "MapPanel");
-            AddPanelBorder(panel);
-            var mapUI = panel.AddComponent<MapUI>();
+            // UI Toolkit-based map screen — root-level GameObject (not under Canvas)
+            var panelGO = new GameObject("MapPanel");
 
-            // ── Title (decorative, with glow) ──
-            var title = TerminalUIHelper.CreateSectionHeader(panel.transform, "MapTitleText", "YOUR JOURNEY",
-                _theme, PhosphorBright, new Vector2(0.1f, 0.92f), new Vector2(0.9f, 0.99f), applyGlow: true);
+            // Create or load PanelSettings asset
+            var panelSettings = EnsurePanelSettings();
 
-            // ── Stats bar container (horizontal chip layout) ──
-            var statsBar = CreateContainer(panel.transform, "StatsBar",
-                new Vector2(0.06f, 0.84f), new Vector2(0.94f, 0.92f));
-            var statsHlg = statsBar.AddComponent<HorizontalLayoutGroup>();
-            statsHlg.spacing = 10;
-            statsHlg.padding = new RectOffset(4, 4, 2, 2);
-            statsHlg.childForceExpandWidth = false;
-            statsHlg.childForceExpandHeight = true;
-            statsHlg.childControlWidth = true;
-            statsHlg.childControlHeight = true;
-            statsHlg.childAlignment = TextAnchor.MiddleCenter;
+            // Add UIDocument with UXML and PanelSettings
+            var uiDoc = panelGO.AddComponent<UIDocument>();
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Screens/Map.uxml");
+            if (uxml == null)
+                Debug.LogWarning("[GameSceneSetup] Map.uxml not found at Assets/UI/Screens/Map.uxml");
 
-            // Wave chip
-            var waveChip = CreateStatChip(statsBar.transform, "WaveChip", "# Wave 1",
-                CyanInfo, new Color(CyanInfo.r * 0.08f, CyanInfo.g * 0.08f, CyanInfo.b * 0.08f, 0.7f));
-            var waveText = waveChip.GetComponentInChildren<TextMeshProUGUI>();
+            uiDoc.panelSettings = panelSettings;
+            uiDoc.visualTreeAsset = uxml;
 
-            // HP chip
-            var hpChip = CreateStatChip(statsBar.transform, "HPChip", "HP --/--",
-                PhosphorGreen, new Color(PhosphorGreen.r * 0.06f, PhosphorGreen.g * 0.06f, PhosphorGreen.b * 0.06f, 0.7f));
-            var hpStatText = hpChip.GetComponentInChildren<TextMeshProUGUI>();
+            // Add MapController
+            var controller = panelGO.AddComponent<MapController>();
+            SetSerializedField(controller, "uiDocument", uiDoc);
+            SetSerializedField(controller, "gameConfig", LoadAsset<GameConfigSO>("Assets/Data/Config/GameConfig.asset"));
 
-            // Gold chip
-            var goldChip = CreateStatChip(statsBar.transform, "GoldChip", "$ --g",
-                AmberBright, new Color(AmberBright.r * 0.08f, AmberBright.g * 0.08f, AmberBright.b * 0.08f, 0.7f));
-            var goldStatText = goldChip.GetComponentInChildren<TextMeshProUGUI>();
-
-            // Score chip
-            var scoreChip = CreateStatChip(statsBar.transform, "ScoreChip", "* --",
-                CyanInfo, new Color(CyanInfo.r * 0.08f, CyanInfo.g * 0.08f, CyanInfo.b * 0.08f, 0.7f));
-            var scoreStatText = scoreChip.GetComponentInChildren<TextMeshProUGUI>();
-
-            // ── Separator ──
-            TerminalUIHelper.CreateSeparator(panel.transform, "MapSeparator",
-                _theme, PhosphorDim, new Vector2(0.05f, 0.81f), new Vector2(0.95f, 0.84f));
-
-            // ── Node container ──
-            var container = CreateContainer(panel.transform, "NodeContainer",
-                new Vector2(0.08f, 0.15f), new Vector2(0.92f, 0.81f));
-            var vlg = container.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing = 6;
-            vlg.padding = new RectOffset(0, 0, 6, 6);
-            vlg.childForceExpandWidth = true;
-            vlg.childForceExpandHeight = false;
-            vlg.childControlWidth = true;
-            vlg.childControlHeight = false;
-            var csf = container.AddComponent<ContentSizeFitter>();
-            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-            // ── Proceed button (amber-accented primary action) ──
-            var proceedBtn = CreatePrimaryButton(panel.transform, "ProceedButton", "[ PROCEED ]",
-                new Vector2(0.3f, 0.04f), new Vector2(0.7f, 0.12f));
-
-            // ── Language toggle (small, bottom-left) ──
-            var langBtn = CreateButton(panel.transform, "LanguageButton", "EN", ButtonBg,
-                new Vector2(0.02f, 0.04f), new Vector2(0.15f, 0.10f));
-            var langLabel = langBtn.GetComponentInChildren<TMP_Text>();
-
-            SetSerializedField(mapUI, "mapTitleText", title);
-            SetSerializedField(mapUI, "waveText", waveText);
-            SetSerializedField(mapUI, "hpStatText", hpStatText);
-            SetSerializedField(mapUI, "goldStatText", goldStatText);
-            SetSerializedField(mapUI, "scoreStatText", scoreStatText);
-            SetSerializedField(mapUI, "nodeContainer", container.transform);
-            SetSerializedField(mapUI, "proceedButton", proceedBtn.GetComponent<Button>());
-            SetSerializedField(mapUI, "languageButton", langBtn.GetComponent<Button>());
-            SetSerializedField(mapUI, "languageButtonText", langLabel);
-            SetSerializedField(mapUI, "gameConfig", LoadAsset<GameConfigSO>("Assets/Data/Config/GameConfig.asset"));
-            SetSerializedField(mapUI, "theme", _theme);
-
-            return panel;
+            return panelGO;
         }
 
         /// <summary>

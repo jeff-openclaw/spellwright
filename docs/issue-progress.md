@@ -9,7 +9,7 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 39 | Add CRT Audio Atmosphere | ui | ✅ Done | 902082f |
 | 40 | Evaluate Authentic CRT Terminal Fonts | ui | ✅ Done | 7a3e014 |
 | 41 | Create Terminal Design System (USS Theme) | ui | ✅ Done | ed21676 |
-| 42 | UI Toolkit Migration: MainMenuUI (Pilot) | ui | 🔄 In progress | — |
+| 42 | UI Toolkit Migration: MainMenuUI (Pilot) | ui | ✅ Done | 2b2be4c |
 | 43 | UI Toolkit Migration: MapUI (Journey Screen) | ui | ⏳ Queued | — |
 | 44 | UI Toolkit Migration: ShopUI | ui | ⏳ Queued | — |
 | 45 | UI Toolkit Migration: ResultUI | ui | ⏳ Queued | — |
@@ -38,7 +38,16 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=41 | NEXT=42 | QUEUE_TOTAL=28
+LAST_COMPLETED=42 | NEXT=43 | QUEUE_TOTAL=28
+
+## Implementation Notes — #42
+- MainMenu.uxml: UXML layout with title, subtitle+cursor row, underline, separator, start button, hint, version
+- main-menu.uss: Full screen-specific styles with staggered entrance animations (content slide, button scale, fade-in)
+- MainMenuController.cs: UIDocument-based controller replacing uGUI MainMenuUI — uses USS transitions + schedule.Execute() for timing
+- GameSceneSetup: CreateMainMenuPanel now creates root-level UIDocument GO instead of Canvas child
+- EnsurePanelSettings: Creates shared PanelSettings asset with terminal-theme.tss at Assets/UI/SpellwrightPanelSettings.asset
+- DesignSystemTests: Added VerifyMainMenuUIToolkit test (checks UXML elements, Button type, CSS classes, PanelSettings)
+- Old MainMenuUI.cs NOT deleted yet (will be removed in #48 "Remove Legacy uGUI Dependencies")
 
 ## Implementation Notes — #41
 - Created Assets/UI/ directory structure: Themes/, Styles/, Screens/

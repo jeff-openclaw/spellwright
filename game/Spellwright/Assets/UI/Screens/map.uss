@@ -5,38 +5,239 @@
 
 .map-screen {
     flex-direction: column;
+    padding: var(--space-xl);
 }
+
+/* ── Header ── */
 
 .map-screen__header {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     padding-bottom: var(--space-md);
-    border-bottom-width: var(--border-width);
-    border-bottom-color: var(--color-border);
-    margin-bottom: var(--space-lg);
+}
+
+.map-screen__title {
+    color: var(--color-phosphor-bright);
+    letter-spacing: 4px;
 }
 
 .map-screen__stats {
     flex-direction: row;
 }
 
-.map-screen__stats > * {
+.map-screen__stat {
     margin-left: var(--space-lg);
+    padding: var(--space-xs) var(--space-md);
+    background-color: rgba(5, 15, 10, 0.7);
+    border-width: var(--border-width);
+    border-color: var(--color-border);
+    border-radius: var(--border-radius);
 }
+
+.map-screen__stat--wave {
+    color: var(--color-cyan);
+    border-color: rgba(38, 230, 242, 0.3);
+}
+
+.map-screen__stat--hp {
+    color: var(--color-phosphor);
+    border-color: rgba(30, 255, 115, 0.3);
+}
+
+.map-screen__stat--gold {
+    color: var(--color-amber);
+    border-color: rgba(255, 199, 38, 0.3);
+}
+
+.map-screen__stat--score {
+    color: var(--color-cyan);
+    border-color: rgba(38, 230, 242, 0.3);
+}
+
+/* ── Node container ── */
 
 .map-screen__nodes {
     flex-grow: 1;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-md);
 }
+
+/* ── Node entry card ── */
+
+.map-screen__node {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-sm);
+    background-color: rgba(5, 15, 10, 0.7);
+    border-width: var(--border-width);
+    border-color: var(--color-border);
+    border-radius: var(--border-radius);
+    transition: background-color 150ms ease-out,
+                border-color 150ms ease-out,
+                opacity 300ms ease-out;
+}
+
+.map-screen__node--boss {
+    min-height: 56px;
+}
+
+/* Node state modifiers */
+.map-screen__node--completed {
+    border-color: var(--color-node-completed);
+    opacity: 0.7;
+}
+
+.map-screen__node--current {
+    border-color: var(--color-node-current);
+    background-color: rgba(30, 255, 115, 0.04);
+    border-width: var(--border-width-thick);
+}
+
+.map-screen__node--current-boss {
+    border-color: var(--color-node-boss);
+    background-color: rgba(217, 26, 26, 0.04);
+    border-width: var(--border-width-thick);
+}
+
+.map-screen__node--future {
+    border-color: var(--color-node-future);
+    opacity: 0.65;
+}
+
+.map-screen__node--future-boss {
+    border-color: var(--color-node-boss);
+    opacity: 0.65;
+}
+
+/* Node sub-elements */
+.map-screen__node-stripe {
+    width: 4px;
+    align-self: stretch;
+    border-radius: 2px;
+    margin-right: var(--space-sm);
+}
+
+.map-screen__node-connector {
+    width: 36px;
+    -unity-text-align: middle-center;
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+}
+
+.map-screen__node-icon {
+    width: 32px;
+    -unity-text-align: middle-center;
+    font-size: var(--font-size-md);
+}
+
+.map-screen__node-label {
+    flex-grow: 1;
+    -unity-text-align: middle-left;
+    font-size: var(--font-size-sm);
+    color: var(--color-phosphor);
+}
+
+.map-screen__node-label--boss {
+    font-size: var(--font-size-md);
+    -unity-font-style: bold;
+}
+
+.map-screen__node-status {
+    width: 50px;
+    -unity-text-align: middle-center;
+    font-size: var(--font-size-sm);
+}
+
+/* Node color helpers (applied via C# to stripe, icon, label, status) */
+.node-color--completed {
+    color: var(--color-node-completed);
+}
+
+.node-color--current {
+    color: var(--color-node-current);
+}
+
+.node-color--future {
+    color: var(--color-node-future);
+}
+
+.node-color--boss {
+    color: var(--color-node-boss);
+}
+
+.node-stripe--completed {
+    background-color: var(--color-node-completed);
+}
+
+.node-stripe--current {
+    background-color: var(--color-node-current);
+}
+
+.node-stripe--future {
+    background-color: var(--color-node-future);
+}
+
+.node-stripe--boss {
+    background-color: var(--color-node-boss);
+}
+
+/* ── Footer ── */
 
 .map-screen__footer {
     flex-direction: row;
-    justify-content: flex-end;
+    align-items: center;
     padding-top: var(--space-md);
-    border-top-width: var(--border-width);
-    border-top-color: var(--color-border);
-    margin-top: var(--space-lg);
+}
+
+.map-screen__lang-btn {
+    opacity: 1;
+    transition: opacity 200ms ease-out;
+}
+
+.map-screen__lang-btn--hidden {
+    opacity: 0;
+    display: none;
+}
+
+.map-screen__proceed-btn {
+    min-width: 200px;
+    color: var(--color-amber);
+    border-color: var(--color-amber-dim);
+}
+
+.map-screen__proceed-btn:hover {
+    border-color: var(--color-amber);
+    color: var(--color-amber);
+}
+
+.map-screen__proceed-btn:active {
+    background-color: var(--color-amber);
+    color: var(--color-bg);
+}
+
+/* ── Entrance animations ── */
+
+.map-screen__content {
+    opacity: 0;
+    translate: 0 20px;
+}
+
+.map-screen__content--visible {
+    opacity: 1;
+    translate: 0 0;
+    transition: opacity 400ms ease-out,
+                translate 400ms ease-out;
+}
+
+/* Breathing glow for current node (toggled by C#) */
+.map-screen__node--glow-bright {
+    opacity: 1;
+    transition: opacity 550ms ease-in-out;
+}
+
+.map-screen__node--glow-dim {
+    opacity: 0.75;
+    transition: opacity 550ms ease-in-out;
 }
