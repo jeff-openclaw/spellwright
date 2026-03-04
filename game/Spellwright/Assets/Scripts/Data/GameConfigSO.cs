@@ -48,6 +48,14 @@ namespace Spellwright.ScriptableObjects
         [Tooltip("HP restored by heal")]
         public int healAmount = 8;
 
+        [Header("Intel Costs (Gold-for-Intel)")]
+        [Tooltip("Cost to unlock word length intel (easy/mid/hard)")]
+        public Vector3Int intelCostWordLength = new Vector3Int(3, 5, 8);
+        [Tooltip("Cost to unlock first letter intel (easy/mid/hard)")]
+        public Vector3Int intelCostFirstLetter = new Vector3Int(5, 8, 12);
+        [Tooltip("Cost to unlock NPC weakness intel (easy/mid/hard)")]
+        public Vector3Int intelCostWeakness = new Vector3Int(8, 10, 15);
+
         [Header("Difficulty Progression")]
         [Tooltip("Difficulty for encounters 1-2 (min, max)")]
         public Vector2Int earlyDifficulty = new Vector2Int(1, 2);
@@ -77,6 +85,22 @@ namespace Spellwright.ScriptableObjects
             if (encounterNumber <= 2) return earlyDifficulty;
             if (encounterNumber <= 4) return midDifficulty;
             return lateDifficulty;
+        }
+
+        /// <summary>
+        /// Returns the intel cost for the given type and encounter number.
+        /// Difficulty tier: encounters 1-2 = easy, 3-4 = mid, 5+ = hard.
+        /// </summary>
+        public int GetIntelCost(IntelType type, int encounterNumber)
+        {
+            int tier = encounterNumber <= 2 ? 0 : encounterNumber <= 4 ? 1 : 2;
+            return type switch
+            {
+                IntelType.WordLength => intelCostWordLength[tier],
+                IntelType.FirstLetter => intelCostFirstLetter[tier],
+                IntelType.Weakness => intelCostWeakness[tier],
+                _ => 5
+            };
         }
 
         /// <summary>

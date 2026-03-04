@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Spellwright.Core;
 using Spellwright.Data;
 using Spellwright.ScriptableObjects;
@@ -19,6 +20,7 @@ namespace Spellwright.Run
         private RunState _state = new RunState();
         private int _waveNumber;
         private readonly List<NodeOutcome> _nodeOutcomes = new();
+        private readonly Dictionary<int, NodeIntelData> _nodeIntel = new();
 
         // ── Properties ───────────────────────────────────────
 
@@ -104,6 +106,7 @@ namespace Spellwright.Run
             EncountersWon = 0;
             _waveNumber = 1;
             _nodeOutcomes.Clear();
+            _nodeIntel.Clear();
 
             // Generate wave 1: (E-S)×5 + B
             _state.NodeSequence.Clear();
@@ -287,6 +290,93 @@ namespace Spellwright.Run
                 Debug.Log("[RunManager] HP depleted — ending run.");
                 EndRun(won: false);
             }
+        }
+
+        // ── Intel (Gold-for-Intel Economy) ──────────────────
+
+        /// <summary>Generates intel for all nodes using the given word pools. Called by GameManager after wave setup.</summary>
+        public void GenerateIntel(WordPoolSO[] pools) => GenerateNodeIntel(pools);
+
+        /// <summary>Returns the intel data for a node, or null if none generated.</summary>
+        public NodeIntelData GetNodeIntel(int nodeIndex) =>
+            _nodeIntel.TryGetValue(nodeIndex, out var data) ? data : null;
+
+        /// <summary>Attempts to unlock an intel line by spending gold. Returns true on success.</summary>
+        public bool TryUnlockIntel(int nodeIndex, IntelType type)
+        {
+            if (!_state.IsRunActive) return false;
+            if (!_nodeIntel.TryGetValue(nodeIndex, out var intel)) return false;
+            if (intel.Unlocked.Contains(type)) return false;
+
+            int encounterNumber = nodeIndex + 1;
+            int cost = gameConfig != null ? gameConfig.GetIntelCost(type, encounterNumber) : 5;
+            if (!SpendGold(cost)) return false;
+
+            intel.Unlocked.Add(type);
+            EventBus.Instance.Publish(new IntelUnlockedEvent
+            {
+                NodeIndex = nodeIndex,
+                Type = type,
+                GoldSpent = cost
+            });
+
+            Debug.Log($"[RunManager] Intel unlocked: node {nodeIndex}, type={type}, cost={cost}g");
+            return true;
+        }
+
+        /// <summary>Generates preview intel for all nodes in the current wave using word pools.</summary>
+        private void GenerateNodeIntel(WordPoolSO[] pools)
+        {
+            if (pools == null || pools.Length == 0) return;
+
+            var rng = new System.Random(_waveNumber * 1000 + _state.NodeSequence.Count);
+
+            for (int i = 0; i < _state.NodeSequence.Count; i++)
+            {
+                if (_nodeIntel.ContainsKey(i)) continue;
+                if (_state.NodeSequence[i] == NodeType.Boss) continue; // Boss intel is classified
+
+                int encounterNumber = i + 1;
+                var diff = gameConfig != null
+                    ? gameConfig.GetDifficultyForEncounter(encounterNumber)
+                    : new Vector2Int(1, 2);
+
+                // Pick a representative word from pools at this difficulty
+                var pool = pools[i % pools.Length];
+                var candidates = pool.GetWordsByDifficultyRange(diff.x, diff.y);
+                if (candidates.Count == 0)
+                    candidates = pool.GetWords();
+
+                if (candidates.Count == 0) continue;
+
+                var word = candidates[rng.Next(candidates.Count)];
+
+                // Weakness hint based on NPC archetype
+                var npc = GameManager.Instance?.PreviewNPCForNode(i, _state.NodeSequence[i]);
+                string weakness = GenerateWeaknessHint(npc, rng);
+
+                _nodeIntel[i] = new NodeIntelData
+                {
+                    NodeIndex = i,
+                    WordLength = word.LetterCount,
+                    FirstLetter = char.ToUpper(word.Word[0]),
+                    WeaknessHint = weakness
+                };
+            }
+        }
+
+        private static string GenerateWeaknessHint(NPCDataSO npc, System.Random rng)
+        {
+            if (npc == null) return "No known vulnerabilities";
+
+            return npc.archetype switch
+            {
+                NPCArchetype.Guide => "Responds well to partial guesses. Low threat.",
+                NPCArchetype.Riddlemaster => "Clues improve after wrong guesses. Try vowels first.",
+                NPCArchetype.TricksterMerchant => "Bargains often backfire. Trust letter reveals.",
+                NPCArchetype.SilentLibrarian => "Clues are cryptic. Sacrifice tiles for clarity.",
+                _ => "Unknown behavior pattern."
+            };
         }
 
         private void OnRivalDefeated(RivalDefeatedEvent evt)

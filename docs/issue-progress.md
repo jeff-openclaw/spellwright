@@ -23,8 +23,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 24 | Letter Sacrifice (Strategic Tile Trade) | ai-visibility | ✅ Done | b8cdb6b |
 | 25 | Journey Screen Redesign: Design North Star | journey | ⏭️ Epic tracker (skip) | — |
 | 26 | ASCII Dungeon Map with Pipe-Connected Nodes | journey | ✅ Done | ee069ac |
-| 27 | Expandable NPC Dossier Panels | journey | ✅ Done | PENDING |
-| 28 | Gold-for-Intel Economy | journey | ⏳ Queued | — |
+| 27 | Expandable NPC Dossier Panels | journey | ✅ Done | b10b5c0 |
+| 28 | Gold-for-Intel Economy | journey | ✅ Done | PENDING |
 | 29 | Pre-Encounter Gold Wagering | journey | ⏳ Queued | — |
 | 30 | Dual-Pane Norton Commander Layout | journey | ⏳ Queued | — |
 | 31 | Boss Wiretap — Progressive Intel | journey | ⏳ Queued | — |
@@ -38,7 +38,17 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=27 | NEXT=28 | QUEUE_TOTAL=28
+LAST_COMPLETED=28 | NEXT=29 | QUEUE_TOTAL=28
+
+## Implementation Notes — #28
+- Added IntelType enum (WordLength, FirstLetter, Weakness) and NodeIntelData class to GameDataModels, plus IntelUnlockedEvent
+- Added intel cost config to GameConfigSO: Vector3Int per intel type (easy/mid/hard tiers), GetIntelCost() helper method. Costs: WordLength (3/5/8g), FirstLetter (5/8/12g), Weakness (8/10/15g)
+- Added RunManager intel tracking: _nodeIntel dictionary, GenerateIntel() called by GameManager at wave start, GenerateNodeIntel() pre-picks representative words from pools using seeded RNG, TryUnlockIntel() handles gold spending + event publishing
+- Added GenerateWeaknessHint() providing archetype-specific tactical advice
+- Extended MapController.BuildRegularDossier(): adds purchasable intel lines after free dossier info, AddIntelLine() creates locked/unlocked rows with cost buttons, OnIntelUnlockClicked() handles purchase + immediate visual update
+- Added USS: intel-separator, intel-row (flex row), intel-text (locked dim / unlocked green), intel-btn (amber border, disabled state, unlocked state)
+- GameManager calls RunManager.GenerateIntel(ActiveWordPools) in both RunSetup and boss victory (StartNextWave) paths
+- Boss nodes excluded from intel generation (classified theme from #27)
 
 ## Implementation Notes — #27
 - Added PreviewNPCForNode(int nodeIndex, NodeType nodeType) and PreviewCategoryForNode(int nodeIndex) to GameManager for map dossier preview without affecting encounter flow

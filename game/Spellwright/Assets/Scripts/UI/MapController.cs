@@ -513,6 +513,19 @@ namespace Spellwright.UI
             // Garbled category
             string garbledCategory = GarbleText(category, 0.5f);
             AddDossierLine(entry.Dossier, $"CATEGORY: {garbledCategory}", "map-screen__dossier-line--category");
+
+            // Purchasable intel lines
+            var intel = Run.RunManager.Instance?.GetNodeIntel(entry.Index);
+            if (intel != null)
+            {
+                AddIntelSeparator(entry.Dossier);
+                AddIntelLine(entry, intel, IntelType.WordLength, "Word length",
+                    $"Word length: {intel.WordLength} letters");
+                AddIntelLine(entry, intel, IntelType.FirstLetter, "First letter",
+                    $"First letter: {intel.FirstLetter}");
+                AddIntelLine(entry, intel, IntelType.Weakness, "NPC weakness",
+                    $"Weakness: {intel.WeaknessHint}");
+            }
         }
 
         private void BuildBossDossier(DungeonNodeEntry entry, NPCDataSO npc, int encountersWon)
@@ -594,6 +607,78 @@ namespace Spellwright.UI
                 entry.DossierExpanded = false;
             }
             _expandedDossierIndex = -1;
+        }
+
+        // ── Intel Lines ──────────────────────────────────────
+
+        private static void AddIntelSeparator(VisualElement parent)
+        {
+            var sep = new Label("\u2500\u2500\u2500 CLASSIFIED INTEL \u2500\u2500\u2500");
+            sep.AddToClassList("map-screen__dossier-line");
+            sep.AddToClassList("map-screen__intel-separator");
+            parent.Add(sep);
+        }
+
+        private void AddIntelLine(DungeonNodeEntry entry, NodeIntelData intel, IntelType type,
+            string lockedLabel, string unlockedText)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("map-screen__intel-row");
+
+            if (intel.Unlocked.Contains(type))
+            {
+                // Already unlocked — show green text
+                var label = new Label(unlockedText);
+                label.AddToClassList("map-screen__intel-text");
+                label.AddToClassList("map-screen__intel-text--unlocked");
+                row.Add(label);
+            }
+            else
+            {
+                // Locked — show redacted text + cost button
+                var label = new Label($"{lockedLabel}: \u2588\u2588\u2588\u2588\u2588\u2588");
+                label.AddToClassList("map-screen__intel-text");
+                label.AddToClassList("map-screen__intel-text--locked");
+                row.Add(label);
+
+                int encounterNumber = entry.Index + 1;
+                int cost = gameConfig != null ? gameConfig.GetIntelCost(type, encounterNumber) : 5;
+
+                var btn = new Button();
+                btn.text = $"[{cost}g UNLOCK]";
+                btn.AddToClassList("map-screen__intel-btn");
+
+                // Check if player can afford
+                int gold = Run.RunManager.Instance?.Gold ?? 0;
+                if (gold < cost)
+                    btn.AddToClassList("map-screen__intel-btn--disabled");
+
+                btn.clicked += () => OnIntelUnlockClicked(entry, type, label, btn, unlockedText);
+                row.Add(btn);
+            }
+
+            entry.Dossier.Add(row);
+        }
+
+        private void OnIntelUnlockClicked(DungeonNodeEntry entry, IntelType type,
+            Label textLabel, Button btn, string unlockedText)
+        {
+            if (Run.RunManager.Instance == null) return;
+            if (!Run.RunManager.Instance.TryUnlockIntel(entry.Index, type)) return;
+
+            // Update visuals immediately
+            textLabel.text = unlockedText;
+            textLabel.RemoveFromClassList("map-screen__intel-text--locked");
+            textLabel.AddToClassList("map-screen__intel-text--unlocked");
+
+            // Flash the button then hide it
+            btn.text = "[UNLOCKED]";
+            btn.RemoveFromClassList("map-screen__intel-btn--disabled");
+            btn.AddToClassList("map-screen__intel-btn--unlocked");
+            btn.SetEnabled(false);
+
+            // Update gold display
+            UpdateStats();
         }
 
         private class DungeonNodeEntry

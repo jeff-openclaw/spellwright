@@ -368,4 +368,32 @@ namespace Spellwright.Data
         public List<char> Letters { get; set; }
         public int Count { get; set; }
     }
+
+    // ── Intel (Gold-for-Intel Economy) ──────────────────────
+
+    /// <summary>Type of purchasable intel on the map dossier.</summary>
+    public enum IntelType
+    {
+        WordLength,
+        FirstLetter,
+        Weakness
+    }
+
+    /// <summary>Preview intel data for a single map node, generated at wave start.</summary>
+    public class NodeIntelData
+    {
+        public int NodeIndex { get; set; }
+        public int WordLength { get; set; }
+        public char FirstLetter { get; set; }
+        public string WeaknessHint { get; set; }
+        public HashSet<IntelType> Unlocked { get; set; } = new();
+    }
+
+    /// <summary>Fired when the player spends gold to unlock a dossier intel line.</summary>
+    public class IntelUnlockedEvent
+    {
+        public int NodeIndex { get; set; }
+        public IntelType Type { get; set; }
+        public int GoldSpent { get; set; }
+    }
 }

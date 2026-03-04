@@ -281,6 +281,71 @@
     cursor: link;
 }
 
+/* ── Intel Lines (Gold-for-Intel) ── */
+
+.map-screen__intel-separator {
+    color: var(--color-amber-dim);
+    margin-top: var(--space-xs);
+    margin-bottom: 2px;
+}
+
+.map-screen__intel-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1px;
+}
+
+.map-screen__intel-text {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    flex-grow: 1;
+}
+
+.map-screen__intel-text--locked {
+    color: var(--color-phosphor-dim);
+}
+
+.map-screen__intel-text--unlocked {
+    color: var(--color-phosphor);
+    transition: color 300ms ease-out;
+}
+
+.map-screen__intel-btn {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-amber);
+    background-color: transparent;
+    border-width: 1px;
+    border-color: var(--color-amber-dim);
+    padding: 1px var(--space-xs);
+    margin-left: var(--space-xs);
+    cursor: link;
+    transition: border-color 200ms ease-out, color 200ms ease-out;
+}
+
+.map-screen__intel-btn:hover {
+    border-color: var(--color-amber);
+    color: var(--color-amber);
+}
+
+.map-screen__intel-btn:active {
+    background-color: var(--color-amber);
+    color: var(--color-bg);
+}
+
+.map-screen__intel-btn--disabled {
+    color: var(--color-phosphor-dim);
+    border-color: var(--color-phosphor-dim);
+    opacity: 0.5;
+}
+
+.map-screen__intel-btn--unlocked {
+    color: var(--color-phosphor);
+    border-color: var(--color-phosphor-dim);
+    opacity: 0.6;
+}
+
 /* ── Footer ── */
 
 .map-screen__footer {

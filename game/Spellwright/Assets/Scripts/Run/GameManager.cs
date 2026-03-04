@@ -98,7 +98,10 @@ namespace Spellwright.Run
                     // Start a new run, then go directly to Map
                     _encounterCount = 0;
                     if (RunManager.Instance != null)
+                    {
                         RunManager.Instance.StartRun();
+                        RunManager.Instance.GenerateIntel(ActiveWordPools);
+                    }
                     TransitionTo(GameState.Map);
                     return;
 
@@ -192,7 +195,10 @@ namespace Spellwright.Run
                 {
                     // Boss victory — start next wave, show shop, then back to map
                     if (RunManager.Instance != null && RunManager.Instance.IsRunActive)
+                    {
                         RunManager.Instance.StartNextWave();
+                        RunManager.Instance.GenerateIntel(ActiveWordPools);
+                    }
                     GoToShop();
                 }
                 else
