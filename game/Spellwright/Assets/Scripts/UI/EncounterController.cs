@@ -942,7 +942,8 @@ namespace Spellwright.UI
                 _expressionRevertSchedule = _root.schedule.Execute(() =>
                 {
                     SetPortraitExpression(_baseExpression, temporary: false);
-                }).ExecuteLater(2000);
+                });
+                _expressionRevertSchedule.ExecuteLater(2000);
             }
         }
 

@@ -247,10 +247,6 @@
     align-items: center;
 }
 
-.encounter-screen__stat-chip:last-child {
-    margin-right: 0;
-}
-
 .encounter-screen__stat-chip--hp .text-stat {
     color: var(--color-phosphor);
 }

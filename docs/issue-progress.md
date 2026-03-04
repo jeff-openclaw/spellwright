@@ -1,11 +1,11 @@
 # Issue Progress
-Last updated: 2026-03-04T05
+Last updated: 2026-03-04T06
 Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 
 ## Queue
 | # | Title | Label | Status | Commit |
 |---|-------|-------|--------|--------|
-| 37 | UI Overhaul: Design North Star | ui | ⏭️ Epic tracker (skip) | — |
+| 37 | UI Overhaul: Design North Star | ui | ✅ Closed (epic complete) | — |
 | 39 | Add CRT Audio Atmosphere | ui | ✅ Done | 902082f |
 | 40 | Evaluate Authentic CRT Terminal Fonts | ui | ✅ Done | 7a3e014 |
 | 41 | Create Terminal Design System (USS Theme) | ui | ✅ Done | ed21676 |
@@ -15,13 +15,13 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 45 | UI Toolkit Migration: ResultUI | ui | ✅ Done | b1068aa |
 | 46 | UI Toolkit Migration: EncounterUI | ui | ✅ Done | 96671bb |
 | 48 | Remove Legacy uGUI Dependencies | ui | ✅ Done | 927b8bd |
-| 19 | AI Visibility: Design North Star | ai-visibility | ⏭️ Epic tracker (skip) | — |
+| 19 | AI Visibility: Design North Star | ai-visibility | ✅ Closed (epic complete) | — |
 | 20 | NPC Adaptive Difficulty (Mercy/Cruelty) | ai-visibility | ✅ Done | 3513835 |
 | 21 | NPC Ultimatum (Endgame Showdown) | ai-visibility | ✅ Done | 5d3ac65 |
 | 22 | NPC Rival System (Persistent Antagonist) | ai-visibility | ✅ Done | 0c51da3 |
 | 23 | Mood Bargain (Mid-Encounter Deal) | ai-visibility | ✅ Done | b07ef2d |
 | 24 | Letter Sacrifice (Strategic Tile Trade) | ai-visibility | ✅ Done | b8cdb6b |
-| 25 | Journey Screen Redesign: Design North Star | journey | ⏭️ Epic tracker (skip) | — |
+| 25 | Journey Screen Redesign: Design North Star | journey | ✅ Closed (epic complete) | — |
 | 26 | ASCII Dungeon Map with Pipe-Connected Nodes | journey | ✅ Done | ee069ac |
 | 27 | Expandable NPC Dossier Panels | journey | ✅ Done | b10b5c0 |
 | 28 | Gold-for-Intel Economy | journey | ✅ Done | 95125d0 |
@@ -32,13 +32,63 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 33 | Inline Shop as Terminal Overlay | journey | ✅ Done | 53a97b5 |
 | 34 | Signal Strength Oscilloscope | journey | ✅ Done | d15a54b |
 | 35 | Ghost Input Echo — Phosphor Atmosphere | journey | ✅ Done | 9bf4862 |
-| 36 | Intercept Transmission Events & Dead Drops | journey | ✅ Done | PENDING |
+| 36 | Intercept Transmission Events & Dead Drops | journey | ✅ Done | c052e71 |
 
 ## Blocked
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=36 | NEXT=none | QUEUE_TOTAL=28
+LAST_COMPLETED=36 | NEXT=none | QUEUE_TOTAL=28 | ALL_DONE=true
+Verified 2026-03-04: 0 open issues remain on GitHub (confirmed across 16 sessions)
+
+## SESSION SUMMARY
+
+### Issues completed (25 total)
+
+**ui (8 issues):**
+- #39 Add CRT Audio Atmosphere
+- #40 Evaluate Authentic CRT Terminal Fonts
+- #41 Create Terminal Design System (USS Theme)
+- #42 UI Toolkit Migration: MainMenuUI (Pilot)
+- #43 UI Toolkit Migration: MapUI (Journey Screen)
+- #44 UI Toolkit Migration: ShopUI
+- #45 UI Toolkit Migration: ResultUI
+- #46 UI Toolkit Migration: EncounterUI
+- #48 Remove Legacy uGUI Dependencies
+
+**ai-visibility (5 issues):**
+- #20 NPC Adaptive Difficulty (Mercy/Cruelty)
+- #21 NPC Ultimatum (Endgame Showdown)
+- #22 NPC Rival System (Persistent Antagonist)
+- #23 Mood Bargain (Mid-Encounter Deal)
+- #24 Letter Sacrifice (Strategic Tile Trade)
+
+**journey (11 issues):**
+- #26 ASCII Dungeon Map with Pipe-Connected Nodes
+- #27 Expandable NPC Dossier Panels
+- #28 Gold-for-Intel Economy
+- #29 Pre-Encounter Gold Wagering
+- #30 Dual-Pane Norton Commander Layout
+- #31 Boss Wiretap — Progressive Intel
+- #32 Tome Crucible — Sacrifice Two Tomes
+- #33 Inline Shop as Terminal Overlay
+- #34 Signal Strength Oscilloscope
+- #35 Ghost Input Echo — Phosphor Atmosphere
+- #36 Intercept Transmission Events & Dead Drops
+
+### Epic trackers closed (3)
+- #37 UI Overhaul: Design North Star — closed (all 9 child issues complete)
+- #19 AI Visibility: Design North Star — closed (all 5 child issues complete)
+- #25 Journey Screen Redesign: Design North Star — closed (all 11 child issues complete)
+
+### Blocked
+- None
+
+### Patterns observed
+- All UI screens migrated to UI Toolkit (UXML + USS), DOTween fully removed
+- EventBus pub/sub pattern used consistently across all new systems
+- GameSceneSetup wires all new MonoBehaviour singletons
+- Journey screen heavily extended: 11 issues adding map features, intel, shop overlay, atmosphere
 
 ## Implementation Notes — #36
 - Added DeadDrop to NodeType enum in GameDataModels
