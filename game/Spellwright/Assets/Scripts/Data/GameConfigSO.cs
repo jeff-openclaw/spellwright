@@ -24,8 +24,10 @@ namespace Spellwright.ScriptableObjects
         [Header("Encounter")]
         public int maxGuessesPerEncounter = 6;
         public int hpLostPerWrongGuess = 4;
-        public int hpLostPerWrongLetter = 2;
-        public int hpLostPerWrongPhrase = 5;
+        public int hpLostPerWrongLetter = 10;
+        public int hpLostPerWrongPhrase = 10;
+        [Tooltip("HP cost when guessing a letter correctly (buying information has a price)")]
+        public int hpCostPerCorrectLetter = 5;
         public int baseScorePerCorrectGuess = 100;
         public int maxBossClueWords = 3;
         [Tooltip("Number of random letters revealed per clue received")]
@@ -50,9 +52,9 @@ namespace Spellwright.ScriptableObjects
         [Tooltip("Difficulty for encounters 1-2 (min, max)")]
         public Vector2Int earlyDifficulty = new Vector2Int(1, 2);
         [Tooltip("Difficulty for encounters 3-4 (min, max)")]
-        public Vector2Int midDifficulty = new Vector2Int(2, 3);
+        public Vector2Int midDifficulty = new Vector2Int(2, 4);
         [Tooltip("Difficulty for encounters 5-6 (min, max)")]
-        public Vector2Int lateDifficulty = new Vector2Int(3, 4);
+        public Vector2Int lateDifficulty = new Vector2Int(3, 5);
         [Tooltip("Boss difficulty (min, max)")]
         public Vector2Int bossDifficulty = new Vector2Int(3, 4);
 

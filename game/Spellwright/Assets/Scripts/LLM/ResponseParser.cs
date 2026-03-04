@@ -83,26 +83,41 @@ namespace Spellwright.LLM
             var clueMatch = ClueFieldRegex.Match(raw);
             if (clueMatch.Success)
             {
-                var moodMatch = MoodFieldRegex.Match(raw);
-                return new ClueResponse
+                var clue = clueMatch.Groups[1].Value.Trim();
+                if (IsValidClue(clue))
                 {
-                    Clue = clueMatch.Groups[1].Value.Trim(),
-                    Mood = moodMatch.Success ? moodMatch.Groups[1].Value.Trim() : "neutral"
-                };
+                    var moodMatch = MoodFieldRegex.Match(raw);
+                    return new ClueResponse
+                    {
+                        Clue = clue,
+                        Mood = moodMatch.Success ? moodMatch.Groups[1].Value.Trim() : "neutral"
+                    };
+                }
             }
 
-            // Last resort: treat the first 1-2 sentences as the clue.
-            var sentences = raw.Split(new[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
-            if (sentences.Length > 0)
-            {
-                var clue = sentences.Length >= 2
-                    ? $"{sentences[0].Trim()}. {sentences[1].Trim()}."
-                    : $"{sentences[0].Trim()}.";
-
-                return new ClueResponse { Clue = clue, Mood = "neutral" };
-            }
-
+            // No raw text fallback — if the LLM didn't produce valid JSON or
+            // a recognizable clue field, return null so LLMManager can retry or
+            // fall back to static clues instead of showing hallucinated text.
             return null;
+        }
+
+        /// <summary>
+        /// Validates that an extracted clue looks like a genuine hint rather than
+        /// meta-commentary, instructions, or truncated JSON fragments.
+        /// </summary>
+        private static bool IsValidClue(string clue)
+        {
+            if (string.IsNullOrWhiteSpace(clue)) return false;
+            if (clue.Length < 8 || clue.Length > 500) return false;
+
+            // Reject obvious meta-commentary / preamble
+            var lower = clue.ToLowerInvariant();
+            if (lower.StartsWith("here is") || lower.StartsWith("sure,") ||
+                lower.StartsWith("i'll ") || lower.StartsWith("i will ") ||
+                lower.StartsWith("let me ") || lower.StartsWith("okay,"))
+                return false;
+
+            return true;
         }
 
         // ── Boss Truncation ────────────────────────────────

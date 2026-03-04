@@ -48,7 +48,10 @@ namespace Spellwright.LLM
             // Language instruction — at the very top for maximum compliance
             if (language == GameLanguage.Romanian)
             {
-                sb.AppendLine("LANGUAGE: You MUST write ALL clue text in Romanian (romana). Do NOT use English for clues.");
+                sb.AppendLine("LIMBA: Scrie TOATE indiciile in limba romana, natural si fluent.");
+                sb.AppendLine("Nu traduce din engleza — gandeste si scrie direct in romana.");
+                sb.AppendLine("Foloseste un stil conversational, ca si cum ai vorbi cu un prieten roman.");
+                sb.AppendLine("Evita constructii artificiale sau formale. Scrie simplu si clar.");
                 sb.AppendLine();
             }
 
@@ -80,7 +83,8 @@ namespace Spellwright.LLM
             // Language reminder (reinforced)
             if (language == GameLanguage.Romanian)
             {
-                sb.AppendLine("- REMEMBER: Your clue MUST be in Romanian (romana), not English.");
+                sb.AppendLine("- IMPORTANT: Scrie indiciul DOAR in romana, nu in engleza.");
+                sb.AppendLine("- Foloseste expresii naturale romanesti, nu traduceri mot-a-mot din engleza.");
             }
 
             // Boss constraint
@@ -102,8 +106,18 @@ namespace Spellwright.LLM
 
             // Response format
             sb.AppendLine();
-            sb.AppendLine("Respond in JSON format:");
-            sb.AppendLine("{\"clue\": \"your clue text\", \"mood\": \"neutral|amused|cryptic|frustrated|excited\"}");
+            sb.AppendLine("Respond ONLY with a single JSON object, no other text:");
+            if (language == GameLanguage.Romanian)
+            {
+                sb.AppendLine("{\"clue\": \"indiciul tau in romana\", \"mood\": \"neutral|amused|cryptic|frustrated|excited\"}");
+                sb.AppendLine();
+                sb.AppendLine("Exemplu (pentru cuvantul \"elefant\"):");
+                sb.AppendLine("{\"clue\": \"Un urias bland cu trompa lunga, cel mai mare animal de pe uscat.\", \"mood\": \"neutral\"}");
+            }
+            else
+            {
+                sb.AppendLine("{\"clue\": \"your clue text\", \"mood\": \"neutral|amused|cryptic|frustrated|excited\"}");
+            }
 
             return sb.ToString();
         }
@@ -141,7 +155,9 @@ namespace Spellwright.LLM
             sb.AppendLine($"Give clue #{clueNumber}. Remember: more specific than previous clues.");
 
             if (language == GameLanguage.Romanian)
-                sb.AppendLine("Write the clue in Romanian.");
+                sb.AppendLine("Scrie indiciul in romana. Raspunde DOAR cu JSON.");
+            else
+                sb.AppendLine("Respond ONLY with JSON.");
 
             return sb.ToString();
         }

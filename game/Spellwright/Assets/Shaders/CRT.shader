@@ -29,6 +29,8 @@ Shader "Hidden/Spellwright/CRT"
             float _NoiseIntensity;
             float _NoiseSpeed;
             float _Brightness;
+            float _ScreenCurvature;
+            float _BorderSoftness;
             float2 _Resolution;
 
             // Barrel distortion — warps UV to simulate curved CRT glass
@@ -38,6 +40,16 @@ Shader "Hidden/Spellwright/CRT"
                 float r2 = dot(centered, centered);
                 centered *= 1.0 + amount * r2;
                 return centered * 0.5 + 0.5;
+            }
+
+            // Rounded screen border — SDF for the CRT bezel shape
+            float ScreenBorder(float2 uv, float curvature, float softness)
+            {
+                float2 centered = uv * 2.0 - 1.0;
+                // Rounded-rect SDF: pow the coordinates to create rounded corners
+                float2 edge = abs(centered) * curvature;
+                float dist = pow(edge.x, 4.0) + pow(edge.y, 4.0);
+                return smoothstep(1.0, 1.0 - softness, dist);
             }
 
             // Pseudo-random noise for "purici" (static grain)
@@ -92,6 +104,10 @@ Shader "Hidden/Spellwright/CRT"
 
                 // --- Brightness adjustment ---
                 color *= _Brightness;
+
+                // --- Rounded screen border (CRT bezel) ---
+                float border = ScreenBorder(distortedUV, _ScreenCurvature, _BorderSoftness);
+                color *= border;
 
                 return half4(color, 1.0);
             }

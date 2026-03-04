@@ -204,20 +204,44 @@ namespace Spellwright.LLM
                 var raw = await _llmService.ChatAsync(systemPrompt, userMessage, _cts.Token);
                 sw.Stop();
 
+                if (raw != null)
+                {
+                    var parsed = ResponseParser.ParseClueResponse(raw, word);
+                    if (parsed != null)
+                    {
+                        if (npc.IsBoss && gameConfig != null)
+                            ResponseParser.TruncateClue(parsed, gameConfig.maxBossClueWords);
+
+                        parsed.UsedFallbackModel = false;
+                        parsed.GenerationTimeMs = (float)sw.Elapsed.TotalMilliseconds;
+                        return parsed;
+                    }
+
+                    Debug.LogWarning($"[LLMManager] LLM returned non-JSON response, retrying. Raw: {raw.Substring(0, System.Math.Min(raw.Length, 120))}");
+                }
+
+                // Retry once with a forceful JSON-only instruction
+                var retryUser = userMessage + "\nIMPORTANT: Your response MUST be ONLY a JSON object: {\"clue\": \"...\", \"mood\": \"...\"}. No other text.";
+                sw.Restart();
+                raw = await _llmService.ChatAsync(systemPrompt, retryUser, _cts.Token);
+                sw.Stop();
+
                 if (raw == null)
                     return null;
 
-                var parsed = ResponseParser.ParseClueResponse(raw, word);
-                if (parsed == null)
+                var retryParsed = ResponseParser.ParseClueResponse(raw, word);
+                if (retryParsed == null)
+                {
+                    Debug.LogWarning($"[LLMManager] LLM retry also failed. Raw: {raw.Substring(0, System.Math.Min(raw.Length, 120))}");
                     return null;
+                }
 
-                // Boss safety: truncate clue to max allowed words
                 if (npc.IsBoss && gameConfig != null)
-                    ResponseParser.TruncateClue(parsed, gameConfig.maxBossClueWords);
+                    ResponseParser.TruncateClue(retryParsed, gameConfig.maxBossClueWords);
 
-                parsed.UsedFallbackModel = false;
-                parsed.GenerationTimeMs = (float)sw.Elapsed.TotalMilliseconds;
-                return parsed;
+                retryParsed.UsedFallbackModel = false;
+                retryParsed.GenerationTimeMs = (float)sw.Elapsed.TotalMilliseconds;
+                return retryParsed;
             }
             catch (OperationCanceledException)
             {

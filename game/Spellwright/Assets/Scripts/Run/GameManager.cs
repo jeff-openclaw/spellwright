@@ -224,8 +224,13 @@ namespace Spellwright.Run
 
             _encounterCount++;
 
-            // Pick a random word pool
-            var pool = pools[Random.Range(0, pools.Length)];
+            // First encounter: tutorial mode with phrase + first/last letter reveal
+            if (_encounterCount == 1)
+            {
+                StartFirstEncounter(pools);
+                return;
+            }
+
             var usedWords = RunManager.Instance != null
                 ? new List<string>(RunManager.Instance.UsedWords)
                 : new List<string>();
@@ -238,13 +243,72 @@ namespace Spellwright.Run
                 ? gameConfig.GetDifficultyForEncounter(_encounterCount)
                 : new Vector2Int(1, 2);
 
+            // Mid/late encounters: chance to select a phrase instead of a single word
+            float phraseChance = _encounterCount >= 5 ? 0.5f : (_encounterCount >= 3 ? 0.4f : 0f);
+            if (phraseChance > 0f && Random.value < phraseChance)
+            {
+                var phraseCandidates = new List<Data.WordEntry>();
+                foreach (var p in pools)
+                {
+                    var words = p.GetWordsByDifficultyRange(diff.x, diff.y);
+                    phraseCandidates.AddRange(words.FindAll(w => w.IsPhrase && !usedWords.Contains(w.Word)));
+                }
+                if (phraseCandidates.Count > 0)
+                {
+                    Debug.Log($"[GameManager] Encounter #{_encounterCount}: phrase selected ({phraseCandidates.Count} candidates, chance={phraseChance:P0})");
+                    encounterManager.StartEncounter(phraseCandidates, npc, usedWords);
+                    return;
+                }
+            }
+
+            // Regular single-word encounter
+            var pool = pools[Random.Range(0, pools.Length)];
             int difficulty = Random.Range(diff.x, diff.y + 1);
 
             Debug.Log($"[GameManager] Starting encounter #{_encounterCount}: NPC={npc?.displayName}, Difficulty={difficulty}");
             encounterManager.StartEncounter(pool, npc, usedWords, difficulty);
         }
 
-        /// <summary>Picks an NPC based on encounter number for progressive difficulty.</summary>
+        /// <summary>First encounter: picks a phrase (2+ words) and uses tutorial mode with first/last letter reveal.</summary>
+        private void StartFirstEncounter(WordPoolSO[] pools)
+        {
+            var usedWords = RunManager.Instance != null
+                ? new List<string>(RunManager.Instance.UsedWords)
+                : new List<string>();
+
+            NPCDataSO npc = SelectNPCForEncounter(1);
+
+            Vector2Int diff = gameConfig != null
+                ? gameConfig.GetDifficultyForEncounter(1)
+                : new Vector2Int(1, 2);
+
+            // Collect phrase candidates (2+ words) from all pools at easy difficulty
+            var phraseCandidates = new List<Data.WordEntry>();
+            foreach (var pool in pools)
+            {
+                var words = pool.GetWordsByDifficultyRange(diff.x, diff.y);
+                phraseCandidates.AddRange(words.FindAll(w => w.IsPhrase));
+            }
+
+            if (phraseCandidates.Count > 0)
+            {
+                Debug.Log($"[GameManager] First encounter (tutorial): {phraseCandidates.Count} phrase candidates found");
+                encounterManager.StartEncounter(phraseCandidates, npc, usedWords, isFirstEncounter: true);
+            }
+            else
+            {
+                // Fallback: normal encounter if no phrases available
+                Debug.LogWarning("[GameManager] No phrases found for first encounter, falling back to normal word.");
+                var pool = pools[Random.Range(0, pools.Length)];
+                int difficulty = Random.Range(diff.x, diff.y + 1);
+                encounterManager.StartEncounter(pool, npc, usedWords, difficulty);
+            }
+        }
+
+        /// <summary>
+        /// Picks an NPC based on encounter number for progressive difficulty.
+        /// Array order: [0]=Guide (tutorial), [1]=Riddlemaster, [2]=Merchant, [3]=Librarian
+        /// </summary>
         private NPCDataSO SelectNPCForEncounter(int encounterNumber)
         {
             if (regularNPCs == null || regularNPCs.Length == 0)
@@ -253,16 +317,19 @@ namespace Spellwright.Run
                 return null;
             }
 
-            // Early encounters (1-2): easiest NPC
-            // Mid encounters (3-4): middle NPC
-            // Late encounters (5-6): hardest NPC
+            // Encounter 1: tutorial guide (index 0)
+            // Early encounters (2-3): easy NPC (index 1)
+            // Mid encounters (4-5): mid NPC (index 2)
+            // Late encounters (6+): hard NPC (index 3)
             int npcIndex;
-            if (encounterNumber <= 2)
+            if (encounterNumber <= 1)
                 npcIndex = 0;
-            else if (encounterNumber <= 4)
+            else if (encounterNumber <= 3)
                 npcIndex = Mathf.Min(1, regularNPCs.Length - 1);
-            else
+            else if (encounterNumber <= 5)
                 npcIndex = Mathf.Min(2, regularNPCs.Length - 1);
+            else
+                npcIndex = Mathf.Min(3, regularNPCs.Length - 1);
 
             return regularNPCs[npcIndex];
         }

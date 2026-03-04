@@ -48,7 +48,8 @@ namespace Spellwright.Data
     {
         Riddlemaster,
         TricksterMerchant,
-        SilentLibrarian
+        SilentLibrarian,
+        Guide
     }
 
     /// <summary>Category of a Tome's effect.</summary>
@@ -161,6 +162,7 @@ namespace Spellwright.Data
         public bool IsPhrase { get; set; }
         public int WordCount { get; set; }
         public int LetterCount { get; set; }
+        public bool IsFirstEncounter { get; set; }
     }
 
     /// <summary>Fired when the player submits a guess.</summary>

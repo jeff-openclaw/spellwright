@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Spellwright.Data;
 using Spellwright.Encounter;
 using Spellwright.Rendering;
 using Spellwright.Run;
@@ -980,17 +981,24 @@ namespace Spellwright.Editor
             SetSerializedField(gm, "gameConfig", LoadAsset<GameConfigSO>("Assets/Data/Config/GameConfig.asset"));
             SetSerializedField(gm, "bossNPC", LoadAsset<NPCDataSO>("Assets/Data/NPCs/boss_whisperer.asset"));
 
-            // Regular NPCs ordered easy → hard
+            // Create Inkwell guide NPC if it doesn't exist
+            EnsureGuideNPC();
+            // Create phrase word pools if they don't exist
+            EnsurePhrasePools();
+
+            // Regular NPCs ordered easy → hard (Inkwell is the tutorial guide)
+            var guide = LoadAsset<NPCDataSO>("Assets/Data/NPCs/guide.asset");
             var riddlemaster = LoadAsset<NPCDataSO>("Assets/Data/NPCs/riddlemaster.asset");
             var merchant = LoadAsset<NPCDataSO>("Assets/Data/NPCs/merchant.asset");
             var librarian = LoadAsset<NPCDataSO>("Assets/Data/NPCs/librarian.asset");
 
             var so = new SerializedObject(gm);
             var npcsProp = so.FindProperty("regularNPCs");
-            npcsProp.arraySize = 3;
-            npcsProp.GetArrayElementAtIndex(0).objectReferenceValue = riddlemaster;
-            npcsProp.GetArrayElementAtIndex(1).objectReferenceValue = merchant;
-            npcsProp.GetArrayElementAtIndex(2).objectReferenceValue = librarian;
+            npcsProp.arraySize = 4;
+            npcsProp.GetArrayElementAtIndex(0).objectReferenceValue = guide;
+            npcsProp.GetArrayElementAtIndex(1).objectReferenceValue = riddlemaster;
+            npcsProp.GetArrayElementAtIndex(2).objectReferenceValue = merchant;
+            npcsProp.GetArrayElementAtIndex(3).objectReferenceValue = librarian;
 
             var poolsProp = so.FindProperty("wordPools");
             var poolPaths = new[]
@@ -1002,7 +1010,8 @@ namespace Spellwright.Editor
                 "Assets/Data/Words/mythology.asset",
                 "Assets/Data/Words/nature.asset",
                 "Assets/Data/Words/science.asset",
-                "Assets/Data/Words/tools.asset"
+                "Assets/Data/Words/tools.asset",
+                "Assets/Data/Words/phrases.asset"
             };
             poolsProp.arraySize = poolPaths.Length;
             for (int i = 0; i < poolPaths.Length; i++)
@@ -1019,7 +1028,8 @@ namespace Spellwright.Editor
                 "Assets/Data/Words/ro/mitologie.asset",
                 "Assets/Data/Words/ro/natura.asset",
                 "Assets/Data/Words/ro/stiinta.asset",
-                "Assets/Data/Words/ro/unelte.asset"
+                "Assets/Data/Words/ro/unelte.asset",
+                "Assets/Data/Words/ro/expresii.asset"
             };
             poolsRoProp.arraySize = roPoolPaths.Length;
             for (int i = 0; i < roPoolPaths.Length; i++)
@@ -1498,6 +1508,61 @@ namespace Spellwright.Editor
             }
             Debug.LogWarning($"[GameSceneSetup] Could not find child GameObject '{name}'");
             return null;
+        }
+
+        // ── Asset Creation Helpers ─────────────────────────────
+
+        /// <summary>Creates the Inkwell guide NPC asset if it doesn't exist.</summary>
+        private static void EnsureGuideNPC()
+        {
+            const string path = "Assets/Data/NPCs/guide.asset";
+            if (AssetDatabase.LoadAssetAtPath<NPCDataSO>(path) != null) return;
+
+            var npc = ScriptableObject.CreateInstance<NPCDataSO>();
+            npc.displayName = "Inkwell";
+            npc.archetype = NPCArchetype.Guide;
+            npc.systemPromptAsset = AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Data/NPCs/guide.md");
+            npc.difficultyModifier = 0.5f;
+            npc.isBoss = false;
+            npc.bossConstraint = "";
+
+            AssetDatabase.CreateAsset(npc, path);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[GameSceneSetup] Created Inkwell guide NPC at {path}");
+        }
+
+        /// <summary>Creates phrase word pool assets if they don't exist.</summary>
+        private static void EnsurePhrasePools()
+        {
+            // English phrases
+            const string enPath = "Assets/Data/Words/phrases.asset";
+            if (AssetDatabase.LoadAssetAtPath<WordPoolSO>(enPath) == null)
+            {
+                var pool = ScriptableObject.CreateInstance<WordPoolSO>();
+                pool.category = "Phrases";
+                pool.minDifficulty = 1;
+                pool.maxDifficulty = 5;
+                pool.sourceFile = AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Data/Words/phrases.txt");
+
+                AssetDatabase.CreateAsset(pool, enPath);
+                Debug.Log($"[GameSceneSetup] Created phrases word pool at {enPath}");
+            }
+
+            // Romanian expressions
+            const string roPath = "Assets/Data/Words/ro/expresii.asset";
+            if (AssetDatabase.LoadAssetAtPath<WordPoolSO>(roPath) == null)
+            {
+                var pool = ScriptableObject.CreateInstance<WordPoolSO>();
+                pool.category = "Expresii";
+                pool.minDifficulty = 1;
+                pool.maxDifficulty = 5;
+                pool.sourceFile = AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Data/Words/ro/expresii.txt");
+
+                AssetDatabase.CreateAsset(pool, roPath);
+                Debug.Log($"[GameSceneSetup] Created Romanian expressions word pool at {roPath}");
+            }
+
+            AssetDatabase.SaveAssets();
         }
     }
 }

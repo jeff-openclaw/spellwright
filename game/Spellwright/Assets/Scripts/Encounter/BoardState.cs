@@ -113,6 +113,22 @@ namespace Spellwright.Encounter
         }
 
         /// <summary>
+        /// Reveals the last hidden letter tile. Returns its index, or -1 if none left.
+        /// </summary>
+        public int RevealLastLetter()
+        {
+            for (int i = _tiles.Length - 1; i >= 0; i--)
+            {
+                if (_tiles[i].Type == TileType.Letter && _tiles[i].State == TileState.Hidden)
+                {
+                    _tiles[i].State = TileState.Revealed;
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
         /// Checks whether the phrase contains the given letter.
         /// </summary>
         public bool HasLetter(char letter)

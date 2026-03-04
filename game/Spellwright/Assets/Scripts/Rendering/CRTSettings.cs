@@ -24,9 +24,9 @@ namespace Spellwright.Rendering
         public float scanlineFrequency = 320f;
 
         [Header("Barrel Distortion")]
-        [Range(0f, 0.3f)]
-        [Tooltip("Curved screen effect strength")]
-        public float barrelDistortion = 0.12f;
+        [Range(0f, 0.5f)]
+        [Tooltip("Curved screen effect strength (higher = more center zoom)")]
+        public float barrelDistortion = 0.3f;
 
         [Header("Chromatic Aberration")]
         [Range(0f, 0.01f)]
@@ -56,10 +56,19 @@ namespace Spellwright.Rendering
         [Tooltip("RGB subpixel mask intensity")]
         public float phosphorIntensity = 0.08f;
 
+        [Header("Screen Border (Bezel)")]
+        [Range(0.5f, 1.5f)]
+        [Tooltip("Screen edge curvature — how rounded the CRT bezel is")]
+        public float screenCurvature = 1.15f;
+
+        [Range(0.01f, 0.3f)]
+        [Tooltip("Softness of the border falloff to black")]
+        public float borderSoftness = 0.12f;
+
         [Header("Brightness")]
         [Range(0.8f, 1.5f)]
         [Tooltip("Overall brightness compensation")]
-        public float brightness = 1.05f;
+        public float brightness = 1.12f;
 
         // Shader property IDs (cached)
         private static readonly int PropScanlineIntensity = Shader.PropertyToID("_ScanlineIntensity");
@@ -71,6 +80,8 @@ namespace Spellwright.Rendering
         private static readonly int PropVignetteIntensity = Shader.PropertyToID("_VignetteIntensity");
         private static readonly int PropVignetteRoundness = Shader.PropertyToID("_VignetteRoundness");
         private static readonly int PropPhosphorIntensity = Shader.PropertyToID("_PhosphorIntensity");
+        private static readonly int PropScreenCurvature = Shader.PropertyToID("_ScreenCurvature");
+        private static readonly int PropBorderSoftness = Shader.PropertyToID("_BorderSoftness");
         private static readonly int PropBrightness = Shader.PropertyToID("_Brightness");
 
         private void Awake()
@@ -106,6 +117,8 @@ namespace Spellwright.Rendering
             mat.SetFloat(PropVignetteIntensity, vignetteIntensity);
             mat.SetFloat(PropVignetteRoundness, vignetteRoundness);
             mat.SetFloat(PropPhosphorIntensity, phosphorIntensity);
+            mat.SetFloat(PropScreenCurvature, screenCurvature);
+            mat.SetFloat(PropBorderSoftness, borderSoftness);
             mat.SetFloat(PropBrightness, brightness);
         }
 

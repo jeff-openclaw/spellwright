@@ -30,6 +30,7 @@ namespace Spellwright.Encounter
         private int _currentHP;
         private int _maxHP;
         private BoardState _boardState;
+        private bool _isFirstEncounter;
 
         // ── Pre-generation ───────────────────────────────────
         private Task<ClueResponse> _preGeneratedClue;
@@ -72,9 +73,19 @@ namespace Spellwright.Encounter
             await PostStartEncounter();
         }
 
+        /// <summary>Starts an encounter with pre-filtered word candidates (used for tutorial/first encounter).</summary>
+        public async void StartEncounter(List<WordEntry> candidates, NPCDataSO npc, List<string> usedWords, bool isFirstEncounter = false)
+        {
+            _isFirstEncounter = isFirstEncounter;
+            StartEncounterInternal(null, npc, usedWords, candidates);
+            await PostStartEncounter();
+        }
+
         private void StartEncounterInternal(WordPoolSO pool, NPCDataSO npc, List<string> usedWords, List<WordEntry> wordCandidates)
         {
             DiscardPreGeneratedClue();
+            // Reset first-encounter flag unless explicitly set before this call
+            if (pool != null) _isFirstEncounter = false;
 
             var candidates = wordCandidates
                 .Where(w => !usedWords.Contains(w.Word))
@@ -121,7 +132,8 @@ namespace Spellwright.Encounter
                 NPC = _npcData,
                 IsPhrase = _targetWord.IsPhrase,
                 WordCount = _targetWord.WordCount,
-                LetterCount = _targetWord.LetterCount
+                LetterCount = _targetWord.LetterCount,
+                IsFirstEncounter = _isFirstEncounter
             });
 
             // Apply Tome HP bonuses
@@ -144,7 +156,7 @@ namespace Spellwright.Encounter
                 }
             }
 
-            Debug.Log($"[EncounterManager] Encounter started: \"{_targetWord.Word}\" ({_targetWord.Category}, difficulty {_targetWord.Difficulty}, phrase={_targetWord.IsPhrase})");
+            Debug.Log($"[EncounterManager] Encounter started: \"{_targetWord.Word}\" ({_targetWord.Category}, difficulty {_targetWord.Difficulty}, phrase={_targetWord.IsPhrase}, firstEncounter={_isFirstEncounter})");
 
             if (_isBoss)
             {
@@ -153,6 +165,27 @@ namespace Spellwright.Encounter
                     BossName = _npcData.DisplayName,
                     IntroText = $"{_npcData.DisplayName} awakens..."
                 });
+            }
+
+            // Tutorial: reveal first and last letters for the first encounter
+            if (_isFirstEncounter && _boardState != null)
+            {
+                var tutorialRevealed = new List<int>();
+                int first = _boardState.RevealFirstLetter();
+                if (first >= 0) tutorialRevealed.Add(first);
+                int last = _boardState.RevealLastLetter();
+                if (last >= 0) tutorialRevealed.Add(last);
+
+                if (tutorialRevealed.Count > 0)
+                {
+                    Debug.Log($"[EncounterManager] Tutorial: revealed first+last letters ({tutorialRevealed.Count} tiles)");
+                    EventBus.Instance.Publish(new LetterRevealedEvent
+                    {
+                        RevealedPositions = tutorialRevealed,
+                        RevealedLetter = '\0',
+                        Source = "tutorial"
+                    });
+                }
             }
 
             TryPreGenerateNextClue();
@@ -275,7 +308,7 @@ namespace Spellwright.Encounter
 
                 if (result.IsLetterInPhrase)
                 {
-                    // Hit — reveal tiles, do NOT consume a guess
+                    // Hit — reveal tiles, do NOT consume a guess, but costs HP
                     if (_boardState != null)
                     {
                         int revealed = _boardState.RevealAllOfLetter(letter);
@@ -294,6 +327,9 @@ namespace Spellwright.Encounter
                         Guess = result.GuessedWord,
                         Result = result
                     });
+
+                    // Correct letter still costs HP (buying information has a price)
+                    ApplyHPLoss(gameConfig != null ? gameConfig.hpCostPerCorrectLetter : 5);
 
                     // Check auto-win
                     if (_boardState != null && _boardState.IsFullyRevealed())
