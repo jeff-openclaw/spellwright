@@ -60,6 +60,10 @@ namespace Spellwright.UI
         private bool _shopAutoOpen;
         private bool _shopOpen;
 
+        // Signal waveform animation
+        private IVisualElementScheduledItem _signalSchedule;
+        private int _signalTick;
+
         private void OnEnable()
         {
             if (uiDocument == null) return;
@@ -85,6 +89,7 @@ namespace Spellwright.UI
             UnwireEvents();
             UnsubscribeEventBus();
             StopGlow();
+            StopSignalAnimation();
         }
 
         private void CacheElements()
@@ -185,6 +190,7 @@ namespace Spellwright.UI
             UpdateLanguageButtonVisibility();
             RefreshRightPane();
             PlayEntranceAnimation();
+            StartSignalAnimation();
         }
 
         private void AddPipeConnector()
@@ -233,6 +239,11 @@ namespace Spellwright.UI
             perms.AddToClassList("map-screen__node-perms");
             node.Add(perms);
 
+            // Signal waveform oscilloscope
+            var signal = new Label("~~~~~~");
+            signal.AddToClassList("map-screen__node-signal");
+            node.Add(signal);
+
             // Outcome text
             var outcome = new Label("");
             outcome.AddToClassList("map-screen__node-outcome");
@@ -253,6 +264,7 @@ namespace Spellwright.UI
                 Indicator = indicator,
                 RoomLabel = roomLabel,
                 PermsLabel = perms,
+                SignalLabel = signal,
                 OutcomeLabel = outcome,
                 Dossier = dossier,
                 Index = index,
@@ -768,6 +780,7 @@ namespace Spellwright.UI
 
         private void ClearNodes()
         {
+            StopSignalAnimation();
             _nodeContainer?.Clear();
             _nodeEntries.Clear();
             _expandedDossierIndex = -1;
@@ -1108,6 +1121,123 @@ namespace Spellwright.UI
             UpdateStats();
         }
 
+        // ── Signal Waveform Oscilloscope ─────────────────────
+
+        private static readonly char[] WaveCharsClean = { '~', '\u223F', '\u223E', '~', '\u223F', '\u223E' }; // ~ ∿ ∾
+        private static readonly char[] WaveCharsNoisy = { '\u224B', '\u2307', '\u2248', '\u2261', '\u224B', '\u2307' }; // ≋ ⌇ ≈ ≡
+        private const int SignalWidth = 6;
+
+        private void StartSignalAnimation()
+        {
+            StopSignalAnimation();
+            if (_root == null) return;
+
+            _signalTick = 0;
+            _signalSchedule = _root.schedule.Execute(() =>
+            {
+                _signalTick++;
+                UpdateAllSignals();
+            }).Every(200);
+        }
+
+        private void StopSignalAnimation()
+        {
+            _signalSchedule?.Pause();
+            _signalSchedule = null;
+        }
+
+        private void UpdateAllSignals()
+        {
+            if (Run.RunManager.Instance == null) return;
+            int currentIndex = Run.RunManager.Instance.CurrentNodeIndex;
+
+            foreach (var entry in _nodeEntries)
+            {
+                if (entry.SignalLabel == null) continue;
+
+                if (entry.Index < currentIndex)
+                {
+                    // Completed: flatline
+                    entry.SignalLabel.text = new string('\u2500', SignalWidth); // ─ flatline
+                    entry.SignalLabel.RemoveFromClassList("map-screen__node-signal--active");
+                    entry.SignalLabel.RemoveFromClassList("map-screen__node-signal--noisy");
+                    entry.SignalLabel.RemoveFromClassList("map-screen__node-signal--boss");
+                    entry.SignalLabel.AddToClassList("map-screen__node-signal--flat");
+                }
+                else
+                {
+                    float noise = GetSignalNoise(entry);
+                    entry.SignalLabel.text = GenerateWaveform(noise, _signalTick, entry.Index);
+
+                    entry.SignalLabel.RemoveFromClassList("map-screen__node-signal--flat");
+                    if (entry.Type == NodeType.Boss)
+                    {
+                        entry.SignalLabel.AddToClassList("map-screen__node-signal--boss");
+                    }
+                    else if (noise > 0.5f)
+                    {
+                        entry.SignalLabel.RemoveFromClassList("map-screen__node-signal--active");
+                        entry.SignalLabel.AddToClassList("map-screen__node-signal--noisy");
+                    }
+                    else
+                    {
+                        entry.SignalLabel.RemoveFromClassList("map-screen__node-signal--noisy");
+                        entry.SignalLabel.AddToClassList("map-screen__node-signal--active");
+                    }
+                }
+            }
+        }
+
+        private float GetSignalNoise(DungeonNodeEntry entry)
+        {
+            if (entry.Type == NodeType.Boss) return 0.9f;
+
+            var gm = Run.GameManager.Instance;
+            if (gm == null) return 0.3f;
+
+            var npc = gm.PreviewNPCForNode(entry.Index, entry.Type);
+            float diff = npc != null ? npc.difficultyModifier : 1f;
+
+            // Map difficulty (0.5 easy .. 2.0 boss) to noise (0.1 .. 0.8)
+            return Mathf.Clamp01((diff - 0.3f) / 1.7f);
+        }
+
+        private static string GenerateWaveform(float noise, int tick, int seed)
+        {
+            var chars = new char[SignalWidth];
+            var rng = new System.Random(tick * 31 + seed * 7);
+
+            for (int i = 0; i < SignalWidth; i++)
+            {
+                // Base sine wave phase
+                float phase = (tick * 0.5f + i * 0.8f + seed * 2.1f);
+                float sine = Mathf.Sin(phase);
+
+                // Add noise
+                float noiseVal = (float)(rng.NextDouble() * 2 - 1) * noise;
+                float combined = sine + noiseVal;
+
+                if (noise > 0.7f && rng.NextDouble() < 0.15f)
+                {
+                    // Glitch: scanline tear for high noise
+                    chars[i] = WaveCharsNoisy[rng.Next(WaveCharsNoisy.Length)];
+                }
+                else if (combined > 0.3f)
+                {
+                    chars[i] = WaveCharsClean[rng.Next(WaveCharsClean.Length)];
+                }
+                else if (combined < -0.3f)
+                {
+                    chars[i] = noise > 0.4f ? WaveCharsNoisy[rng.Next(WaveCharsNoisy.Length)] : '_';
+                }
+                else
+                {
+                    chars[i] = noise > 0.5f ? '\u2248' : '~'; // ≈ or ~
+                }
+            }
+            return new string(chars);
+        }
+
         // ── Shop Overlay ─────────────────────────────────────
 
         /// <summary>Flags the shop to auto-open on next OnEnable (called by GameManager).</summary>
@@ -1333,6 +1463,7 @@ namespace Spellwright.UI
             public Label Indicator;
             public Label RoomLabel;
             public Label PermsLabel;
+            public Label SignalLabel;
             public Label OutcomeLabel;
             public VisualElement Dossier;
             public int Index;

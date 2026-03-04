@@ -277,6 +277,33 @@
     -unity-text-align: middle-right;
 }
 
+/* Node signal waveform oscilloscope */
+.map-screen__node-signal {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+    min-width: 48px;
+    -unity-text-align: middle-center;
+    letter-spacing: 1px;
+}
+
+.map-screen__node-signal--active {
+    color: var(--color-phosphor);
+}
+
+.map-screen__node-signal--noisy {
+    color: var(--color-amber);
+}
+
+.map-screen__node-signal--boss {
+    color: var(--color-danger);
+}
+
+.map-screen__node-signal--flat {
+    color: var(--color-phosphor-dim);
+    opacity: 0.5;
+}
+
 /* Node outcome text */
 .map-screen__node-outcome {
     flex-grow: 1;

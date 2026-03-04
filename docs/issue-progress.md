@@ -29,8 +29,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 30 | Dual-Pane Norton Commander Layout | journey | ✅ Done | 2897074 |
 | 31 | Boss Wiretap — Progressive Intel | journey | ✅ Done | 5052a28 |
 | 32 | Tome Crucible — Sacrifice Two Tomes | journey | ✅ Done | e4e85d4 |
-| 33 | Inline Shop as Terminal Overlay | journey | ✅ Done | PENDING |
-| 34 | Signal Strength Oscilloscope | journey | ⏳ Queued | — |
+| 33 | Inline Shop as Terminal Overlay | journey | ✅ Done | 53a97b5 |
+| 34 | Signal Strength Oscilloscope | journey | ✅ Done | PENDING |
 | 35 | Ghost Input Echo — Phosphor Atmosphere | journey | ⏳ Queued | — |
 | 36 | Intercept Transmission Events & Dead Drops | journey | ⏳ Queued | — |
 
@@ -38,7 +38,18 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=33 | NEXT=34 | QUEUE_TOTAL=28
+LAST_COMPLETED=34 | NEXT=35 | QUEUE_TOTAL=28
+
+## Implementation Notes — #34
+- Added SignalLabel to each dungeon node row between file permissions and outcome text
+- 6-character wide oscilloscope waveform using Unicode wave chars (∿ ∾ ~ for clean, ≋ ⌇ ≈ ≡ for noisy)
+- Waveform animates continuously at 200ms intervals via scheduled callback
+- Difficulty-to-noise mapping: easy (0.1 noise) → smooth sine waves, hard (0.6-0.8) → erratic with scanline tears, boss (0.9) → maximally unstable
+- Completed nodes: flatline with ─ characters at 50% opacity
+- Color coding: green (active/easy), amber (noisy/hard), red (boss), dim (flatline/completed)
+- GenerateWaveform() uses sine wave + seeded RNG noise injection, with glitch character substitution at high noise levels
+- GetSignalNoise() reads NPC difficultyModifier via GameManager.PreviewNPCForNode()
+- USS styles: min-width 48px, letter-spacing 1px, state classes for active/noisy/boss/flat
 
 ## Implementation Notes — #33
 - Replaced separate shop screen flow with inline terminal popup overlay on the map screen
