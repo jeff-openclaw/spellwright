@@ -6,7 +6,7 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | # | Title | Label | Status | Commit |
 |---|-------|-------|--------|--------|
 | 37 | UI Overhaul: Design North Star | ui | ⏭️ Epic tracker (skip) | — |
-| 39 | Add CRT Audio Atmosphere | ui | ⏳ Queued | — |
+| 39 | Add CRT Audio Atmosphere | ui | ✅ Done | 902082f |
 | 40 | Evaluate Authentic CRT Terminal Fonts | ui | ⏳ Queued | — |
 | 41 | Create Terminal Design System (USS Theme) | ui | ⏳ Queued | — |
 | 42 | UI Toolkit Migration: MainMenuUI (Pilot) | ui | ⏳ Queued | — |
@@ -38,4 +38,4 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=0 | NEXT=37 | QUEUE_TOTAL=28
+LAST_COMPLETED=39 | NEXT=40 | QUEUE_TOTAL=28
