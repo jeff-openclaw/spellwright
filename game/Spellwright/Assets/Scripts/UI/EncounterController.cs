@@ -55,12 +55,21 @@ namespace Spellwright.UI
         private VisualElement _ultimatumOverlay;
         private Label _ultimatumTextLabel;
         private Label _countdownTextLabel;
+        private VisualElement _bargainOverlay;
+        private Label _bargainFlavorLabel;
+        private Label _bargainDescriptionLabel;
+        private Label _bargainCostLabel;
+        private Button _bargainAcceptBtn;
+        private VisualElement _bargainTimerFill;
 
         // State
         private EncounterManager _encounter;
         private bool _isProcessing;
         private bool _isBossEncounter;
         private bool _ultimatumActive;
+        private bool _bargainActive;
+        private BargainEffect _pendingBargainEffect;
+        private IVisualElementScheduledItem _bargainTimerSchedule;
         private float _targetHPFill;
         private float _currentHPFill;
         private int _lastDisplayedGold;
@@ -107,6 +116,7 @@ namespace Spellwright.UI
             _hpLerpSchedule?.Pause();
             _expressionRevertSchedule?.Pause();
             _countdownSchedule?.Pause();
+            _bargainTimerSchedule?.Pause();
         }
 
         private void CacheElements()
@@ -139,6 +149,12 @@ namespace Spellwright.UI
             _ultimatumOverlay = _root.Q("ultimatum-overlay");
             _ultimatumTextLabel = _root.Q<Label>("ultimatum-text");
             _countdownTextLabel = _root.Q<Label>("countdown-text");
+            _bargainOverlay = _root.Q("bargain-overlay");
+            _bargainFlavorLabel = _root.Q<Label>("bargain-flavor");
+            _bargainDescriptionLabel = _root.Q<Label>("bargain-description");
+            _bargainCostLabel = _root.Q<Label>("bargain-cost");
+            _bargainAcceptBtn = _root.Q<Button>("bargain-accept");
+            _bargainTimerFill = _root.Q("bargain-timer-fill");
         }
 
         private void WireEvents()
@@ -154,6 +170,8 @@ namespace Spellwright.UI
                 _guessInput.RegisterCallback<KeyDownEvent>(OnInputKeyDown);
                 _guessInput.RegisterValueChangedCallback(OnInputChanged);
             }
+            if (_bargainAcceptBtn != null)
+                _bargainAcceptBtn.clicked += OnBargainAcceptClicked;
         }
 
         private void UnwireEvents()
@@ -169,6 +187,8 @@ namespace Spellwright.UI
                 _guessInput.UnregisterCallback<KeyDownEvent>(OnInputKeyDown);
                 _guessInput.UnregisterValueChangedCallback(OnInputChanged);
             }
+            if (_bargainAcceptBtn != null)
+                _bargainAcceptBtn.clicked -= OnBargainAcceptClicked;
         }
 
         private void SubscribeEventBus()
@@ -187,6 +207,8 @@ namespace Spellwright.UI
             EventBus.Instance.Subscribe<UltimatumLineReceivedEvent>(OnUltimatumLineReceived);
             EventBus.Instance.Subscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
             EventBus.Instance.Subscribe<RivalEncounterStartedEvent>(OnRivalEncounterStarted);
+            EventBus.Instance.Subscribe<BargainOfferedEvent>(OnBargainOffered);
+            EventBus.Instance.Subscribe<BargainExpiredEvent>(OnBargainExpired);
         }
 
         private void UnsubscribeEventBus()
@@ -205,6 +227,8 @@ namespace Spellwright.UI
             EventBus.Instance.Unsubscribe<UltimatumLineReceivedEvent>(OnUltimatumLineReceived);
             EventBus.Instance.Unsubscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
             EventBus.Instance.Unsubscribe<RivalEncounterStartedEvent>(OnRivalEncounterStarted);
+            EventBus.Instance.Unsubscribe<BargainOfferedEvent>(OnBargainOffered);
+            EventBus.Instance.Unsubscribe<BargainExpiredEvent>(OnBargainExpired);
         }
 
         // ── Event Handlers ──────────────────────────────────
@@ -224,8 +248,9 @@ namespace Spellwright.UI
 
         private void OnEncounterStarted(EncounterStartedEvent evt)
         {
-            // Hide result overlay
+            // Hide result overlay and bargain
             HideResult();
+            HideBargain();
 
             // NPC info
             if (_npcNameLabel != null)
@@ -1116,6 +1141,66 @@ namespace Spellwright.UI
             {
                 _flashOverlay.RemoveFromClassList(flashClass);
             }).ExecuteLater((long)flashDurationMs);
+        }
+
+        // ── Bargain ──────────────────────────────────────────
+
+        private void OnBargainOffered(BargainOfferedEvent evt)
+        {
+            if (_bargainOverlay == null) return;
+
+            _bargainActive = true;
+            _pendingBargainEffect = evt.Effect;
+
+            if (_bargainFlavorLabel != null)
+                _bargainFlavorLabel.text = $"\"{evt.NpcFlavorText}\"";
+            if (_bargainDescriptionLabel != null)
+                _bargainDescriptionLabel.text = evt.Description;
+            if (_bargainCostLabel != null)
+                _bargainCostLabel.text = string.IsNullOrEmpty(evt.CostDescription) ? "" : $"Cost: {evt.CostDescription}";
+            if (_bargainTimerFill != null)
+                _bargainTimerFill.style.width = Length.Percent(100);
+
+            _bargainOverlay.AddToClassList("encounter-screen__bargain-overlay--visible");
+
+            // Start timer fill animation
+            var bargainSystem = FindAnyObjectByType<MoodBargainSystem>();
+            if (bargainSystem != null)
+            {
+                _bargainTimerSchedule?.Pause();
+                _bargainTimerSchedule = _root.schedule.Execute(() =>
+                {
+                    if (!_bargainActive || bargainSystem == null) return;
+                    float pct = bargainSystem.Duration > 0
+                        ? (bargainSystem.TimeRemaining / bargainSystem.Duration) * 100f
+                        : 0f;
+                    if (_bargainTimerFill != null)
+                        _bargainTimerFill.style.width = Length.Percent(Mathf.Max(0, pct));
+                }).Every(250);
+            }
+        }
+
+        private void OnBargainAcceptClicked()
+        {
+            if (!_bargainActive) return;
+            _bargainActive = false;
+
+            EventBus.Instance.Publish(new BargainAcceptedEvent { Effect = _pendingBargainEffect });
+            HideBargain();
+        }
+
+        private void OnBargainExpired(BargainExpiredEvent evt)
+        {
+            _bargainActive = false;
+            HideBargain();
+        }
+
+        private void HideBargain()
+        {
+            _bargainActive = false;
+            _bargainTimerSchedule?.Pause();
+            _bargainTimerSchedule = null;
+            _bargainOverlay?.RemoveFromClassList("encounter-screen__bargain-overlay--visible");
         }
     }
 }

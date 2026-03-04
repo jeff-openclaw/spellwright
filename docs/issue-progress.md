@@ -18,8 +18,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 19 | AI Visibility: Design North Star | ai-visibility | ⏭️ Epic tracker (skip) | — |
 | 20 | NPC Adaptive Difficulty (Mercy/Cruelty) | ai-visibility | ✅ Done | 3513835 |
 | 21 | NPC Ultimatum (Endgame Showdown) | ai-visibility | ✅ Done | 5d3ac65 |
-| 22 | NPC Rival System (Persistent Antagonist) | ai-visibility | ✅ Done | PENDING |
-| 23 | Mood Bargain (Mid-Encounter Deal) | ai-visibility | ⏳ Queued | — |
+| 22 | NPC Rival System (Persistent Antagonist) | ai-visibility | ✅ Done | 0c51da3 |
+| 23 | Mood Bargain (Mid-Encounter Deal) | ai-visibility | ✅ Done | PENDING |
 | 24 | Letter Sacrifice (Strategic Tile Trade) | ai-visibility | ⏳ Queued | — |
 | 25 | Journey Screen Redesign: Design North Star | journey | ⏳ Queued | — |
 | 26 | ASCII Dungeon Map with Pipe-Connected Nodes | journey | ⏳ Queued | — |
@@ -38,7 +38,17 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=22 | NEXT=23 | QUEUE_TOTAL=28
+LAST_COMPLETED=23 | NEXT=24 | QUEUE_TOTAL=28
+
+## Implementation Notes — #23
+- Created MoodBargainSystem.cs: subscribes to ClueReceivedEvent, detects mood changes, offers time-limited bargains (8s) based on NPC archetype + mood. Bargain table: Guide (generous: free vowel/heal), Riddlemaster (fair: vowel-for-guess/double-stakes), TricksterMerchant (risky: vowel-for-guess/double-stakes), SilentLibrarian (cryptic: vowel/skip-guess). Timer runs in Update(), publishes BargainExpiredEvent on timeout
+- Added BargainEffect enum (RevealVowel, SkipGuess, DoubleRisk, HealSmall) + BargainOfferedEvent, BargainAcceptedEvent, BargainExpiredEvent to GameDataModels
+- Added BoardState.RevealRandomVowel(): reveals single random hidden vowel tile, returns index or -1
+- Modified EncounterManager: subscribes to BargainAcceptedEvent, handles SkipGuess (consumes guess slot), handles DoubleRisk (2× HP loss on next wrong guess via MoodBargainSystem.DoubleRiskActive flag in ApplyHPLoss)
+- Added bargain-overlay to Encounter.uxml with flavor text, description, cost, accept button, timer bar
+- Added encounter.uss bargain styles: amber-themed overlay panel, timer fill bar, accept button with hover/active states
+- Modified EncounterController: subscribes to BargainOfferedEvent/BargainExpiredEvent, shows/hides bargain panel, accept button publishes BargainAcceptedEvent, timer fill updates via schedule.Execute().Every(250), hides on encounter start
+- Updated GameSceneSetup: creates MoodBargainSystem GameObject
 
 ## Implementation Notes — #22
 - Created RivalSystem.cs: singleton MonoBehaviour, subscribes to RunStartedEvent/EncounterStartedEvent/EncounterEndedEvent. On run start picks random non-boss/non-guide NPC archetype as rival (Riddlemaster, TricksterMerchant, SilentLibrarian), publishes RivalDesignatedEvent. Tracks rival encounter count as RivalTier, publishes RivalEncounterStartedEvent on encounter start and RivalDefeatedEvent on encounter win

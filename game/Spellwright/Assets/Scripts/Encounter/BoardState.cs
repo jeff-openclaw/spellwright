@@ -97,6 +97,25 @@ namespace Spellwright.Encounter
         }
 
         /// <summary>
+        /// Reveals a single random hidden vowel tile. Returns its index, or -1 if no hidden vowels.
+        /// </summary>
+        public int RevealRandomVowel()
+        {
+            var hidden = new List<int>();
+            for (int i = 0; i < _tiles.Length; i++)
+            {
+                if (_tiles[i].Type == TileType.Letter && _tiles[i].State == TileState.Hidden
+                    && VowelSet.Contains(_tiles[i].Character))
+                    hidden.Add(i);
+            }
+            if (hidden.Count == 0) return -1;
+
+            int idx = hidden[_rng.Next(hidden.Count)];
+            _tiles[idx].State = TileState.Revealed;
+            return idx;
+        }
+
+        /// <summary>
         /// Reveals the first hidden letter tile. Returns its index, or -1 if none left.
         /// </summary>
         public int RevealFirstLetter()

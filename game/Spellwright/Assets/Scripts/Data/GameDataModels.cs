@@ -322,6 +322,30 @@ namespace Spellwright.Data
         public DifficultyShift Shift { get; set; }
     }
 
+    // ── Bargain Events ────────────────────────────────────
+
+    /// <summary>The type of effect a bargain applies.</summary>
+    public enum BargainEffect { RevealVowel, SkipGuess, DoubleRisk, HealSmall }
+
+    /// <summary>Fired when the NPC offers a mood bargain to the player.</summary>
+    public class BargainOfferedEvent
+    {
+        public string Description { get; set; }
+        public string CostDescription { get; set; }
+        public string NpcFlavorText { get; set; }
+        public BargainEffect Effect { get; set; }
+        public string NpcName { get; set; }
+    }
+
+    /// <summary>Fired when the player accepts a bargain offer.</summary>
+    public class BargainAcceptedEvent
+    {
+        public BargainEffect Effect { get; set; }
+    }
+
+    /// <summary>Fired when a bargain offer expires without being accepted.</summary>
+    public class BargainExpiredEvent { }
+
     /// <summary>Fired by Tome effects to request board reveals via EncounterManager.</summary>
     public class TomeRevealRequestEvent
     {

@@ -550,3 +550,77 @@
 .encounter-screen__flash-overlay--boss {
     background-color: var(--color-flash-boss);
 }
+
+/* ── Bargain Overlay ── */
+
+.encounter-screen__bargain-overlay {
+    background-color: rgba(5, 15, 8, 0.9);
+    border-width: var(--border-width);
+    border-color: var(--color-amber-dim);
+    margin: 0 var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    display: none;
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+}
+
+.encounter-screen__bargain-overlay--visible {
+    display: flex;
+    opacity: 1;
+}
+
+.encounter-screen__bargain-flavor {
+    color: var(--color-amber);
+    font-size: var(--font-size-md);
+    white-space: normal;
+    margin-bottom: var(--space-xs);
+    -unity-font-style: italic;
+}
+
+.encounter-screen__bargain-description {
+    color: var(--color-phosphor-bright);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-xs);
+}
+
+.encounter-screen__bargain-cost {
+    color: var(--color-danger);
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-sm);
+}
+
+.encounter-screen__bargain-actions {
+    flex-direction: row;
+    align-items: center;
+}
+
+.encounter-screen__bargain-accept-btn {
+    min-width: 100px;
+    margin-right: var(--space-md);
+    color: var(--color-amber);
+    border-color: var(--color-amber-dim);
+}
+
+.encounter-screen__bargain-accept-btn:hover {
+    border-color: var(--color-amber);
+}
+
+.encounter-screen__bargain-accept-btn:active {
+    background-color: var(--color-amber);
+    color: var(--color-bg);
+}
+
+.encounter-screen__bargain-timer-bg {
+    flex-grow: 1;
+    height: 6px;
+    background-color: rgba(255, 199, 38, 0.15);
+    border-radius: 3px;
+}
+
+.encounter-screen__bargain-timer-fill {
+    height: 100%;
+    width: 100%;
+    background-color: var(--color-amber);
+    border-radius: 3px;
+    transition: width 250ms linear;
+}

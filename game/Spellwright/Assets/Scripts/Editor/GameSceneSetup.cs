@@ -98,6 +98,10 @@ namespace Spellwright.Editor
             var rivalGO = new GameObject("RivalSystem");
             rivalGO.AddComponent<RivalSystem>();
 
+            // MoodBargainSystem (mid-encounter deals on mood shift)
+            var bargainGO = new GameObject("MoodBargainSystem");
+            bargainGO.AddComponent<MoodBargainSystem>();
+
             // ShopManager (on shopPanel for convenience)
             var shopMgr = shopPanel.AddComponent<ShopManager>();
             WireShopManager(shopMgr);

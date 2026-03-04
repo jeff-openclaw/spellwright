@@ -53,12 +53,14 @@ namespace Spellwright.Encounter
         {
             EventBus.Instance.Subscribe<TomeRevealRequestEvent>(OnTomeRevealRequest);
             EventBus.Instance.Subscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
+            EventBus.Instance.Subscribe<BargainAcceptedEvent>(OnBargainAccepted);
         }
 
         private void OnDisable()
         {
             EventBus.Instance.Unsubscribe<TomeRevealRequestEvent>(OnTomeRevealRequest);
             EventBus.Instance.Unsubscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
+            EventBus.Instance.Unsubscribe<BargainAcceptedEvent>(OnBargainAccepted);
         }
 
         // ── Encounter Lifecycle ──────────────────────────────
@@ -459,6 +461,15 @@ namespace Spellwright.Encounter
         private void ApplyHPLoss(int baseLoss)
         {
             int hpLoss = baseLoss;
+
+            // Double risk from mood bargain
+            var bargainSystem = FindAnyObjectByType<MoodBargainSystem>();
+            if (bargainSystem != null && bargainSystem.DoubleRiskActive)
+            {
+                hpLoss *= 2;
+                bargainSystem.ClearDoubleRisk();
+            }
+
             if (TomeManager.Instance != null)
             {
                 int reduction = TomeManager.Instance.TomeSystem.PendingHPLossReduction;
@@ -483,6 +494,24 @@ namespace Spellwright.Encounter
             if (!_isActive) return;
             Debug.Log("[EncounterManager] Ultimatum expired — auto-fail encounter.");
             EndEncounter(false, 0);
+        }
+
+        // ── Bargain Handler ──────────────────────────────────
+
+        private void OnBargainAccepted(BargainAcceptedEvent evt)
+        {
+            if (!_isActive) return;
+
+            if (evt.Effect == Data.BargainEffect.SkipGuess)
+            {
+                // Consume a guess slot
+                _guesses.Add("[BARGAIN]");
+                Debug.Log($"[EncounterManager] Bargain consumed a guess. Remaining: {GuessesRemaining}");
+
+                int maxGuesses = gameConfig != null ? gameConfig.maxGuessesPerEncounter : 6;
+                if (_guesses.Count >= maxGuesses)
+                    EndEncounter(false, 0);
+            }
         }
 
         // ── Tome Reveal Handler ─────────────────────────────

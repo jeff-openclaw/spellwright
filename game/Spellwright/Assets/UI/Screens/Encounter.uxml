@@ -75,6 +75,19 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- Bargain overlay -->
+        <ui:VisualElement name="bargain-overlay" class="encounter-screen__bargain-overlay">
+            <ui:Label name="bargain-flavor" text="" class="text-body encounter-screen__bargain-flavor" />
+            <ui:Label name="bargain-description" text="" class="text-stat encounter-screen__bargain-description" />
+            <ui:Label name="bargain-cost" text="" class="text-small encounter-screen__bargain-cost" />
+            <ui:VisualElement class="encounter-screen__bargain-actions">
+                <ui:Button name="bargain-accept" text="[ ACCEPT ]" class="btn encounter-screen__bargain-accept-btn" />
+                <ui:VisualElement class="encounter-screen__bargain-timer-bg">
+                    <ui:VisualElement name="bargain-timer-fill" class="encounter-screen__bargain-timer-fill" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
         <!-- Guessed letters (hidden by default, kept for compatibility) -->
         <ui:VisualElement name="guessed-letters" class="encounter-screen__guessed-letters" />
 
