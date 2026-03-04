@@ -1,0 +1,41 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../Screens/result.uss" />
+    <ui:VisualElement name="result-root" class="screen-root result-screen">
+        <ui:VisualElement class="result-screen__content col center">
+            <!-- ASCII Banner (populated by C#) -->
+            <ui:Label name="banner" text="" class="text-small result-screen__banner" />
+
+            <!-- Title: VICTORY! / DEFEAT -->
+            <ui:Label name="title" text="RUN OVER" class="text-title-decorative result-screen__title" />
+
+            <!-- Separator -->
+            <ui:VisualElement class="result-screen__separator" />
+
+            <!-- Stats (populated line-by-line by C# for staged reveal) -->
+            <ui:VisualElement name="stats-container" class="result-screen__stats">
+                <ui:VisualElement name="stat-score" class="result-screen__stat-row stagger-item">
+                    <ui:Label text="Final Score" class="text-body result-screen__stat-label" />
+                    <ui:Label name="stat-score-value" text="0" class="text-body result-screen__stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement name="stat-encounters" class="result-screen__stat-row stagger-item">
+                    <ui:Label text="Encounters Won" class="text-body result-screen__stat-label" />
+                    <ui:Label name="stat-encounters-value" text="0" class="text-body result-screen__stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement name="stat-tomes" class="result-screen__stat-row stagger-item">
+                    <ui:Label text="Tomes Collected" class="text-body result-screen__stat-label" />
+                    <ui:Label name="stat-tomes-value" text="0" class="text-body result-screen__stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement name="stat-words" class="result-screen__stat-row stagger-item">
+                    <ui:Label text="Words Used" class="text-body result-screen__stat-label" />
+                    <ui:Label name="stat-words-value" text="0" class="text-body result-screen__stat-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Separator -->
+            <ui:VisualElement class="result-screen__separator" />
+
+            <!-- Play Again button -->
+            <ui:Button name="play-again-btn" text="[ PLAY AGAIN ]" class="btn btn-large result-screen__play-again stagger-item" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

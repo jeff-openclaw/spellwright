@@ -1,5 +1,5 @@
 # Issue Progress
-Last updated: 2026-03-04T03
+Last updated: 2026-03-04T04
 Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 
 ## Queue
@@ -11,8 +11,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 41 | Create Terminal Design System (USS Theme) | ui | ✅ Done | ed21676 |
 | 42 | UI Toolkit Migration: MainMenuUI (Pilot) | ui | ✅ Done | 2b2be4c |
 | 43 | UI Toolkit Migration: MapUI (Journey Screen) | ui | ✅ Done | bfc5a1f |
-| 44 | UI Toolkit Migration: ShopUI | ui | 🔄 In progress | — |
-| 45 | UI Toolkit Migration: ResultUI | ui | ⏳ Queued | — |
+| 44 | UI Toolkit Migration: ShopUI | ui | ✅ Done | f8afedb |
+| 45 | UI Toolkit Migration: ResultUI | ui | ✅ Done | f2c8ece |
 | 46 | UI Toolkit Migration: EncounterUI | ui | ⏳ Queued | — |
 | 48 | Remove Legacy uGUI Dependencies | ui | ⏳ Queued | — |
 | 19 | AI Visibility: Design North Star | ai-visibility | ⏳ Queued | — |
@@ -38,7 +38,23 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=43 | NEXT=44 | QUEUE_TOTAL=28
+LAST_COMPLETED=45 | NEXT=46 | QUEUE_TOTAL=28
+
+## Implementation Notes — #45
+- Result.uxml: UXML layout with ASCII banner, victory/defeat title, 4 stat rows (score, encounters, tomes, words), separators, play-again button. Uses stagger-item classes for staged reveal
+- result.uss: Full result screen styles — win/loss color modifiers (amber victory, red defeat), stat row layout with dotted bottom borders, separator styling, responsive content centering
+- ResultController.cs: UIDocument-based controller replacing uGUI RunEndUI — subscribes to RunEndedEvent + GameStateChangedEvent, applies win/loss CSS modifier class, populates stats from RunManager/TomeManager, staggered entrance animation via schedule.Execute() with configurable delays
+- GameSceneSetup: CreateRunEndPanel now creates UIDocument GO (like MainMenu/Map/Shop), removed AddPanelAnimator for run end panel
+- DesignSystemTests: Added VerifyResultUIToolkit test (13 checks: 8 named elements, 1 Button type, 1 CSS class, 4 stat rows count, 2 asset loads)
+- Old RunEndUI.cs NOT deleted yet (will be removed in #48 "Remove Legacy uGUI Dependencies")
+
+## Implementation Notes — #44
+- Shop.uxml: UXML layout with header (title + gold/HP stats), buy/sell ScrollView containers, feedback label, heal button with dynamic cost text, leave button
+- shop.uss: Card styles with rarity-colored left stripes, hover transitions (bg + scale), sold state dimming, section headers (amber buy, magenta sell), heal button states, staggered entrance animations via opacity+translate
+- ShopController.cs: UIDocument-based controller — dynamic card creation from ShopManager.Inventory, ClickEvent handlers for buy/sell/heal, rarity CSS classes for stripes and names, EventBus GameStateChanged subscription, staggered entrance via schedule.Execute()
+- GameSceneSetup: CreateShopPanel now creates UIDocument GO (like MainMenu/Map), removed AddPanelAnimator for shop, wires ShopController → ShopManager
+- DesignSystemTests: Added VerifyShopUIToolkit test (15 checks: 8 named elements, 2 Button types, 2 ScrollView types, 1 CSS class, 2 asset loads)
+- Old ShopUI.cs NOT deleted yet (will be removed in #48 "Remove Legacy uGUI Dependencies")
 
 ## Implementation Notes — #43
 - Map.uxml: UXML layout with stats bar (wave/HP/gold/score chips), ScrollView node container, footer with lang toggle + proceed button

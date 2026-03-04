@@ -487,6 +487,110 @@ namespace Spellwright.Editor
                 Debug.LogWarning($"{failed} check(s) failed. Review errors above.");
         }
 
+        [MenuItem("Spellwright/Tests/Verify Result UI Toolkit")]
+        public static void VerifyResultUIToolkit()
+        {
+            int passed = 0;
+            int failed = 0;
+
+            Debug.Log("=== Verifying Result UI Toolkit Assets ===\n");
+
+            // Check Result.uxml loads
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Screens/Result.uxml");
+            if (uxml != null)
+            {
+                Debug.Log("[PASS] Result.uxml loaded");
+                passed++;
+            }
+            else
+            {
+                Debug.LogError("[FAIL] Result.uxml not found at Assets/UI/Screens/Result.uxml");
+                failed++;
+            }
+
+            // Check result.uss loads
+            var uss = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/UI/Screens/result.uss");
+            if (uss != null)
+            {
+                Debug.Log("[PASS] result.uss loaded");
+                passed++;
+            }
+            else
+            {
+                Debug.LogError("[FAIL] result.uss not found");
+                failed++;
+            }
+
+            // Instantiate UXML and verify expected elements exist
+            if (uxml != null)
+            {
+                var root = new VisualElement();
+                uxml.CloneTree(root);
+
+                string[] expectedNames = { "banner", "title", "stats-container", "stat-score-value",
+                    "stat-encounters-value", "stat-tomes-value", "stat-words-value", "play-again-btn" };
+                foreach (var name in expectedNames)
+                {
+                    var el = root.Q(name);
+                    if (el != null)
+                    {
+                        Debug.Log($"[PASS] Element '{name}' found in Result.uxml");
+                        passed++;
+                    }
+                    else
+                    {
+                        Debug.LogError($"[FAIL] Element '{name}' NOT found in Result.uxml");
+                        failed++;
+                    }
+                }
+
+                // Verify play-again-btn is a Button
+                var playAgainBtn = root.Q<Button>("play-again-btn");
+                if (playAgainBtn != null)
+                {
+                    Debug.Log("[PASS] play-again-btn is a Button element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] play-again-btn is not a Button element");
+                    failed++;
+                }
+
+                // Verify CSS classes are applied
+                var resultRoot = root.Q(className: "result-screen");
+                if (resultRoot != null)
+                {
+                    Debug.Log("[PASS] .result-screen class found on root element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] .result-screen class not found");
+                    failed++;
+                }
+
+                // Verify stat rows exist
+                var statRows = root.Query(className: "result-screen__stat-row").ToList();
+                if (statRows.Count == 4)
+                {
+                    Debug.Log($"[PASS] Found {statRows.Count} stat rows");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError($"[FAIL] Expected 4 stat rows, found {statRows.Count}");
+                    failed++;
+                }
+            }
+
+            Debug.Log($"\n=== Result UI Toolkit Verification: {passed} passed, {failed} failed ===");
+            if (failed == 0)
+                Debug.Log("All Result UI Toolkit checks passed!");
+            else
+                Debug.LogWarning($"{failed} check(s) failed. Review errors above.");
+        }
+
         [MenuItem("Spellwright/Tests/Preview Theme Test")]
         public static void PreviewThemeTest()
         {

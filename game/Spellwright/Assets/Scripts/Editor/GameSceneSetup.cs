@@ -78,9 +78,8 @@ namespace Spellwright.Editor
             var runEndPanel = CreateRunEndPanel(canvasGO.transform);
 
             // Add CanvasGroup + UIAnimator to each uGUI panel for entrance animations
-            // MainMenuPanel, MapPanel, and ShopPanel use UI Toolkit (USS handles animations)
+            // MainMenuPanel, MapPanel, ShopPanel, and RunEndPanel use UI Toolkit (USS handles animations)
             AddPanelAnimator(encounterPanel);
-            AddPanelAnimator(runEndPanel);
 
             // ── Screen Effects Overlay (scanlines + vignette, above panels) ──
             var overlayGO = new GameObject("ScreenEffectsOverlay");
@@ -717,73 +716,26 @@ namespace Spellwright.Editor
 
         private static GameObject CreateRunEndPanel(Transform parent)
         {
-            var panel = CreatePanel(parent, "RunEndPanel");
-            AddPanelBorder(panel);
-            var runEndUI = panel.AddComponent<RunEndUI>();
+            // UI Toolkit-based run-end screen — root-level GameObject (not under Canvas)
+            var panelGO = new GameObject("RunEndPanel");
 
-            // ── Corner brackets (decorative frame, matching main menu) ──
-            Color frameColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.35f);
-            int frameSize = _theme != null ? _theme.headerSize + 8 : 38;
-            CreateText(panel.transform, "CornerTL", "\u250C",
-                frameSize, frameColor,
-                TextAlignmentOptions.TopLeft, new Vector2(0.04f, 0.88f), new Vector2(0.12f, 0.97f));
-            CreateText(panel.transform, "CornerTR", "\u2510",
-                frameSize, frameColor,
-                TextAlignmentOptions.TopRight, new Vector2(0.88f, 0.88f), new Vector2(0.96f, 0.97f));
-            CreateText(panel.transform, "CornerBL", "\u2514",
-                frameSize, frameColor,
-                TextAlignmentOptions.BottomLeft, new Vector2(0.04f, 0.05f), new Vector2(0.12f, 0.14f));
-            CreateText(panel.transform, "CornerBR", "\u2518",
-                frameSize, frameColor,
-                TextAlignmentOptions.BottomRight, new Vector2(0.88f, 0.05f), new Vector2(0.96f, 0.14f));
+            // Create or load PanelSettings asset
+            var panelSettings = EnsurePanelSettings();
 
-            // ── Top decorative border ──
-            CreateText(panel.transform, "TopBorder", new string('\u2500', 50),
-                _theme != null ? _theme.smallSize + 1 : 14, frameColor,
-                TextAlignmentOptions.Center, new Vector2(0.10f, 0.92f), new Vector2(0.90f, 0.96f));
+            // Add UIDocument with UXML and PanelSettings
+            var uiDoc = panelGO.AddComponent<UIDocument>();
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Screens/Result.uxml");
+            if (uxml == null)
+                Debug.LogWarning("[GameSceneSetup] Result.uxml not found at Assets/UI/Screens/Result.uxml");
 
-            // ── ASCII Banner (above title) ──
-            var banner = CreateText(panel.transform, "BannerText", "",
-                _theme != null ? _theme.smallSize - 1 : 12, PhosphorGreen,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.78f), new Vector2(0.9f, 0.92f));
-            banner.enableWordWrapping = false;
-            banner.overflowMode = TextOverflowModes.Overflow;
+            uiDoc.panelSettings = panelSettings;
+            uiDoc.visualTreeAsset = uxml;
 
-            // ── Title (VT323 with glow) ──
-            var title = TerminalUIHelper.CreateDecorativeText(panel.transform, "TitleText", "RUN OVER",
-                _theme, _theme != null ? _theme.decorativeTitleSize - 12 : 52, PhosphorBright,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.62f), new Vector2(0.9f, 0.78f), applyGlow: true);
+            // Add ResultController
+            var controller = panelGO.AddComponent<ResultController>();
+            SetSerializedField(controller, "uiDocument", uiDoc);
 
-            // ── Separator above stats (amber for visual hierarchy) ──
-            Color sepAmber = new Color(AmberBright.r, AmberBright.g, AmberBright.b, 0.35f);
-            TerminalUIHelper.CreateSeparator(panel.transform, "StatsSepTop",
-                _theme, sepAmber, new Vector2(0.20f, 0.59f), new Vector2(0.80f, 0.62f));
-
-            // ── Stats ──
-            var stats = CreateText(panel.transform, "StatsText", "Score: 0\nEncounters: 0",
-                _theme != null ? _theme.bodySize + 2 : 20, PhosphorGreen,
-                TextAlignmentOptions.Center, new Vector2(0.15f, 0.30f), new Vector2(0.85f, 0.59f));
-
-            // ── Separator below stats ──
-            TerminalUIHelper.CreateSeparator(panel.transform, "StatsSepBottom",
-                _theme, sepAmber, new Vector2(0.20f, 0.27f), new Vector2(0.80f, 0.30f));
-
-            // ── Play again button (amber-accented primary action) ──
-            var playAgainBtn = CreatePrimaryButton(panel.transform, "PlayAgainButton", "[ PLAY AGAIN ]",
-                new Vector2(0.3f, 0.14f), new Vector2(0.7f, 0.25f));
-
-            // ── Bottom decorative border ──
-            CreateText(panel.transform, "BottomBorder", new string('\u2500', 50),
-                _theme != null ? _theme.smallSize + 1 : 14, frameColor,
-                TextAlignmentOptions.Center, new Vector2(0.10f, 0.08f), new Vector2(0.90f, 0.12f));
-
-            SetSerializedField(runEndUI, "bannerText", banner);
-            SetSerializedField(runEndUI, "titleText", title);
-            SetSerializedField(runEndUI, "statsText", stats);
-            SetSerializedField(runEndUI, "playAgainButton", playAgainBtn.GetComponent<Button>());
-            SetSerializedField(runEndUI, "theme", _theme);
-
-            return panel;
+            return panelGO;
         }
 
         // ── Wiring Methods ──────────────────────────────────
