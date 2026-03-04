@@ -12,8 +12,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 42 | UI Toolkit Migration: MainMenuUI (Pilot) | ui | ✅ Done | 2b2be4c |
 | 43 | UI Toolkit Migration: MapUI (Journey Screen) | ui | ✅ Done | bfc5a1f |
 | 44 | UI Toolkit Migration: ShopUI | ui | ✅ Done | f8afedb |
-| 45 | UI Toolkit Migration: ResultUI | ui | ✅ Done | f2c8ece |
-| 46 | UI Toolkit Migration: EncounterUI | ui | ⏳ Queued | — |
+| 45 | UI Toolkit Migration: ResultUI | ui | ✅ Done | b1068aa |
+| 46 | UI Toolkit Migration: EncounterUI | ui | ✅ Done | PENDING |
 | 48 | Remove Legacy uGUI Dependencies | ui | ⏳ Queued | — |
 | 19 | AI Visibility: Design North Star | ai-visibility | ⏳ Queued | — |
 | 20 | NPC Adaptive Difficulty (Mercy/Cruelty) | ai-visibility | ⏳ Queued | — |
@@ -38,7 +38,15 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=45 | NEXT=46 | QUEUE_TOTAL=28
+LAST_COMPLETED=46 | NEXT=48 | QUEUE_TOTAL=28
+
+## Implementation Notes — #46
+- Encounter.uxml: Full UXML layout — board frame with tile grid, category banner, NPC dialog card (portrait + name + clue), stats bar (HP with bar/gold/guesses/score chips), input area (prompt + TextField + submit/solve buttons), bottom panels (history + tomes split), guessed letters grid, result overlay, flash overlay
+- encounter.uss: Comprehensive encounter styles — WoF-style tile cells with hidden/revealed/empty/flash/glow states, category banner with amber text, NPC dialog card, stat chips with color variants, input area with terminal prompt styling, bottom panels split layout, guessed letters with hit/miss colors, result overlay with visibility toggle, flash overlay with damage/success/boss CSS classes, boss color modifiers
+- EncounterController.cs: UIDocument-based controller replacing uGUI EncounterUI — subscribes to 9 EventBus events (EncounterStarted, ClueReceived, GuessSubmitted, EncounterEnded, HPChanged, TomeTriggered, BossIntro, LetterRevealed, GameStateChanged), builds WoF tile board dynamically using same algorithm as TileBoardUI, builds A-Z guessed letters grid, typewriter effect via schedule.Execute().Every(), HP bar lerp via schedule.Execute().Every(16), flash overlay via CSS class toggle + delayed removal, tile reveal animation via flash→reveal→glow class sequence, NPC portrait expressions via NPCPortraitData with temporary revert scheduling, result overlay with staggered details typewriter + delayed continue button reveal, Enter key submit via KeyDownEvent
+- GameSceneSetup: CreateEncounterPanel now creates UIDocument GO (like MainMenu/Map/Shop/Result), removed AddPanelAnimator for encounter panel, removed WireEncounterUI call, legacy methods preserved with _Legacy suffix for #48 cleanup
+- DesignSystemTests: Added VerifyEncounterUIToolkit test (31 checks: 24 named elements, 3 Button types, 1 TextField type, 1 CSS class, 2 asset loads)
+- Old EncounterUI.cs, TileBoardUI.cs, GuessedLettersUI.cs NOT deleted yet (will be removed in #48 "Remove Legacy uGUI Dependencies")
 
 ## Implementation Notes — #45
 - Result.uxml: UXML layout with ASCII banner, victory/defeat title, 4 stat rows (score, encounters, tomes, words), separators, play-again button. Uses stagger-item classes for staged reveal

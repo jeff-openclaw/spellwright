@@ -77,9 +77,7 @@ namespace Spellwright.Editor
             var shopPanel = CreateShopPanel(canvasGO.transform);
             var runEndPanel = CreateRunEndPanel(canvasGO.transform);
 
-            // Add CanvasGroup + UIAnimator to each uGUI panel for entrance animations
-            // MainMenuPanel, MapPanel, ShopPanel, and RunEndPanel use UI Toolkit (USS handles animations)
-            AddPanelAnimator(encounterPanel);
+            // MainMenuPanel, MapPanel, ShopPanel, RunEndPanel, and EncounterPanel use UI Toolkit (USS handles animations)
 
             // ── Screen Effects Overlay (scanlines + vignette, above panels) ──
             var overlayGO = new GameObject("ScreenEffectsOverlay");
@@ -170,9 +168,7 @@ namespace Spellwright.Editor
             var audioGO = new GameObject("AudioManager");
             audioGO.AddComponent<AudioManager>();
 
-            // EncounterUI (on encounterPanel)
-            var encUI = encounterPanel.AddComponent<EncounterUI>();
-            WireEncounterUI(encUI, encounterPanel);
+            // EncounterController is already added by CreateEncounterPanel (UI Toolkit)
 
             // GameManager (root-level for DontDestroyOnLoad)
             var gmGO = new GameObject("GameManager");
@@ -442,6 +438,31 @@ namespace Spellwright.Editor
         }
 
         private static GameObject CreateEncounterPanel(Transform parent)
+        {
+            // UI Toolkit-based encounter screen — root-level GameObject (not under Canvas)
+            var panelGO = new GameObject("EncounterPanel");
+
+            // Create or load PanelSettings asset
+            var panelSettings = EnsurePanelSettings();
+
+            // Add UIDocument with UXML and PanelSettings
+            var uiDoc = panelGO.AddComponent<UIDocument>();
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Screens/Encounter.uxml");
+            if (uxml == null)
+                Debug.LogWarning("[GameSceneSetup] Encounter.uxml not found at Assets/UI/Screens/Encounter.uxml");
+
+            uiDoc.panelSettings = panelSettings;
+            uiDoc.visualTreeAsset = uxml;
+
+            // Add EncounterController
+            var controller = panelGO.AddComponent<EncounterController>();
+            SetSerializedField(controller, "uiDocument", uiDoc);
+
+            return panelGO;
+        }
+
+        // Legacy encounter panel creation preserved as reference — will be removed in #48
+        private static GameObject CreateEncounterPanel_Legacy(Transform parent)
         {
             var panel = CreatePanel(parent, "EncounterPanel");
             AddPanelBorder(panel);
@@ -829,7 +850,8 @@ namespace Spellwright.Editor
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        private static void WireEncounterUI(EncounterUI encUI, GameObject panel)
+        // Legacy wiring preserved as reference — will be removed in #48
+        private static void WireEncounterUI_Legacy(EncounterUI encUI, GameObject panel)
         {
             var so = new SerializedObject(encUI);
             so.FindProperty("npcNameText").objectReferenceValue = FindChild<TextMeshProUGUI>(panel, "NpcNameText");

@@ -1,0 +1,90 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../Screens/encounter.uss" />
+    <ui:VisualElement name="encounter-root" class="screen-root encounter-screen">
+        <!-- Board frame (WoF-style bordered area) -->
+        <ui:VisualElement name="board-frame" class="encounter-screen__board-frame">
+            <ui:VisualElement name="tile-grid" class="encounter-screen__tile-grid" />
+        </ui:VisualElement>
+
+        <!-- Category banner -->
+        <ui:VisualElement class="encounter-screen__category-banner">
+            <ui:Label name="category" text="..." class="text-stat encounter-screen__category-text" />
+        </ui:VisualElement>
+
+        <!-- NPC dialog card -->
+        <ui:VisualElement class="encounter-screen__dialog">
+            <!-- Portrait + Name row -->
+            <ui:VisualElement class="encounter-screen__dialog-header">
+                <ui:Label name="npc-portrait" text="" class="encounter-screen__portrait" />
+                <ui:VisualElement class="encounter-screen__npc-info">
+                    <ui:Label name="npc-name" text="NPC Name" class="text-header encounter-screen__npc-name" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="divider" />
+            <!-- Clue display -->
+            <ui:VisualElement class="encounter-screen__clue-area">
+                <ui:Label name="clue-number" text="" class="text-stat encounter-screen__clue-number" />
+                <ui:Label name="clue-text" text="Waiting for clue..." class="text-body encounter-screen__clue-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Stats bar -->
+        <ui:VisualElement class="encounter-screen__stats-bar">
+            <ui:VisualElement class="encounter-screen__stat-chip encounter-screen__stat-chip--hp">
+                <ui:Label name="hp-text" text="HP 30/30" class="text-stat" />
+                <ui:VisualElement class="encounter-screen__hp-bar">
+                    <ui:VisualElement name="hp-bar-fill" class="encounter-screen__hp-bar-fill" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="encounter-screen__stat-chip encounter-screen__stat-chip--gold">
+                <ui:Label name="gold-text" text="$ 0g" class="text-stat" />
+            </ui:VisualElement>
+            <ui:VisualElement class="encounter-screen__stat-chip encounter-screen__stat-chip--guesses">
+                <ui:Label name="guesses-text" text="Guesses: 6" class="text-stat" />
+            </ui:VisualElement>
+            <ui:VisualElement class="encounter-screen__stat-chip encounter-screen__stat-chip--score">
+                <ui:Label name="score-text" text="* 0" class="text-stat" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Input area -->
+        <ui:VisualElement class="encounter-screen__input-area">
+            <ui:Label name="terminal-prompt" text=">_" class="encounter-screen__prompt" />
+            <ui:TextField name="guess-input" class="encounter-screen__input-field" />
+            <ui:Button name="submit-btn" text="[ GUESS ]" class="btn encounter-screen__submit-btn" />
+            <ui:Button name="solve-btn" text="[ SOLVE ]" class="btn encounter-screen__solve-btn" />
+        </ui:VisualElement>
+        <ui:Label name="input-mode" text="LETTER MODE" class="text-small encounter-screen__input-mode" />
+
+        <!-- History + Tomes split -->
+        <ui:VisualElement class="encounter-screen__bottom-panels">
+            <ui:VisualElement class="encounter-screen__bottom-panel">
+                <ui:Label text="── History ──" class="text-label encounter-screen__section-header" />
+                <ui:ScrollView name="history-scroll" class="encounter-screen__history-scroll">
+                    <ui:Label name="history-text" text="" class="text-small encounter-screen__history-text" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement class="encounter-screen__bottom-panel encounter-screen__bottom-panel--tomes">
+                <ui:Label text="── Tomes ──" class="text-label encounter-screen__section-header encounter-screen__section-header--tomes" />
+                <ui:ScrollView name="tomes-scroll" class="encounter-screen__tomes-scroll">
+                    <ui:Label name="tome-info" text="" class="text-small encounter-screen__tome-text" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Guessed letters (hidden by default, kept for compatibility) -->
+        <ui:VisualElement name="guessed-letters" class="encounter-screen__guessed-letters" />
+
+        <!-- Result overlay -->
+        <ui:VisualElement name="result-overlay" class="encounter-screen__result-overlay">
+            <ui:Label name="result-banner" text="" class="encounter-screen__result-banner" />
+            <ui:Label name="result-title" text="" class="text-header encounter-screen__result-title" />
+            <ui:VisualElement class="divider" />
+            <ui:Label name="result-details" text="" class="text-body encounter-screen__result-details" />
+            <ui:Button name="continue-btn" text="[ CONTINUE ]" class="btn btn-large encounter-screen__continue-btn stagger-item" />
+        </ui:VisualElement>
+
+        <!-- Flash overlay -->
+        <ui:VisualElement name="flash-overlay" class="encounter-screen__flash-overlay" />
+    </ui:VisualElement>
+</ui:UXML>

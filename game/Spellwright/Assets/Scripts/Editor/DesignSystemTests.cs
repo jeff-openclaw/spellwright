@@ -591,6 +591,143 @@ namespace Spellwright.Editor
                 Debug.LogWarning($"{failed} check(s) failed. Review errors above.");
         }
 
+        [MenuItem("Spellwright/Tests/Verify Encounter UI Toolkit")]
+        public static void VerifyEncounterUIToolkit()
+        {
+            int passed = 0;
+            int failed = 0;
+
+            Debug.Log("=== Verifying Encounter UI Toolkit Assets ===\n");
+
+            // Check Encounter.uxml loads
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Screens/Encounter.uxml");
+            if (uxml != null)
+            {
+                Debug.Log("[PASS] Encounter.uxml loaded");
+                passed++;
+            }
+            else
+            {
+                Debug.LogError("[FAIL] Encounter.uxml not found at Assets/UI/Screens/Encounter.uxml");
+                failed++;
+            }
+
+            // Check encounter.uss loads
+            var uss = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/UI/Screens/encounter.uss");
+            if (uss != null)
+            {
+                Debug.Log("[PASS] encounter.uss loaded");
+                passed++;
+            }
+            else
+            {
+                Debug.LogError("[FAIL] encounter.uss not found");
+                failed++;
+            }
+
+            // Instantiate UXML and verify expected elements exist
+            if (uxml != null)
+            {
+                var root = new VisualElement();
+                uxml.CloneTree(root);
+
+                string[] expectedNames = {
+                    "tile-grid", "category", "npc-portrait", "npc-name",
+                    "clue-number", "clue-text", "hp-text", "hp-bar-fill",
+                    "gold-text", "guesses-text", "score-text",
+                    "guess-input", "submit-btn", "solve-btn", "input-mode",
+                    "history-text", "tome-info", "guessed-letters",
+                    "result-overlay", "result-banner", "result-title",
+                    "result-details", "continue-btn", "flash-overlay"
+                };
+                foreach (var name in expectedNames)
+                {
+                    var el = root.Q(name);
+                    if (el != null)
+                    {
+                        Debug.Log($"[PASS] Element '{name}' found in Encounter.uxml");
+                        passed++;
+                    }
+                    else
+                    {
+                        Debug.LogError($"[FAIL] Element '{name}' NOT found in Encounter.uxml");
+                        failed++;
+                    }
+                }
+
+                // Verify submit-btn is a Button
+                var submitBtn = root.Q<Button>("submit-btn");
+                if (submitBtn != null)
+                {
+                    Debug.Log("[PASS] submit-btn is a Button element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] submit-btn is not a Button element");
+                    failed++;
+                }
+
+                // Verify solve-btn is a Button
+                var solveBtn = root.Q<Button>("solve-btn");
+                if (solveBtn != null)
+                {
+                    Debug.Log("[PASS] solve-btn is a Button element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] solve-btn is not a Button element");
+                    failed++;
+                }
+
+                // Verify continue-btn is a Button
+                var continueBtn = root.Q<Button>("continue-btn");
+                if (continueBtn != null)
+                {
+                    Debug.Log("[PASS] continue-btn is a Button element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] continue-btn is not a Button element");
+                    failed++;
+                }
+
+                // Verify guess-input is a TextField
+                var guessInput = root.Q<TextField>("guess-input");
+                if (guessInput != null)
+                {
+                    Debug.Log("[PASS] guess-input is a TextField element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] guess-input is not a TextField element");
+                    failed++;
+                }
+
+                // Verify CSS classes are applied
+                var encounterRoot = root.Q(className: "encounter-screen");
+                if (encounterRoot != null)
+                {
+                    Debug.Log("[PASS] .encounter-screen class found on root element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] .encounter-screen class not found");
+                    failed++;
+                }
+            }
+
+            Debug.Log($"\n=== Encounter UI Toolkit Verification: {passed} passed, {failed} failed ===");
+            if (failed == 0)
+                Debug.Log("All Encounter UI Toolkit checks passed!");
+            else
+                Debug.LogWarning($"{failed} check(s) failed. Review errors above.");
+        }
+
         [MenuItem("Spellwright/Tests/Preview Theme Test")]
         public static void PreviewThemeTest()
         {
