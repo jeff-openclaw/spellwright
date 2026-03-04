@@ -35,6 +35,33 @@ namespace Spellwright.LLM
             return (system, user);
         }
 
+        /// <summary>
+        /// Builds a short prompt for the NPC's dramatic ultimatum line (final guess moment).
+        /// </summary>
+        public static (string SystemPrompt, string UserMessage) BuildUltimatumPrompt(
+            NPCPromptData npc,
+            string mood,
+            string targetWord,
+            GameLanguage language = GameLanguage.English)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"You are {npc.DisplayName}, a {npc.Archetype} in a word-guessing game.");
+            sb.AppendLine($"Your current mood is: {mood}.");
+            sb.AppendLine("The player has ONE guess left. This is the dramatic final moment.");
+            sb.AppendLine("Deliver a single dramatic sentence — your final words before they guess.");
+            sb.AppendLine("Do NOT reveal the answer. Do NOT mention the word.");
+            sb.AppendLine("Keep it under 15 words. Be theatrical and in-character.");
+            if (language == GameLanguage.Romanian)
+                sb.AppendLine("Scrie in romana, natural si dramatic.");
+            sb.AppendLine("Respond with ONLY the sentence. No JSON. No quotes.");
+
+            string user = language == GameLanguage.Romanian
+                ? $"Cuvantul secret este \"{targetWord}\". Spune ultima ta replica dramatica."
+                : $"The secret word is \"{targetWord}\". Deliver your dramatic final line.";
+
+            return (sb.ToString(), user);
+        }
+
         // ── System Prompt ──────────────────────────────────
 
         private static string BuildSystemPrompt(

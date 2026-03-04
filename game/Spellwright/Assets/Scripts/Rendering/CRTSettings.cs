@@ -127,5 +127,45 @@ namespace Spellwright.Rendering
         {
             crtEnabled = !crtEnabled;
         }
+
+        // ── Clean Mode (Ultimatum) ──────────────────────────
+
+        private bool _isCleanMode;
+        private float _savedScanlineIntensity;
+        private float _savedNoiseIntensity;
+        private float _savedChromaticAberration;
+        private float _savedPhosphorIntensity;
+
+        /// <summary>
+        /// Toggles clean mode: zeroes out noise, scanlines, chromatic aberration, and phosphor grid
+        /// for a dramatic clear-screen effect during ultimatum. Restores cached values when disabled.
+        /// </summary>
+        public void SetCleanMode(bool clean)
+        {
+            if (clean == _isCleanMode) return;
+            _isCleanMode = clean;
+
+            if (clean)
+            {
+                _savedScanlineIntensity = scanlineIntensity;
+                _savedNoiseIntensity = noiseIntensity;
+                _savedChromaticAberration = chromaticAberration;
+                _savedPhosphorIntensity = phosphorIntensity;
+
+                scanlineIntensity = 0f;
+                noiseIntensity = 0f;
+                chromaticAberration = 0f;
+                phosphorIntensity = 0f;
+            }
+            else
+            {
+                scanlineIntensity = _savedScanlineIntensity;
+                noiseIntensity = _savedNoiseIntensity;
+                chromaticAberration = _savedChromaticAberration;
+                phosphorIntensity = _savedPhosphorIntensity;
+            }
+        }
+
+        public bool IsCleanMode => _isCleanMode;
     }
 }

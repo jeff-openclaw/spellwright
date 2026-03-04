@@ -78,6 +78,12 @@
         <!-- Guessed letters (hidden by default, kept for compatibility) -->
         <ui:VisualElement name="guessed-letters" class="encounter-screen__guessed-letters" />
 
+        <!-- Ultimatum overlay -->
+        <ui:VisualElement name="ultimatum-overlay" class="encounter-screen__ultimatum-overlay">
+            <ui:Label name="ultimatum-text" text="" class="text-body encounter-screen__ultimatum-text" />
+            <ui:Label name="countdown-text" text="" class="text-header encounter-screen__countdown-text" />
+        </ui:VisualElement>
+
         <!-- Result overlay -->
         <ui:VisualElement name="result-overlay" class="encounter-screen__result-overlay">
             <ui:Label name="result-banner" text="" class="encounter-screen__result-banner" />

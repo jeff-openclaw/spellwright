@@ -52,11 +52,15 @@ namespace Spellwright.UI
         private Button _continueBtn;
         private VisualElement _flashOverlay;
         private Label _signalStatusLabel;
+        private VisualElement _ultimatumOverlay;
+        private Label _ultimatumTextLabel;
+        private Label _countdownTextLabel;
 
         // State
         private EncounterManager _encounter;
         private bool _isProcessing;
         private bool _isBossEncounter;
+        private bool _ultimatumActive;
         private float _targetHPFill;
         private float _currentHPFill;
         private int _lastDisplayedGold;
@@ -77,6 +81,7 @@ namespace Spellwright.UI
         private bool _npcIsBoss;
         private NPCExpression _baseExpression = NPCExpression.Neutral;
         private IVisualElementScheduledItem _expressionRevertSchedule;
+        private IVisualElementScheduledItem _countdownSchedule;
 
         private void OnEnable()
         {
@@ -101,6 +106,7 @@ namespace Spellwright.UI
             StopTypewriter();
             _hpLerpSchedule?.Pause();
             _expressionRevertSchedule?.Pause();
+            _countdownSchedule?.Pause();
         }
 
         private void CacheElements()
@@ -130,6 +136,9 @@ namespace Spellwright.UI
             _continueBtn = _root.Q<Button>("continue-btn");
             _flashOverlay = _root.Q("flash-overlay");
             _signalStatusLabel = _root.Q<Label>("signal-status");
+            _ultimatumOverlay = _root.Q("ultimatum-overlay");
+            _ultimatumTextLabel = _root.Q<Label>("ultimatum-text");
+            _countdownTextLabel = _root.Q<Label>("countdown-text");
         }
 
         private void WireEvents()
@@ -174,6 +183,9 @@ namespace Spellwright.UI
             EventBus.Instance.Subscribe<LetterRevealedEvent>(OnLetterRevealed);
             EventBus.Instance.Subscribe<GameStateChangedEvent>(OnGameStateChanged);
             EventBus.Instance.Subscribe<DifficultyShiftChangedEvent>(OnDifficultyShiftChanged);
+            EventBus.Instance.Subscribe<UltimatumTriggeredEvent>(OnUltimatumTriggered);
+            EventBus.Instance.Subscribe<UltimatumLineReceivedEvent>(OnUltimatumLineReceived);
+            EventBus.Instance.Subscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
         }
 
         private void UnsubscribeEventBus()
@@ -188,6 +200,9 @@ namespace Spellwright.UI
             EventBus.Instance.Unsubscribe<LetterRevealedEvent>(OnLetterRevealed);
             EventBus.Instance.Unsubscribe<GameStateChangedEvent>(OnGameStateChanged);
             EventBus.Instance.Unsubscribe<DifficultyShiftChangedEvent>(OnDifficultyShiftChanged);
+            EventBus.Instance.Unsubscribe<UltimatumTriggeredEvent>(OnUltimatumTriggered);
+            EventBus.Instance.Unsubscribe<UltimatumLineReceivedEvent>(OnUltimatumLineReceived);
+            EventBus.Instance.Unsubscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
         }
 
         // ── Event Handlers ──────────────────────────────────
@@ -240,6 +255,9 @@ namespace Spellwright.UI
                 _signalStatusLabel.RemoveFromClassList("encounter-screen__signal-status--mercy");
                 _signalStatusLabel.RemoveFromClassList("encounter-screen__signal-status--cruel");
             }
+
+            // Hide ultimatum if active
+            HideUltimatum();
 
             // Clear history + tomes
             if (_historyTextLabel != null) _historyTextLabel.text = "";
@@ -328,6 +346,7 @@ namespace Spellwright.UI
 
         private void OnEncounterEnded(EncounterEndedEvent evt)
         {
+            HideUltimatum();
             SetInputEnabled(false);
             RevealAllAnimated();
 
@@ -404,6 +423,81 @@ namespace Spellwright.UI
                     _signalStatusLabel.text = "";
                     break;
             }
+        }
+
+        // ── Ultimatum ────────────────────────────────────────
+
+        private void OnUltimatumTriggered(UltimatumTriggeredEvent evt)
+        {
+            _ultimatumActive = true;
+
+            // Show overlay
+            _ultimatumOverlay?.AddToClassList("encounter-screen__ultimatum-overlay--visible");
+
+            // Clear text until LLM line arrives
+            if (_ultimatumTextLabel != null)
+            {
+                _ultimatumTextLabel.text = "";
+                _ultimatumTextLabel.RemoveFromClassList("encounter-screen__ultimatum-text--visible");
+            }
+
+            // Start countdown display
+            StartCountdownDisplay();
+
+            // Flash effect
+            Flash("encounter-screen__flash-overlay--boss");
+        }
+
+        private void OnUltimatumLineReceived(UltimatumLineReceivedEvent evt)
+        {
+            if (_ultimatumTextLabel != null)
+            {
+                _ultimatumTextLabel.text = evt.Line;
+                _ultimatumTextLabel.AddToClassList("encounter-screen__ultimatum-text--visible");
+            }
+        }
+
+        private void OnUltimatumExpired(UltimatumExpiredEvent evt)
+        {
+            HideUltimatum();
+            Flash("encounter-screen__flash-overlay--damage");
+        }
+
+        private void StartCountdownDisplay()
+        {
+            var ultimatumSystem = FindAnyObjectByType<UltimatumSystem>();
+            if (ultimatumSystem == null) return;
+
+            _countdownSchedule?.Pause();
+            _countdownSchedule = _root.schedule.Execute(() =>
+            {
+                if (!_ultimatumActive || ultimatumSystem == null || !ultimatumSystem.IsActive)
+                {
+                    HideUltimatum();
+                    _countdownSchedule?.Pause();
+                    return;
+                }
+
+                int seconds = Mathf.CeilToInt(ultimatumSystem.TimeRemaining);
+                if (_countdownTextLabel != null)
+                {
+                    _countdownTextLabel.text = $"> FINAL ANSWER IN: {seconds}s";
+                    // Blink when under 5 seconds
+                    if (seconds <= 5 && seconds % 2 == 0)
+                        _countdownTextLabel.AddToClassList("encounter-screen__countdown-text--blink");
+                    else
+                        _countdownTextLabel.RemoveFromClassList("encounter-screen__countdown-text--blink");
+                }
+            }).Every(250);
+        }
+
+        private void HideUltimatum()
+        {
+            _ultimatumActive = false;
+            _countdownSchedule?.Pause();
+            _ultimatumOverlay?.RemoveFromClassList("encounter-screen__ultimatum-overlay--visible");
+            _ultimatumTextLabel?.RemoveFromClassList("encounter-screen__ultimatum-text--visible");
+            _countdownTextLabel?.RemoveFromClassList("encounter-screen__countdown-text--blink");
         }
 
         // ── Input ───────────────────────────────────────────

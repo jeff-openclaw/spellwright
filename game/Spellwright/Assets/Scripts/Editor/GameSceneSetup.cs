@@ -90,6 +90,10 @@ namespace Spellwright.Editor
             var adaptiveGO = new GameObject("AdaptiveDifficultyMod");
             adaptiveGO.AddComponent<AdaptiveDifficultyMod>();
 
+            // UltimatumSystem (final-guess dramatic moment)
+            var ultimatumGO = new GameObject("UltimatumSystem");
+            ultimatumGO.AddComponent<UltimatumSystem>();
+
             // ShopManager (on shopPanel for convenience)
             var shopMgr = shopPanel.AddComponent<ShopManager>();
             WireShopManager(shopMgr);

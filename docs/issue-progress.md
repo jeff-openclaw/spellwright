@@ -16,7 +16,7 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 46 | UI Toolkit Migration: EncounterUI | ui | ✅ Done | 96671bb |
 | 48 | Remove Legacy uGUI Dependencies | ui | ✅ Done | 927b8bd |
 | 19 | AI Visibility: Design North Star | ai-visibility | ⏭️ Epic tracker (skip) | — |
-| 20 | NPC Adaptive Difficulty (Mercy/Cruelty) | ai-visibility | ⏳ Queued | — |
+| 20 | NPC Adaptive Difficulty (Mercy/Cruelty) | ai-visibility | ✅ Done | 3513835 |
 | 21 | NPC Ultimatum (Endgame Showdown) | ai-visibility | ⏳ Queued | — |
 | 22 | NPC Rival System (Persistent Antagonist) | ai-visibility | ⏳ Queued | — |
 | 23 | Mood Bargain (Mid-Encounter Deal) | ai-visibility | ⏳ Queued | — |
@@ -38,7 +38,18 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=48 | NEXT=20 | QUEUE_TOTAL=28
+LAST_COMPLETED=20 | NEXT=21 | QUEUE_TOTAL=28
+
+## Implementation Notes — #20
+- Created AdaptiveDifficultyMod.cs: subscribes to ClueReceivedEvent, maps mood→DifficultyShift (Mercy/Normal/Cruel), publishes DifficultyShiftChangedEvent. Mood mapping: frustrated/encouraging→Mercy, amused/taunting/menacing→Cruel, others→Normal
+- Modified EncounterManager.RequestNextClue(): reads AdaptiveDifficultyMod.CurrentShift, Mercy adds +1 letter reveal, Cruel sets reveals to 0
+- Modified PromptBuilder.BuildUserMessage(): accepts DifficultyShift param, injects "player is struggling, give clearer hint" (Mercy) or "player is doing well, be more oblique" (Cruel)
+- Modified LLMManager.TryLLMClueAsync(): reads AdaptiveDifficultyMod and passes shift to PromptBuilder
+- Added DifficultyShift enum + DifficultyShiftChangedEvent to GameDataModels.cs
+- Added signal-status Label to Encounter.uxml (inside new clue-header row with clue-number)
+- Added encounter.uss styles: signal-status with mercy (green) / cruel (red) CSS modifiers, fade transition
+- Modified EncounterController: subscribes to DifficultyShiftChangedEvent, shows [SIGNAL: BOOSTED] (mercy/green) or [SIGNAL: DEGRADED] (cruel/red), resets on encounter start
+- Updated GameSceneSetup: creates AdaptiveDifficultyMod GameObject in scene
 
 ## Implementation Notes — #48
 - Deleted 18 legacy uGUI scripts: MainMenuUI, MapUI, ShopUI, RunEndUI, EncounterUI, TileBoardUI, GuessedLettersUI, NPCPortraitUI, UIAnimator, ButtonHoverEffect, BossEntranceUI, SuspenseEffects, TextSpinner, AnimatedCounter, TileGlowEffect, TerminalUIHelper, EncounterTestUI, LLMTestUI

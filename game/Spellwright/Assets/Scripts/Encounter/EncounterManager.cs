@@ -52,11 +52,13 @@ namespace Spellwright.Encounter
         private void OnEnable()
         {
             EventBus.Instance.Subscribe<TomeRevealRequestEvent>(OnTomeRevealRequest);
+            EventBus.Instance.Subscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
         }
 
         private void OnDisable()
         {
             EventBus.Instance.Unsubscribe<TomeRevealRequestEvent>(OnTomeRevealRequest);
+            EventBus.Instance.Unsubscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
         }
 
         // ── Encounter Lifecycle ──────────────────────────────
@@ -472,6 +474,15 @@ namespace Spellwright.Encounter
                 NewHP = _currentHP,
                 MaxHP = _maxHP
             });
+        }
+
+        // ── Ultimatum Handler ────────────────────────────────
+
+        private void OnUltimatumExpired(UltimatumExpiredEvent evt)
+        {
+            if (!_isActive) return;
+            Debug.Log("[EncounterManager] Ultimatum expired — auto-fail encounter.");
+            EndEncounter(false, 0);
         }
 
         // ── Tome Reveal Handler ─────────────────────────────

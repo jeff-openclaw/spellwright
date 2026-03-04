@@ -257,6 +257,43 @@ namespace Spellwright.LLM
             }
         }
 
+        /// <summary>
+        /// Generates a dramatic ultimatum line for the NPC's final-guess moment.
+        /// Returns a plain text line (not JSON). Falls back to a generic line if LLM unavailable.
+        /// </summary>
+        public async Task<string> GenerateUltimatumLineAsync(
+            NPCPromptData npc,
+            string mood,
+            string targetWord)
+        {
+            var lang = gameConfig != null ? gameConfig.language : Data.GameLanguage.English;
+            var (systemPrompt, userMessage) = PromptBuilder.BuildUltimatumPrompt(npc, mood, targetWord, lang);
+
+            if (IsModelLoaded)
+            {
+                try
+                {
+                    var raw = await _llmService.ChatAsync(systemPrompt, userMessage, _cts.Token);
+                    if (!string.IsNullOrWhiteSpace(raw))
+                    {
+                        // Strip any quotes the LLM might add
+                        raw = raw.Trim().Trim('"', '\'');
+                        if (raw.Length > 0)
+                            return raw;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[LLMManager] Ultimatum line generation failed: {ex.Message}");
+                }
+            }
+
+            // Fallback generic lines
+            return lang == Data.GameLanguage.Romanian
+                ? "Ultimul tau cuvant... alege cu grija."
+                : "Your final word... choose wisely.";
+        }
+
         // ── Public API: Raw Streaming ───────────────────────
 
         /// <summary>

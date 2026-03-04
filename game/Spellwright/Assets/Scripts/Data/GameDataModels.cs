@@ -282,6 +282,22 @@ namespace Spellwright.Data
         public string Source { get; set; }
     }
 
+    /// <summary>Fired when the player reaches their final guess, triggering the ultimatum sequence.</summary>
+    public class UltimatumTriggeredEvent
+    {
+        public string NpcName { get; set; }
+        public string Mood { get; set; }
+    }
+
+    /// <summary>Fired when the ultimatum countdown expires without a guess.</summary>
+    public class UltimatumExpiredEvent { }
+
+    /// <summary>Fired when the NPC delivers their ultimatum line.</summary>
+    public class UltimatumLineReceivedEvent
+    {
+        public string Line { get; set; }
+    }
+
     /// <summary>Fired when the adaptive difficulty shift changes based on NPC mood.</summary>
     public class DifficultyShiftChangedEvent
     {

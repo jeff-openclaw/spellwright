@@ -416,6 +416,52 @@
     color: var(--color-danger);
 }
 
+/* ── Ultimatum Overlay ── */
+
+.encounter-screen__ultimatum-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0);
+    justify-content: center;
+    align-items: center;
+    display: none;
+    transition: background-color 500ms ease-out;
+}
+
+.encounter-screen__ultimatum-overlay--visible {
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.encounter-screen__ultimatum-text {
+    color: var(--color-phosphor-bright);
+    font-size: var(--font-size-lg);
+    -unity-text-align: upper-center;
+    white-space: normal;
+    max-width: 80%;
+    margin-bottom: var(--space-lg);
+    opacity: 0;
+    transition: opacity 600ms ease-out;
+}
+
+.encounter-screen__ultimatum-text--visible {
+    opacity: 1;
+}
+
+.encounter-screen__countdown-text {
+    color: var(--color-danger);
+    font-size: var(--font-size-xl);
+    -unity-text-align: middle-center;
+}
+
+.encounter-screen__countdown-text--blink {
+    opacity: 0;
+    transition: opacity 300ms ease-in-out;
+}
+
 /* ── Result Overlay ── */
 
 .encounter-screen__result-overlay {
