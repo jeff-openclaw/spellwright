@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Spellwright.Audio;
 using Spellwright.Data;
 using Spellwright.Encounter;
 using Spellwright.Rendering;
@@ -164,6 +165,10 @@ namespace Spellwright.Editor
             // CRTSettings
             var crtGO = new GameObject("CRTSettings");
             crtGO.AddComponent<CRTSettings>();
+
+            // AudioManager
+            var audioGO = new GameObject("AudioManager");
+            audioGO.AddComponent<AudioManager>();
 
             // EncounterUI (on encounterPanel)
             var encUI = encounterPanel.AddComponent<EncounterUI>();
