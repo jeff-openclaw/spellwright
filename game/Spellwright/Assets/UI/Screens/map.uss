@@ -1,50 +1,156 @@
 /* =============================================================
    Spellwright — Map Screen Styles
-   ASCII dungeon map with pipe-connected nodes
+   Dual-pane Norton Commander layout with encounter directory
    ============================================================= */
 
 .map-screen {
     flex-direction: column;
-    padding: var(--space-md);
+    padding: var(--space-xs);
     flex-grow: 1;
 }
 
-/* ── ASCII Frame ── */
+/* ── Dual-Pane Layout ── */
 
-.map-screen__frame {
+.map-screen__dual-pane {
+    flex-direction: row;
     flex-grow: 1;
+    border-width: 1px;
+    border-color: var(--color-phosphor-dim);
+}
+
+.map-screen__pane {
     flex-direction: column;
+    flex-grow: 1;
+    flex-basis: 0;
 }
 
-.map-screen__border-text {
+.map-screen__pane--left {
+    border-right-width: 0;
+}
+
+.map-screen__pane--right {
+    border-left-width: 0;
+}
+
+.map-screen__pane-header {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor);
+    -unity-text-align: middle-center;
+    padding: var(--space-xs) 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-phosphor-dim);
+    background-color: rgba(30, 255, 115, 0.03);
+}
+
+.map-screen__pane-divider {
     -unity-font-definition: var(--font-primary);
     font-size: var(--font-size-sm);
     color: var(--color-phosphor-dim);
+    min-width: 12px;
     -unity-text-align: middle-center;
-    white-space: nowrap;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-color: var(--color-phosphor-dim);
 }
 
-.map-screen__border-char {
+.map-screen__pane-scroll {
+    flex-grow: 1;
+}
+
+/* ── Right Pane Sections ── */
+
+.map-screen__section-header {
     -unity-font-definition: var(--font-primary);
-    font-size: var(--font-size-sm);
-    color: var(--color-phosphor-dim);
-    min-width: 16px;
-    -unity-text-align: middle-center;
+    font-size: var(--font-size-xs);
+    color: var(--color-cyan);
+    padding: var(--space-xs) var(--space-sm);
+    margin-top: var(--space-xs);
 }
 
-/* ── Status Rows ── */
+.map-screen__section {
+    padding: 0 var(--space-sm);
+    margin-bottom: var(--space-xs);
+}
 
-.map-screen__status-row {
+/* Run log entry */
+.map-screen__log-entry {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+    margin-bottom: 1px;
+}
+
+.map-screen__log-entry--win {
+    color: var(--color-phosphor);
+}
+
+.map-screen__log-entry--loss {
+    color: var(--color-danger);
+}
+
+/* Tome loadout entry */
+.map-screen__tome-entry {
     flex-direction: row;
     align-items: center;
-    padding: var(--space-xs) 0;
+    margin-bottom: 1px;
 }
 
-.map-screen__status-content {
+.map-screen__tome-slot {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+    min-width: 20px;
+}
+
+.map-screen__tome-name {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor);
     flex-grow: 1;
+}
+
+.map-screen__tome-status {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-cyan);
+}
+
+.map-screen__tome-empty {
+    color: var(--color-phosphor-dim);
+    font-size: var(--font-size-xs);
+}
+
+/* Boss wiretap */
+.map-screen__wiretap-bar {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+}
+
+.map-screen__wiretap-progress {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-amber-dim);
+    margin-top: 2px;
+}
+
+.map-screen__wiretap-fragment {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-amber);
+    margin-top: 1px;
+}
+
+/* ── Bottom Status Bar ── */
+
+.map-screen__status-bar {
     flex-direction: row;
+    align-items: center;
     justify-content: space-between;
-    padding: 0 var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
+    border-width: 0 1px 1px 1px;
+    border-color: var(--color-phosphor-dim);
 }
 
 .map-screen__stat-inline {
@@ -71,14 +177,7 @@
     color: var(--color-danger);
 }
 
-/* ── Dungeon Scroll Area ── */
-
-.map-screen__dungeon-scroll {
-    flex-grow: 1;
-    margin: 0;
-}
-
-/* ── Dungeon Node Row ── */
+/* ── Dungeon Node Row (Left Pane) ── */
 
 .map-screen__dungeon-row {
     flex-direction: row;
@@ -90,7 +189,7 @@
     -unity-font-definition: var(--font-primary);
     font-size: var(--font-size-sm);
     color: var(--color-phosphor-dim);
-    min-width: 16px;
+    min-width: 12px;
     -unity-text-align: middle-center;
 }
 
@@ -103,7 +202,7 @@
     transition: opacity 300ms ease-out;
 }
 
-/* Node indicator (checkbox-style) */
+/* Node indicator */
 .map-screen__node-indicator {
     -unity-font-definition: var(--font-primary);
     font-size: var(--font-size-sm);
@@ -118,6 +217,15 @@
     min-width: 80px;
 }
 
+/* Node file permissions */
+.map-screen__node-perms {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+    min-width: 30px;
+    -unity-text-align: middle-right;
+}
+
 /* Node outcome text */
 .map-screen__node-outcome {
     flex-grow: 1;
@@ -130,14 +238,14 @@
 .map-screen__dungeon-connector {
     flex-direction: row;
     align-items: center;
-    height: 16px;
+    height: 12px;
 }
 
 .map-screen__connector-pipe {
     -unity-font-definition: var(--font-primary);
     font-size: var(--font-size-sm);
     color: var(--color-phosphor-dim);
-    min-width: 16px;
+    min-width: 12px;
     -unity-text-align: middle-center;
 }
 
@@ -147,7 +255,6 @@
 
 /* ── Node State Modifiers ── */
 
-/* Completed node */
 .map-screen__dungeon-node--completed {
     opacity: 0.6;
 }
@@ -233,7 +340,7 @@
     flex-direction: column;
     margin: var(--space-xs) 0;
     padding: var(--space-xs) var(--space-sm);
-    padding-left: 44px;
+    padding-left: 40px;
     opacity: 0;
     max-height: 0;
     overflow: hidden;
@@ -243,7 +350,7 @@
 .map-screen__dossier--visible {
     display: flex;
     opacity: 1;
-    max-height: 200px;
+    max-height: 400px;
 }
 
 .map-screen__dossier-line {
@@ -405,27 +512,10 @@
     opacity: 1;
 }
 
-/* ── Footer ── */
-
-.map-screen__footer {
-    flex-direction: row;
-    align-items: center;
-    padding-top: var(--space-md);
-    justify-content: center;
-}
-
-.map-screen__lang-btn {
-    opacity: 1;
-    transition: opacity 200ms ease-out;
-}
-
-.map-screen__lang-btn--hidden {
-    opacity: 0;
-    display: none;
-}
+/* ── Footer Buttons ── */
 
 .map-screen__proceed-btn {
-    min-width: 200px;
+    min-width: 160px;
     color: var(--color-amber);
     border-color: var(--color-amber-dim);
     letter-spacing: 4px;
@@ -439,6 +529,17 @@
 .map-screen__proceed-btn:active {
     background-color: var(--color-amber);
     color: var(--color-bg);
+}
+
+.map-screen__lang-btn {
+    opacity: 1;
+    transition: opacity 200ms ease-out;
+    margin-left: var(--space-sm);
+}
+
+.map-screen__lang-btn--hidden {
+    opacity: 0;
+    display: none;
 }
 
 /* ── Breathing glow for current node ── */

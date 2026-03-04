@@ -3,6 +3,7 @@ using System.Linq;
 using Spellwright.Core;
 using Spellwright.Data;
 using Spellwright.ScriptableObjects;
+using Spellwright.Tomes;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -30,6 +31,11 @@ namespace Spellwright.UI
         private ScrollView _nodeContainer;
         private Button _proceedButton;
         private Button _langToggleButton;
+
+        // Right pane
+        private VisualElement _runLogContainer;
+        private VisualElement _tomeLoadoutContainer;
+        private VisualElement _bossWiretapContainer;
 
         private readonly List<DungeonNodeEntry> _nodeEntries = new();
         private IVisualElementScheduledItem _glowSchedule;
@@ -66,6 +72,9 @@ namespace Spellwright.UI
             _nodeContainer = _root.Q<ScrollView>("node-container");
             _proceedButton = _root.Q<Button>("proceed");
             _langToggleButton = _root.Q<Button>("lang-toggle");
+            _runLogContainer = _root.Q("run-log");
+            _tomeLoadoutContainer = _root.Q("tome-loadout");
+            _bossWiretapContainer = _root.Q("boss-wiretap");
         }
 
         private void WireEvents()
@@ -102,6 +111,7 @@ namespace Spellwright.UI
         {
             UpdateNodeStates();
             UpdateStats();
+            RefreshRightPane();
         }
 
         // ── Map Building ────────────────────────────────────
@@ -127,6 +137,7 @@ namespace Spellwright.UI
             UpdateNodeStates();
             UpdateStats();
             UpdateLanguageButtonVisibility();
+            RefreshRightPane();
             PlayEntranceAnimation();
         }
 
@@ -154,11 +165,6 @@ namespace Spellwright.UI
             row.AddToClassList("map-screen__dungeon-row");
             row.AddToClassList("stagger-item");
 
-            // Left pipe
-            var leftPipe = new Label("\u2551");
-            leftPipe.AddToClassList("map-screen__dungeon-pipe");
-            row.Add(leftPipe);
-
             // Node content
             var node = new VisualElement();
             node.AddToClassList("map-screen__dungeon-node");
@@ -168,32 +174,25 @@ namespace Spellwright.UI
             indicator.AddToClassList("map-screen__node-indicator");
             node.Add(indicator);
 
-            // Room label
+            // Room label (file listing style)
             string roomText = isBoss
-                ? "B O S S"
-                : $"ROOM {index + 1:D2}";
+                ? "boss.enc.???"
+                : $"room_{index + 1:D2}.enc";
             var roomLabel = new Label(roomText);
             roomLabel.AddToClassList("map-screen__node-room");
             node.Add(roomLabel);
 
-            // Separator
-            var sep = new Label("\u2500\u2500");
-            sep.AddToClassList("map-screen__node-indicator");
-            sep.style.color = new StyleColor(new Color(0.12f, 1f, 0.45f, 0.3f));
-            node.Add(sep);
+            // File permissions
+            var perms = new Label("---");
+            perms.AddToClassList("map-screen__node-perms");
+            node.Add(perms);
 
             // Outcome text
-            var outcome = new Label(isBoss ? "??????????????" : "\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591");
+            var outcome = new Label("");
             outcome.AddToClassList("map-screen__node-outcome");
             node.Add(outcome);
 
             row.Add(node);
-
-            // Right pipe
-            var rightPipe = new Label("\u2551");
-            rightPipe.AddToClassList("map-screen__dungeon-pipe");
-            row.Add(rightPipe);
-
             _nodeContainer.Add(row);
 
             // Dossier panel (hidden by default, expandable on click)
@@ -207,6 +206,7 @@ namespace Spellwright.UI
                 Node = node,
                 Indicator = indicator,
                 RoomLabel = roomLabel,
+                PermsLabel = perms,
                 OutcomeLabel = outcome,
                 Dossier = dossier,
                 Index = index,
@@ -242,13 +242,14 @@ namespace Spellwright.UI
                     // Completed
                     entry.Node.AddToClassList("map-screen__dungeon-node--completed");
                     entry.Indicator.text = "[\u2713]"; // ✓
+                    entry.PermsLabel.text = "r--";
 
                     // Find outcome for this node
                     var nodeOutcome = outcomes.FirstOrDefault(o => o.NodeIndex == entry.Index);
                     if (nodeOutcome.Won)
-                        entry.OutcomeLabel.text = $"SOLVED {nodeOutcome.GuessCount}/6 +{nodeOutcome.GoldEarned}g";
+                        entry.OutcomeLabel.text = $"+{nodeOutcome.GoldEarned}g";
                     else
-                        entry.OutcomeLabel.text = "FAILED";
+                        entry.OutcomeLabel.text = "FAIL";
                 }
                 else if (entry.Index == currentIndex)
                 {
@@ -257,7 +258,8 @@ namespace Spellwright.UI
                     entry.Node.AddToClassList(stateClass);
                     if (isBoss) entry.Node.AddToClassList("map-screen__dungeon-node--boss");
                     entry.Indicator.text = "[\u25B6]"; // ▶
-                    entry.OutcomeLabel.text = isBoss ? "??????????????" : "\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588";
+                    entry.PermsLabel.text = "rwx";
+                    entry.OutcomeLabel.text = "";
                 }
                 else
                 {
@@ -265,7 +267,8 @@ namespace Spellwright.UI
                     entry.Node.AddToClassList("map-screen__dungeon-node--future");
                     if (isBoss) entry.Node.AddToClassList("map-screen__dungeon-node--boss");
                     entry.Indicator.text = isBoss ? "[\u2620]" : "[ ]"; // ☠ or empty
-                    entry.OutcomeLabel.text = isBoss ? "??????????????" : "\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591";
+                    entry.PermsLabel.text = isBoss ? "???" : "---";
+                    entry.OutcomeLabel.text = "";
                 }
             }
 
@@ -350,6 +353,131 @@ namespace Spellwright.UI
                 _langToggleButton.AddToClassList("map-screen__lang-btn--hidden");
 
             UpdateLanguageLabel();
+        }
+
+        // ── Right Pane ────────────────────────────────────────
+
+        private void RefreshRightPane()
+        {
+            RefreshRunLog();
+            RefreshTomeLoadout();
+            RefreshBossWiretap();
+        }
+
+        private void RefreshRunLog()
+        {
+            if (_runLogContainer == null) return;
+            _runLogContainer.Clear();
+
+            var outcomes = Run.RunManager.Instance?.NodeOutcomes;
+            if (outcomes == null || outcomes.Count == 0)
+            {
+                var empty = new Label("  (no encounters yet)");
+                empty.AddToClassList("map-screen__log-entry");
+                _runLogContainer.Add(empty);
+                return;
+            }
+
+            foreach (var o in outcomes)
+            {
+                string status = o.Won ? "RC=0" : "RC=1";
+                string line = $"  ENC_{o.NodeIndex + 1:D2} {status}";
+                if (o.Won)
+                    line += $" +{o.GoldEarned}g {o.GuessCount}/6";
+                else
+                    line += " FAIL";
+
+                var label = new Label(line);
+                label.AddToClassList("map-screen__log-entry");
+                label.AddToClassList(o.Won ? "map-screen__log-entry--win" : "map-screen__log-entry--loss");
+                _runLogContainer.Add(label);
+            }
+        }
+
+        private void RefreshTomeLoadout()
+        {
+            if (_tomeLoadoutContainer == null) return;
+            _tomeLoadoutContainer.Clear();
+
+            var tomeManager = TomeManager.Instance;
+            if (tomeManager == null || tomeManager.TomeSystem == null)
+            {
+                var empty = new Label("  (no tomes equipped)");
+                empty.AddToClassList("map-screen__tome-empty");
+                _tomeLoadoutContainer.Add(empty);
+                return;
+            }
+
+            var equipped = tomeManager.TomeSystem.GetEquippedTomes();
+            int maxSlots = gameConfig != null ? gameConfig.maxTomeSlots : 5;
+
+            for (int i = 0; i < maxSlots; i++)
+            {
+                var row = new VisualElement();
+                row.AddToClassList("map-screen__tome-entry");
+
+                var slot = new Label($"  {i + 1}.");
+                slot.AddToClassList("map-screen__tome-slot");
+                row.Add(slot);
+
+                if (i < equipped.Count)
+                {
+                    var name = new Label(equipped[i].TomeName);
+                    name.AddToClassList("map-screen__tome-name");
+                    row.Add(name);
+
+                    var status = new Label("[ACT]");
+                    status.AddToClassList("map-screen__tome-status");
+                    row.Add(status);
+                }
+                else
+                {
+                    var empty = new Label("(empty)");
+                    empty.AddToClassList("map-screen__tome-empty");
+                    row.Add(empty);
+                }
+
+                _tomeLoadoutContainer.Add(row);
+            }
+        }
+
+        private void RefreshBossWiretap()
+        {
+            if (_bossWiretapContainer == null) return;
+            _bossWiretapContainer.Clear();
+
+            int encountersWon = Run.RunManager.Instance?.EncountersWon ?? 0;
+            int totalEncounters = 5; // encounters per wave before boss
+            int fragments = Mathf.Min(encountersWon, totalEncounters);
+
+            // Encrypted bar
+            int barWidth = 20;
+            int decrypted = totalEncounters > 0 ? Mathf.RoundToInt((float)fragments / totalEncounters * barWidth) : 0;
+            string bar = new string('\u2593', decrypted) + new string('\u2591', barWidth - decrypted);
+            var barLabel = new Label($"  {bar}");
+            barLabel.AddToClassList("map-screen__wiretap-bar");
+            _bossWiretapContainer.Add(barLabel);
+
+            var progress = new Label($"  [{fragments}/{totalEncounters} FRAGMENTS]");
+            progress.AddToClassList("map-screen__wiretap-progress");
+            _bossWiretapContainer.Add(progress);
+
+            // Show fragments based on encounters won
+            string[] fragmentTexts =
+            {
+                "BOSS: Uses cryptic, minimal clues",
+                "BOSS: Difficulty modifier is HIGH",
+                "BOSS: Defeat = immediate run loss",
+                "BOSS: 3-word clue constraint active",
+                "BOSS: Full intel unlocked — READY"
+            };
+
+            for (int i = 0; i < fragments && i < fragmentTexts.Length; i++)
+            {
+                var frag = new Label($"  > {fragmentTexts[i]}");
+                frag.AddToClassList("map-screen__wiretap-fragment");
+                _bossWiretapContainer.Add(frag);
+            }
         }
 
         // ── Proceed ─────────────────────────────────────────
@@ -764,6 +892,7 @@ namespace Spellwright.UI
             public VisualElement Node;
             public Label Indicator;
             public Label RoomLabel;
+            public Label PermsLabel;
             public Label OutcomeLabel;
             public VisualElement Dossier;
             public int Index;

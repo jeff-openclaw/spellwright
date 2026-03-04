@@ -25,8 +25,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 26 | ASCII Dungeon Map with Pipe-Connected Nodes | journey | ✅ Done | ee069ac |
 | 27 | Expandable NPC Dossier Panels | journey | ✅ Done | b10b5c0 |
 | 28 | Gold-for-Intel Economy | journey | ✅ Done | 95125d0 |
-| 29 | Pre-Encounter Gold Wagering | journey | ✅ Done | PENDING |
-| 30 | Dual-Pane Norton Commander Layout | journey | ⏳ Queued | — |
+| 29 | Pre-Encounter Gold Wagering | journey | ✅ Done | c17cb7c |
+| 30 | Dual-Pane Norton Commander Layout | journey | ✅ Done | PENDING |
 | 31 | Boss Wiretap — Progressive Intel | journey | ⏳ Queued | — |
 | 32 | Tome Crucible — Sacrifice Two Tomes | journey | ⏳ Queued | — |
 | 33 | Inline Shop as Terminal Overlay | journey | ⏳ Queued | — |
@@ -38,7 +38,16 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=29 | NEXT=30 | QUEUE_TOTAL=28
+LAST_COMPLETED=30 | NEXT=31 | QUEUE_TOTAL=28
+
+## Implementation Notes — #30
+- Rewrote Map.uxml: dual-pane layout with left pane (Encounter Directory + ScrollView) and right pane (System Log with Run Log, Tome Loadout, Boss Wiretap sections). Bottom status bar spans full width with HP/gold/score/rival + wave/proceed/lang-toggle
+- Rewrote map.uss: dual-pane flexbox (50/50 split), pane headers with dim background, pane divider with border, section headers (cyan), log/tome/wiretap entry styles, status bar with bottom border
+- File-listing metaphor: nodes display as room_01.enc/boss.enc.??? with rwx/r--/---/??? permissions
+- Modified MapController: removed left/right pipe chars from nodes, added right pane elements (_runLogContainer, _tomeLoadoutContainer, _bossWiretapContainer), RefreshRightPane() called on map refresh and state change
+- RefreshRunLog: shows encounter outcomes as ENC_XX RC=0/1 with gold earned, win/loss color coding
+- RefreshTomeLoadout: shows equipped tomes with slot numbers and [ACT] status, empty slots as (empty)
+- RefreshBossWiretap: progress bar (▓░), fragment counter [X/5 FRAGMENTS], progressive intel lines unlocked per encounter won (boss clue style, difficulty, defeat consequence, constraint, full intel)
 
 ## Implementation Notes — #29
 - Added wager tier config to GameConfigSO: wagerCosts[0,5,10,20], wagerMultipliers[1.0,1.5,2.0,3.0], wagerDamageBonus[0,1,2,3]
