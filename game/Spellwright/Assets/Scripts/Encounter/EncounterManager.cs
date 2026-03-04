@@ -236,10 +236,18 @@ namespace Spellwright.Encounter
                 ClueNumber = _clueNumber
             });
 
-            // Reveal letters as clue bonus
+            // Reveal letters as clue bonus (adjusted by adaptive difficulty)
             if (_boardState != null && gameConfig != null)
             {
                 int toReveal = gameConfig.lettersRevealedPerClue;
+                var adaptiveMod = FindAnyObjectByType<AdaptiveDifficultyMod>();
+                if (adaptiveMod != null)
+                {
+                    if (adaptiveMod.CurrentShift == Data.DifficultyShift.Mercy)
+                        toReveal += 1;
+                    else if (adaptiveMod.CurrentShift == Data.DifficultyShift.Cruel)
+                        toReveal = 0;
+                }
                 var revealed = new List<int>();
                 for (int i = 0; i < toReveal; i++)
                 {

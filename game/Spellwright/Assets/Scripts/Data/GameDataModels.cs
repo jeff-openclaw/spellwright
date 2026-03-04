@@ -69,6 +69,14 @@ namespace Spellwright.Data
         Phrase
     }
 
+    /// <summary>Adaptive difficulty shift based on NPC mood.</summary>
+    public enum DifficultyShift
+    {
+        Normal,
+        Mercy,
+        Cruel
+    }
+
     /// <summary>Type of board reveal requested by a Tome effect.</summary>
     public enum RevealType
     {
@@ -272,6 +280,12 @@ namespace Spellwright.Data
         public char RevealedLetter { get; set; }
         /// <summary>"clue", "guess", "consolation", or "tome"</summary>
         public string Source { get; set; }
+    }
+
+    /// <summary>Fired when the adaptive difficulty shift changes based on NPC mood.</summary>
+    public class DifficultyShiftChangedEvent
+    {
+        public DifficultyShift Shift { get; set; }
     }
 
     /// <summary>Fired by Tome effects to request board reveals via EncounterManager.</summary>

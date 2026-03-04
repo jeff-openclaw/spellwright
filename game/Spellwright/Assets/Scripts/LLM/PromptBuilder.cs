@@ -27,10 +27,11 @@ namespace Spellwright.LLM
             int clueNumber,
             List<string> previousGuesses,
             List<string> activeTomeEffects,
-            GameLanguage language = GameLanguage.English)
+            GameLanguage language = GameLanguage.English,
+            DifficultyShift difficultyShift = DifficultyShift.Normal)
         {
             var system = BuildSystemPrompt(npc, category, clueNumber, activeTomeEffects, language);
-            var user = BuildUserMessage(targetWord, category, clueNumber, previousGuesses, language);
+            var user = BuildUserMessage(targetWord, category, clueNumber, previousGuesses, language, difficultyShift);
             return (system, user);
         }
 
@@ -129,7 +130,8 @@ namespace Spellwright.LLM
             string category,
             int clueNumber,
             List<string> previousGuesses,
-            GameLanguage language = GameLanguage.English)
+            GameLanguage language = GameLanguage.English,
+            DifficultyShift difficultyShift = DifficultyShift.Normal)
         {
             var sb = new StringBuilder();
 
@@ -153,6 +155,12 @@ namespace Spellwright.LLM
             }
 
             sb.AppendLine($"Give clue #{clueNumber}. Remember: more specific than previous clues.");
+
+            // Adaptive difficulty hints based on NPC mood shift
+            if (difficultyShift == DifficultyShift.Mercy)
+                sb.AppendLine("The player is struggling. Give a clearer, more direct hint.");
+            else if (difficultyShift == DifficultyShift.Cruel)
+                sb.AppendLine("The player is doing well. Be more oblique and challenging with your hint.");
 
             if (language == GameLanguage.Romanian)
                 sb.AppendLine("Scrie indiciul in romana. Raspunde DOAR cu JSON.");

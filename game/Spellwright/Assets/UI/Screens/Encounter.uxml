@@ -23,7 +23,10 @@
             <ui:VisualElement class="divider" />
             <!-- Clue display -->
             <ui:VisualElement class="encounter-screen__clue-area">
-                <ui:Label name="clue-number" text="" class="text-stat encounter-screen__clue-number" />
+                <ui:VisualElement class="encounter-screen__clue-header">
+                    <ui:Label name="clue-number" text="" class="text-stat encounter-screen__clue-number" />
+                    <ui:Label name="signal-status" text="" class="text-stat encounter-screen__signal-status" />
+                </ui:VisualElement>
                 <ui:Label name="clue-text" text="Waiting for clue..." class="text-body encounter-screen__clue-text" />
             </ui:VisualElement>
         </ui:VisualElement>

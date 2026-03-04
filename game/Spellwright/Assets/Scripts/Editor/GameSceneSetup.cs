@@ -86,6 +86,10 @@ namespace Spellwright.Editor
             var encMgrGO = new GameObject("EncounterManager");
             var encMgr = encMgrGO.AddComponent<EncounterManager>();
 
+            // AdaptiveDifficultyMod (reads NPC mood, adjusts difficulty)
+            var adaptiveGO = new GameObject("AdaptiveDifficultyMod");
+            adaptiveGO.AddComponent<AdaptiveDifficultyMod>();
+
             // ShopManager (on shopPanel for convenience)
             var shopMgr = shopPanel.AddComponent<ShopManager>();
             WireShopManager(shopMgr);

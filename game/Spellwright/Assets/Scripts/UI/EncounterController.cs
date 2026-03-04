@@ -51,6 +51,7 @@ namespace Spellwright.UI
         private Label _resultDetails;
         private Button _continueBtn;
         private VisualElement _flashOverlay;
+        private Label _signalStatusLabel;
 
         // State
         private EncounterManager _encounter;
@@ -128,6 +129,7 @@ namespace Spellwright.UI
             _resultDetails = _root.Q<Label>("result-details");
             _continueBtn = _root.Q<Button>("continue-btn");
             _flashOverlay = _root.Q("flash-overlay");
+            _signalStatusLabel = _root.Q<Label>("signal-status");
         }
 
         private void WireEvents()
@@ -171,6 +173,7 @@ namespace Spellwright.UI
             EventBus.Instance.Subscribe<BossIntroEvent>(OnBossIntro);
             EventBus.Instance.Subscribe<LetterRevealedEvent>(OnLetterRevealed);
             EventBus.Instance.Subscribe<GameStateChangedEvent>(OnGameStateChanged);
+            EventBus.Instance.Subscribe<DifficultyShiftChangedEvent>(OnDifficultyShiftChanged);
         }
 
         private void UnsubscribeEventBus()
@@ -184,6 +187,7 @@ namespace Spellwright.UI
             EventBus.Instance.Unsubscribe<BossIntroEvent>(OnBossIntro);
             EventBus.Instance.Unsubscribe<LetterRevealedEvent>(OnLetterRevealed);
             EventBus.Instance.Unsubscribe<GameStateChangedEvent>(OnGameStateChanged);
+            EventBus.Instance.Unsubscribe<DifficultyShiftChangedEvent>(OnDifficultyShiftChanged);
         }
 
         // ── Event Handlers ──────────────────────────────────
@@ -227,9 +231,15 @@ namespace Spellwright.UI
             // Reset guessed letters
             ResetGuessedLetters();
 
-            // Reset clue
+            // Reset clue + signal status
             if (_clueTextLabel != null) _clueTextLabel.text = "...";
             if (_clueNumberLabel != null) _clueNumberLabel.text = "";
+            if (_signalStatusLabel != null)
+            {
+                _signalStatusLabel.text = "";
+                _signalStatusLabel.RemoveFromClassList("encounter-screen__signal-status--mercy");
+                _signalStatusLabel.RemoveFromClassList("encounter-screen__signal-status--cruel");
+            }
 
             // Clear history + tomes
             if (_historyTextLabel != null) _historyTextLabel.text = "";
@@ -370,6 +380,29 @@ namespace Spellwright.UI
                 if (_historyTextLabel.text.Length > 0)
                     _historyTextLabel.text += "\n";
                 _historyTextLabel.text += $"<{evt.TomeName}> {evt.RevealedInfo}";
+            }
+        }
+
+        private void OnDifficultyShiftChanged(DifficultyShiftChangedEvent evt)
+        {
+            if (_signalStatusLabel == null) return;
+
+            _signalStatusLabel.RemoveFromClassList("encounter-screen__signal-status--mercy");
+            _signalStatusLabel.RemoveFromClassList("encounter-screen__signal-status--cruel");
+
+            switch (evt.Shift)
+            {
+                case DifficultyShift.Mercy:
+                    _signalStatusLabel.text = "[SIGNAL: BOOSTED]";
+                    _signalStatusLabel.AddToClassList("encounter-screen__signal-status--mercy");
+                    break;
+                case DifficultyShift.Cruel:
+                    _signalStatusLabel.text = "[SIGNAL: DEGRADED]";
+                    _signalStatusLabel.AddToClassList("encounter-screen__signal-status--cruel");
+                    break;
+                default:
+                    _signalStatusLabel.text = "";
+                    break;
             }
         }
 

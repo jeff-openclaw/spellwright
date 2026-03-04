@@ -1,5 +1,5 @@
 # Issue Progress
-Last updated: 2026-03-04T04
+Last updated: 2026-03-04T05
 Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 
 ## Queue
@@ -14,8 +14,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 44 | UI Toolkit Migration: ShopUI | ui | ✅ Done | f8afedb |
 | 45 | UI Toolkit Migration: ResultUI | ui | ✅ Done | b1068aa |
 | 46 | UI Toolkit Migration: EncounterUI | ui | ✅ Done | 96671bb |
-| 48 | Remove Legacy uGUI Dependencies | ui | 🔄 In progress | — |
-| 19 | AI Visibility: Design North Star | ai-visibility | ⏳ Queued | — |
+| 48 | Remove Legacy uGUI Dependencies | ui | ✅ Done | 927b8bd |
+| 19 | AI Visibility: Design North Star | ai-visibility | ⏭️ Epic tracker (skip) | — |
 | 20 | NPC Adaptive Difficulty (Mercy/Cruelty) | ai-visibility | ⏳ Queued | — |
 | 21 | NPC Ultimatum (Endgame Showdown) | ai-visibility | ⏳ Queued | — |
 | 22 | NPC Rival System (Persistent Antagonist) | ai-visibility | ⏳ Queued | — |
@@ -38,7 +38,16 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=46 | NEXT=48 | QUEUE_TOTAL=28
+LAST_COMPLETED=48 | NEXT=20 | QUEUE_TOTAL=28
+
+## Implementation Notes — #48
+- Deleted 18 legacy uGUI scripts: MainMenuUI, MapUI, ShopUI, RunEndUI, EncounterUI, TileBoardUI, GuessedLettersUI, NPCPortraitUI, UIAnimator, ButtonHoverEffect, BossEntranceUI, SuspenseEffects, TextSpinner, AnimatedCounter, TileGlowEffect, TerminalUIHelper, EncounterTestUI, LLMTestUI
+- Migrated ScreenEffectsOverlay: RawImage → UI Toolkit VisualElement with runtime-generated textures (scanlines + vignette), now RequireComponent(UIDocument)
+- Migrated AmbientDataStream: TextMeshProUGUI columns → UI Toolkit Label elements with flexbox row layout, now RequireComponent(UIDocument)
+- GameSceneSetup rewritten: Removed Canvas, EventSystem, all uGUI factory methods (CreatePanel, CreateButton, CreatePrimaryButton, CreateInputField, CreateFullscreenImage, CreateContainer, CreateText, CreateStatChip, CreateEncounterStatChip, AddPanelAnimator, AddPanelBorder, SetAnchors), CreateEncounterPanel_Legacy, WireEncounterUI_Legacy. Added CreateAmbientDataStream() and CreateScreenEffectsOverlay() as UIDocument-based GameObjects with sort ordering (-100 for background, +100 for overlay). Reduced from 1361 → 433 lines
+- DOTween removed entirely: Deleted Assets/Plugins/Demigiant/, Resources/DOTweenSettings.asset, cleaned DOTWEEN scripting define symbols from ProjectSettings.asset
+- Zero remaining UnityEngine.UI imports in codebase (only UnityEngine.UIElements remains)
+- TMPro still used by TerminalThemeSO (font asset references) and FontEvaluator (editor font utility) — valid dependencies
 
 ## Implementation Notes — #46
 - Encounter.uxml: Full UXML layout — board frame with tile grid, category banner, NPC dialog card (portrait + name + clue), stats bar (HP with bar/gold/guesses/score chips), input area (prompt + TextField + submit/solve buttons), bottom panels (history + tomes split), guessed letters grid, result overlay, flash overlay

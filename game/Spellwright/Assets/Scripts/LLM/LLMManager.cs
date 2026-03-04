@@ -194,11 +194,14 @@ namespace Spellwright.LLM
             try
             {
                 var llmLang = gameConfig != null ? gameConfig.language : Data.GameLanguage.English;
+                var adaptiveMod = FindAnyObjectByType<Encounter.AdaptiveDifficultyMod>();
+                var shift = adaptiveMod != null ? adaptiveMod.CurrentShift : Data.DifficultyShift.Normal;
                 var (systemPrompt, userMessage) = PromptBuilder.BuildCluePrompt(
                     npc, word, category, clueNumber,
                     previousGuesses ?? new List<string>(),
                     activeTomeEffects ?? new List<string>(),
-                    llmLang);
+                    llmLang,
+                    shift);
 
                 var sw = Stopwatch.StartNew();
                 var raw = await _llmService.ChatAsync(systemPrompt, userMessage, _cts.Token);

@@ -184,10 +184,33 @@
     margin-top: var(--space-xs);
 }
 
+.encounter-screen__clue-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+}
+
 .encounter-screen__clue-number {
     color: var(--color-amber);
     font-size: var(--font-size-sm);
-    margin-bottom: var(--space-xs);
+}
+
+.encounter-screen__signal-status {
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+    opacity: 0;
+    transition: opacity 400ms ease-out, color 400ms ease-out;
+}
+
+.encounter-screen__signal-status--mercy {
+    color: var(--color-success);
+    opacity: 1;
+}
+
+.encounter-screen__signal-status--cruel {
+    color: var(--color-danger);
+    opacity: 1;
 }
 
 .encounter-screen__clue-text {
