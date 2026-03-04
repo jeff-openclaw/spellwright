@@ -28,3 +28,14 @@ leu puternic	2
 urs mare	2
 cal alb	1
 ceas vechi	2
+drum greu	3
+noapte lunga	3
+vant rece	3
+munte inalt	3
+pas gresit	4
+lup singuratic	4
+apa adanca	3
+foc mare	3
+drum de munte	4
+lumina slaba	4
+val de frig	4
