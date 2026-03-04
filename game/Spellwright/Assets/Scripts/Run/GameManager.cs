@@ -167,10 +167,10 @@ namespace Spellwright.Run
             }
         }
 
-        /// <summary>Called after encounter result to show the shop before returning to map.</summary>
+        /// <summary>Called after encounter result to show the shop as inline overlay on the map.</summary>
         public void GoToShop()
         {
-            TransitionTo(GameState.Shop);
+            ReturnToMapWithShop();
         }
 
         /// <summary>Called after encounter/shop completes to return to the map.</summary>
@@ -182,6 +182,21 @@ namespace Spellwright.Run
                 // AdvanceNode may end the run if all nodes complete
                 if (RunManager.Instance.IsRunActive)
                     TransitionTo(GameState.Map);
+            }
+        }
+
+        /// <summary>Advances the node and transitions to Map with the shop overlay auto-opening.</summary>
+        public void ReturnToMapWithShop()
+        {
+            if (RunManager.Instance != null && RunManager.Instance.IsRunActive)
+            {
+                RunManager.Instance.AdvanceNode();
+                if (!RunManager.Instance.IsRunActive) return;
+
+                // Flag the map controller to auto-open shop overlay
+                var mapController = mapPanel != null ? mapPanel.GetComponent<UI.MapController>() : null;
+                mapController?.RequestShopAutoOpen();
+                TransitionTo(GameState.Map);
             }
         }
 

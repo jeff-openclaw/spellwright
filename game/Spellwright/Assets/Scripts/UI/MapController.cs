@@ -3,6 +3,7 @@ using System.Linq;
 using Spellwright.Core;
 using Spellwright.Data;
 using Spellwright.ScriptableObjects;
+using Spellwright.Shop;
 using Spellwright.Tomes;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,6 +18,7 @@ namespace Spellwright.UI
     {
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private GameConfigSO gameConfig;
+        [SerializeField] private ShopManager shopManager;
 
         [Header("Animation")]
         [SerializeField] private float staggerDelayMs = 60f;
@@ -47,6 +49,17 @@ namespace Spellwright.UI
         private string _crucibleSelectedA;
         private VisualElement _crucibleContainer;
 
+        // Shop overlay
+        private VisualElement _shopOverlay;
+        private VisualElement _shopBuyItems;
+        private VisualElement _shopServices;
+        private Label _shopGoldLabel;
+        private Label _shopFeedbackLabel;
+        private Button _shopCloseButton;
+        private Button _shopToggleButton;
+        private bool _shopAutoOpen;
+        private bool _shopOpen;
+
         private void OnEnable()
         {
             if (uiDocument == null) return;
@@ -58,6 +71,13 @@ namespace Spellwright.UI
             WireEvents();
             SubscribeEventBus();
             RefreshMap();
+
+            // Auto-open shop if flagged (post-encounter)
+            if (_shopAutoOpen)
+            {
+                _shopAutoOpen = false;
+                _root?.schedule.Execute(OpenShop).ExecuteLater(300);
+            }
         }
 
         private void OnDisable()
@@ -80,6 +100,15 @@ namespace Spellwright.UI
             _runLogContainer = _root.Q("run-log");
             _tomeLoadoutContainer = _root.Q("tome-loadout");
             _bossWiretapContainer = _root.Q("boss-wiretap");
+
+            // Shop overlay
+            _shopOverlay = _root.Q("shop-overlay");
+            _shopBuyItems = _root.Q("shop-buy-items");
+            _shopServices = _root.Q("shop-services");
+            _shopGoldLabel = _root.Q<Label>("shop-gold");
+            _shopFeedbackLabel = _root.Q<Label>("shop-feedback");
+            _shopCloseButton = _root.Q<Button>("shop-close");
+            _shopToggleButton = _root.Q<Button>("shop-toggle");
         }
 
         private void WireEvents()
@@ -88,6 +117,12 @@ namespace Spellwright.UI
                 _proceedButton.clicked += OnProceedClicked;
             if (_langToggleButton != null)
                 _langToggleButton.clicked += OnLanguageClicked;
+            if (_shopToggleButton != null)
+                _shopToggleButton.clicked += OnShopToggleClicked;
+            if (_shopCloseButton != null)
+                _shopCloseButton.clicked += CloseShop;
+            if (_shopOverlay != null)
+                _shopOverlay.RegisterCallback<ClickEvent>(OnShopOverlayClicked);
         }
 
         private void UnwireEvents()
@@ -96,6 +131,12 @@ namespace Spellwright.UI
                 _proceedButton.clicked -= OnProceedClicked;
             if (_langToggleButton != null)
                 _langToggleButton.clicked -= OnLanguageClicked;
+            if (_shopToggleButton != null)
+                _shopToggleButton.clicked -= OnShopToggleClicked;
+            if (_shopCloseButton != null)
+                _shopCloseButton.clicked -= CloseShop;
+            if (_shopOverlay != null)
+                _shopOverlay.UnregisterCallback<ClickEvent>(OnShopOverlayClicked);
         }
 
         private void SubscribeEventBus()
@@ -1065,6 +1106,224 @@ namespace Spellwright.UI
             }
 
             UpdateStats();
+        }
+
+        // ── Shop Overlay ─────────────────────────────────────
+
+        /// <summary>Flags the shop to auto-open on next OnEnable (called by GameManager).</summary>
+        public void RequestShopAutoOpen() => _shopAutoOpen = true;
+
+        private void OnShopToggleClicked()
+        {
+            if (_shopOpen)
+                CloseShop();
+            else
+                OpenShop();
+        }
+
+        private void OnShopOverlayClicked(ClickEvent evt)
+        {
+            // Close if clicking the backdrop (not the popup itself)
+            if (evt.target == _shopOverlay)
+                CloseShop();
+        }
+
+        private void OpenShop()
+        {
+            if (_shopOverlay == null || shopManager == null) return;
+
+            shopManager.GenerateInventory();
+            RefreshShopUI();
+
+            _shopOverlay.AddToClassList("map-screen__shop-overlay--visible");
+            _shopOverlay.pickingMode = PickingMode.Position;
+            _shopOpen = true;
+        }
+
+        private void CloseShop()
+        {
+            if (_shopOverlay == null) return;
+
+            _shopOverlay.RemoveFromClassList("map-screen__shop-overlay--visible");
+            _shopOverlay.pickingMode = PickingMode.Ignore;
+            _shopOpen = false;
+
+            // Refresh map stats (gold may have changed)
+            UpdateStats();
+            RefreshRightPane();
+        }
+
+        private void RefreshShopUI()
+        {
+            if (shopManager == null) return;
+
+            // Build buy items
+            _shopBuyItems?.Clear();
+            for (int i = 0; i < shopManager.Inventory.Count; i++)
+            {
+                var item = shopManager.Inventory[i];
+                if (!item.IsHealItem)
+                    CreateShopBuyItem(i, item);
+            }
+
+            // Build sell items + heal in services section
+            _shopServices?.Clear();
+            BuildShopHealButton();
+            BuildShopSellItems();
+
+            UpdateShopGold();
+            if (_shopFeedbackLabel != null)
+                _shopFeedbackLabel.text = "";
+        }
+
+        private void CreateShopBuyItem(int index, ShopItem item)
+        {
+            if (_shopBuyItems == null) return;
+
+            var row = new VisualElement();
+            row.AddToClassList("map-screen__shop-item");
+            if (item.IsSold)
+                row.AddToClassList("map-screen__shop-item--sold");
+
+            var nameLabel = new Label();
+            nameLabel.AddToClassList("map-screen__shop-item-name");
+            if (item.IsSold)
+            {
+                nameLabel.text = $"[SOLD] {item.TomeData?.displayName ?? "Unknown"}";
+                nameLabel.AddToClassList("map-screen__shop-item-name--sold");
+            }
+            else
+            {
+                nameLabel.text = item.TomeData?.displayName ?? "Unknown";
+                nameLabel.AddToClassList(GetShopRarityClass(item.TomeData));
+            }
+            row.Add(nameLabel);
+
+            if (!item.IsSold)
+            {
+                var priceLabel = new Label($"{item.Price}g");
+                priceLabel.AddToClassList("map-screen__shop-item-price");
+                row.Add(priceLabel);
+
+                var actionLabel = new Label("[ BUY ]");
+                actionLabel.AddToClassList("map-screen__shop-item-action");
+                row.Add(actionLabel);
+
+                int capturedIndex = index;
+                row.RegisterCallback<ClickEvent>(_ => OnShopBuyClicked(capturedIndex));
+            }
+
+            _shopBuyItems.Add(row);
+        }
+
+        private void BuildShopHealButton()
+        {
+            if (_shopServices == null || shopManager == null) return;
+
+            int healCost = 0;
+            foreach (var item in shopManager.Inventory)
+            {
+                if (item.IsHealItem) { healCost = item.Price; break; }
+            }
+
+            int healAmount = shopManager.HealAmountValue;
+            bool canHeal = Run.RunManager.Instance != null
+                && Run.RunManager.Instance.Gold >= healCost
+                && Run.RunManager.Instance.CurrentHP < Run.RunManager.Instance.MaxHP;
+
+            var btn = new Button();
+            btn.text = $"[ HEAL +{healAmount}HP ({healCost}g) ]";
+            btn.AddToClassList("map-screen__shop-heal-btn");
+            if (!canHeal)
+                btn.AddToClassList("map-screen__shop-heal-btn--disabled");
+            btn.clicked += OnShopHealClicked;
+            _shopServices.Add(btn);
+        }
+
+        private void BuildShopSellItems()
+        {
+            if (_shopServices == null) return;
+
+            var tomeManager = TomeManager.Instance;
+            if (tomeManager?.TomeSystem == null) return;
+
+            var equipped = tomeManager.TomeSystem.GetEquippedTomes();
+            if (equipped.Count == 0) return;
+
+            var sellHeader = new Label("> SELL TOMES");
+            sellHeader.AddToClassList("map-screen__shop-section-header");
+            _shopServices.Add(sellHeader);
+
+            foreach (var tome in equipped)
+            {
+                var row = new VisualElement();
+                row.AddToClassList("map-screen__shop-sell-item");
+
+                var nameLabel = new Label(tome.TomeName);
+                nameLabel.AddToClassList("map-screen__shop-sell-name");
+                row.Add(nameLabel);
+
+                var priceLabel = new Label($"+{ShopManager.MinSellPrice}g");
+                priceLabel.AddToClassList("map-screen__shop-sell-price");
+                row.Add(priceLabel);
+
+                var actionLabel = new Label("[ SELL ]");
+                actionLabel.AddToClassList("map-screen__shop-item-action");
+                row.Add(actionLabel);
+
+                string capturedId = tome.TomeId;
+                row.RegisterCallback<ClickEvent>(_ => OnShopSellClicked(capturedId));
+                _shopServices.Add(row);
+            }
+        }
+
+        private void OnShopBuyClicked(int index)
+        {
+            if (shopManager == null) return;
+            var result = shopManager.BuyTome(index);
+            if (_shopFeedbackLabel != null) _shopFeedbackLabel.text = result.Message;
+            if (result.Success) RefreshShopUI();
+            UpdateShopGold();
+            UpdateStats();
+        }
+
+        private void OnShopSellClicked(string tomeId)
+        {
+            if (shopManager == null) return;
+            var result = shopManager.SellTome(tomeId);
+            if (_shopFeedbackLabel != null) _shopFeedbackLabel.text = result.Message;
+            if (result.Success) RefreshShopUI();
+            UpdateShopGold();
+            UpdateStats();
+        }
+
+        private void OnShopHealClicked()
+        {
+            if (shopManager == null) return;
+            var result = shopManager.BuyHeal();
+            if (_shopFeedbackLabel != null) _shopFeedbackLabel.text = result.Message;
+            RefreshShopUI();
+            UpdateShopGold();
+            UpdateStats();
+        }
+
+        private void UpdateShopGold()
+        {
+            if (_shopGoldLabel != null && Run.RunManager.Instance != null)
+                _shopGoldLabel.text = $"GOLD: {Run.RunManager.Instance.Gold}g";
+        }
+
+        private static string GetShopRarityClass(TomeDataSO tome)
+        {
+            if (tome == null) return "map-screen__shop-item-name--common";
+            return tome.rarity switch
+            {
+                TomeRarity.Common => "map-screen__shop-item-name--common",
+                TomeRarity.Uncommon => "map-screen__shop-item-name--uncommon",
+                TomeRarity.Rare => "map-screen__shop-item-name--rare",
+                TomeRarity.Legendary => "map-screen__shop-item-name--legendary",
+                _ => "map-screen__shop-item-name--common"
+            };
         }
 
         private class DungeonNodeEntry

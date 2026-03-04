@@ -31,6 +31,25 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- Shop overlay (centered popup) -->
+        <ui:VisualElement name="shop-overlay" class="map-screen__shop-overlay" picking-mode="Ignore">
+            <ui:VisualElement name="shop-popup" class="map-screen__shop-popup">
+                <ui:Label text="╔══ REQUISITION ══╗" class="map-screen__shop-title" />
+                <ui:ScrollView name="shop-content" class="map-screen__shop-content">
+                    <ui:Label text="> TOMES FOR SALE" class="map-screen__shop-section-header" />
+                    <ui:VisualElement name="shop-buy-items" class="map-screen__shop-section" />
+                    <ui:Label text="> SERVICES" class="map-screen__shop-section-header" />
+                    <ui:VisualElement name="shop-services" class="map-screen__shop-section" />
+                </ui:ScrollView>
+                <ui:VisualElement class="map-screen__shop-footer">
+                    <ui:Label name="shop-gold" text="GOLD: 0g" class="map-screen__shop-gold" />
+                    <ui:Label name="shop-feedback" text="" class="map-screen__shop-feedback" />
+                    <ui:Button name="shop-close" text="[ ESC ] CLOSE" class="btn btn-small map-screen__shop-close-btn" />
+                </ui:VisualElement>
+                <ui:Label text="╚══════════════════╝" class="map-screen__shop-border-bottom" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
         <!-- Bottom status bar -->
         <ui:VisualElement class="map-screen__status-bar">
             <ui:Label name="hp" text="HP ██████████ 30/30" class="text-stat map-screen__stat-inline map-screen__stat-inline--hp" />
@@ -41,6 +60,7 @@
         <ui:VisualElement class="map-screen__status-bar">
             <ui:Label name="wave" text="WAVE 01" class="text-stat map-screen__stat-inline map-screen__stat-inline--wave" />
             <ui:VisualElement class="grow" />
+            <ui:Button name="shop-toggle" text="[TAB] SHOP" class="btn btn-small map-screen__shop-toggle-btn" />
             <ui:Button name="proceed" text="[ P R O C E E D ]" class="btn btn-small map-screen__proceed-btn" />
             <ui:Button name="lang-toggle" text="EN" class="btn btn-small map-screen__lang-btn" />
         </ui:VisualElement>

@@ -28,8 +28,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 29 | Pre-Encounter Gold Wagering | journey | ✅ Done | c17cb7c |
 | 30 | Dual-Pane Norton Commander Layout | journey | ✅ Done | 2897074 |
 | 31 | Boss Wiretap — Progressive Intel | journey | ✅ Done | 5052a28 |
-| 32 | Tome Crucible — Sacrifice Two Tomes | journey | ✅ Done | PENDING |
-| 33 | Inline Shop as Terminal Overlay | journey | ⏳ Queued | — |
+| 32 | Tome Crucible — Sacrifice Two Tomes | journey | ✅ Done | e4e85d4 |
+| 33 | Inline Shop as Terminal Overlay | journey | ✅ Done | PENDING |
 | 34 | Signal Strength Oscilloscope | journey | ⏳ Queued | — |
 | 35 | Ghost Input Echo — Phosphor Atmosphere | journey | ⏳ Queued | — |
 | 36 | Intercept Transmission Events & Dead Drops | journey | ⏳ Queued | — |
@@ -38,7 +38,19 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=32 | NEXT=33 | QUEUE_TOTAL=28
+LAST_COMPLETED=33 | NEXT=34 | QUEUE_TOTAL=28
+
+## Implementation Notes — #33
+- Replaced separate shop screen flow with inline terminal popup overlay on the map screen
+- Added shop overlay UXML: centered popup with bordered panel containing TOMES FOR SALE, SERVICES (heal + sell), gold display, feedback, and close button
+- Added [TAB] SHOP button to map status bar for manual shop access at any time
+- MapController now holds ShopManager reference and builds shop items dynamically: CreateShopBuyItem (buy tomes), BuildShopHealButton (heal service), BuildShopSellItems (sell equipped tomes)
+- Shop overlay show/hide: OpenShop() generates inventory + refreshes, CloseShop() hides + refreshes map stats. Backdrop click or close button dismisses
+- Flow change: GameManager.GoToShop() now calls ReturnToMapWithShop() which advances the node, flags MapController.RequestShopAutoOpen(), and transitions to Map. Shop popup auto-opens 300ms after map renders
+- EncounterController.OnContinueClicked() still calls GoToShop() — no change needed there
+- Gold updates in real-time in both shop popup and status bar via UpdateShopGold() + UpdateStats()
+- USS: overlay backdrop (60% black), popup panel with amber border, buy items with rarity colors, sell items, heal button, slide-in animation
+- GameSceneSetup: wires ShopManager to MapController in addition to ShopController
 
 ## Implementation Notes — #32
 - Created TomeCrucible.cs: singleton MonoBehaviour, FuseTomes(idA, idB) removes both input tomes and equips a fused tome with the rarer effect and bumped rarity. Limited to one fusion per wave via _lastFusionWave tracking

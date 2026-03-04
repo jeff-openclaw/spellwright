@@ -119,6 +119,11 @@ namespace Spellwright.Editor
             if (shopController != null)
                 SetSerializedField(shopController, "shopManager", shopMgr);
 
+            // Wire MapController → ShopManager (for inline shop overlay)
+            var mapController = mapPanel.GetComponent<MapController>();
+            if (mapController != null)
+                SetSerializedField(mapController, "shopManager", shopMgr);
+
             // CRTSettings
             var crtGO = new GameObject("CRTSettings");
             crtGO.AddComponent<CRTSettings>();
