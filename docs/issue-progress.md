@@ -26,8 +26,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 27 | Expandable NPC Dossier Panels | journey | ✅ Done | b10b5c0 |
 | 28 | Gold-for-Intel Economy | journey | ✅ Done | 95125d0 |
 | 29 | Pre-Encounter Gold Wagering | journey | ✅ Done | c17cb7c |
-| 30 | Dual-Pane Norton Commander Layout | journey | ✅ Done | PENDING |
-| 31 | Boss Wiretap — Progressive Intel | journey | ⏳ Queued | — |
+| 30 | Dual-Pane Norton Commander Layout | journey | ✅ Done | 2897074 |
+| 31 | Boss Wiretap — Progressive Intel | journey | ✅ Done | PENDING |
 | 32 | Tome Crucible — Sacrifice Two Tomes | journey | ⏳ Queued | — |
 | 33 | Inline Shop as Terminal Overlay | journey | ⏳ Queued | — |
 | 34 | Signal Strength Oscilloscope | journey | ⏳ Queued | — |
@@ -38,7 +38,15 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=30 | NEXT=31 | QUEUE_TOTAL=28
+LAST_COMPLETED=31 | NEXT=32 | QUEUE_TOTAL=28
+
+## Implementation Notes — #31
+- Enhanced RefreshBossWiretap() to use actual boss NPC data: PreviewNPCForNode for boss name, PreviewCategoryForNode for category, difficultyModifier for threat level, bossConstraint for tactic
+- 5 progressive fragments: (1) redacted boss name (20% → 60% → 100% visible), (2) garbled category (clears at fragment 4), (3) threat level bar, (4) boss tactic/constraint, (5) defeat warning + READY status
+- Added decrypt animation: new fragments scramble through random glitch chars (!@#$%^&*<>{}[]) over 640ms (8 cycles at 80ms), progressively settling on target text via ScramblePartial()
+- Animation tracked via _lastWiretapFragments field — only triggers when fragment count increases between refreshes
+- Boss node dossier (#27) already syncs via shared encountersWon/5 legibility formula — no changes needed
+- Added ScrambleText() and ScramblePartial() helper methods for character-cycling effect
 
 ## Implementation Notes — #30
 - Rewrote Map.uxml: dual-pane layout with left pane (Encounter Directory + ScrollView) and right pane (System Log with Run Log, Tome Loadout, Boss Wiretap sections). Bottom status bar spans full width with HP/gold/score/rival + wave/proceed/lang-toggle

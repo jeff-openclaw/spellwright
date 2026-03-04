@@ -41,6 +41,7 @@ namespace Spellwright.UI
         private IVisualElementScheduledItem _glowSchedule;
         private bool _glowBright = true;
         private int _currentGlowNodeIndex = -1;
+        private int _lastWiretapFragments = -1;
 
         private void OnEnable()
         {
@@ -447,37 +448,126 @@ namespace Spellwright.UI
             _bossWiretapContainer.Clear();
 
             int encountersWon = Run.RunManager.Instance?.EncountersWon ?? 0;
-            int totalEncounters = 5; // encounters per wave before boss
+            int totalEncounters = 5;
             int fragments = Mathf.Min(encountersWon, totalEncounters);
 
-            // Encrypted bar
-            int barWidth = 20;
-            int decrypted = totalEncounters > 0 ? Mathf.RoundToInt((float)fragments / totalEncounters * barWidth) : 0;
-            string bar = new string('\u2593', decrypted) + new string('\u2591', barWidth - decrypted);
-            var barLabel = new Label($"  {bar}");
-            barLabel.AddToClassList("map-screen__wiretap-bar");
-            _bossWiretapContainer.Add(barLabel);
+            // Get boss NPC data
+            var gm = Run.GameManager.Instance;
+            var bossNpc = gm?.PreviewNPCForNode(totalEncounters, NodeType.Boss);
+            string bossName = bossNpc != null ? bossNpc.displayName : "???";
+            string bossCategory = gm?.PreviewCategoryForNode(totalEncounters) ?? "???";
+            float bossDiff = bossNpc != null ? bossNpc.difficultyModifier : 2.0f;
 
-            var progress = new Label($"  [{fragments}/{totalEncounters} FRAGMENTS]");
-            progress.AddToClassList("map-screen__wiretap-progress");
-            _bossWiretapContainer.Add(progress);
+            bool hasNewFragment = fragments > _lastWiretapFragments && _lastWiretapFragments >= 0;
+            _lastWiretapFragments = fragments;
 
-            // Show fragments based on encounters won
-            string[] fragmentTexts =
+            if (fragments == 0)
             {
-                "BOSS: Uses cryptic, minimal clues",
-                "BOSS: Difficulty modifier is HIGH",
-                "BOSS: Defeat = immediate run loss",
-                "BOSS: 3-word clue constraint active",
-                "BOSS: Full intel unlocked — READY"
-            };
-
-            for (int i = 0; i < fragments && i < fragmentTexts.Length; i++)
-            {
-                var frag = new Label($"  > {fragmentTexts[i]}");
-                frag.AddToClassList("map-screen__wiretap-fragment");
-                _bossWiretapContainer.Add(frag);
+                AddWiretapLine("  [SIGNAL TOO WEAK]", "map-screen__wiretap-bar");
+                AddWiretapLine($"  [0/{totalEncounters} FRAGMENTS]", "map-screen__wiretap-progress");
+                return;
             }
+
+            // Fragment 1: heavily redacted name (gets clearer with more fragments)
+            if (fragments >= 1)
+            {
+                float nameReveal = fragments >= 5 ? 1f : fragments >= 3 ? 0.6f : 0.2f;
+                string redacted = RedactText(bossName, nameReveal);
+                bool anim = hasNewFragment && (fragments == 1 || fragments == 3 || fragments == 5);
+                AddWiretapLine($"  SUBJECT: {redacted}", "map-screen__wiretap-fragment", anim);
+            }
+
+            // Fragment 2: partially garbled category (clears at fragment 4)
+            if (fragments >= 2)
+            {
+                float catReveal = fragments >= 4 ? 0.1f : 0.7f;
+                string garbled = GarbleText(bossCategory, catReveal);
+                bool anim = hasNewFragment && (fragments == 2 || fragments == 4);
+                AddWiretapLine($"  CATEGORY: {garbled}", "map-screen__wiretap-fragment", anim);
+            }
+
+            // Fragment 3: threat level
+            if (fragments >= 3)
+            {
+                int threat = Mathf.Clamp(Mathf.RoundToInt(bossDiff * 3), 3, 5);
+                string bar = new string('\u2593', threat) + new string('\u2591', 5 - threat);
+                bool anim = hasNewFragment && fragments == 3;
+                AddWiretapLine($"  THREAT: {bar} (HIGH)", "map-screen__wiretap-fragment", anim);
+            }
+
+            // Fragment 4: personality/constraint
+            if (fragments >= 4)
+            {
+                string constraint = bossNpc != null && !string.IsNullOrEmpty(bossNpc.bossConstraint)
+                    ? bossNpc.bossConstraint
+                    : "Clues are cryptic and minimal";
+                AddWiretapLine($"  TACTIC: {constraint}", "map-screen__wiretap-fragment",
+                    hasNewFragment && fragments == 4);
+            }
+
+            // Fragment 5: full intel
+            if (fragments >= 5)
+            {
+                bool anim5 = hasNewFragment && fragments == 5;
+                AddWiretapLine("  WARNING: Defeat = immediate run loss", "map-screen__wiretap-fragment", anim5);
+                AddWiretapLine("  STATUS: FULL INTEL \u2014 READY", "map-screen__wiretap-fragment", anim5);
+            }
+
+            // Progress bar
+            int barWidth = 20;
+            int filled = Mathf.RoundToInt((float)fragments / totalEncounters * barWidth);
+            string progressBar = new string('\u2593', filled) + new string('\u2591', barWidth - filled);
+            AddWiretapLine($"  {progressBar}", "map-screen__wiretap-bar");
+            AddWiretapLine($"  [{fragments}/{totalEncounters} FRAGMENTS]", "map-screen__wiretap-progress");
+        }
+
+        private void AddWiretapLine(string text, string className, bool animate = false)
+        {
+            var label = new Label(animate ? ScrambleText(text) : text);
+            label.AddToClassList(className);
+            _bossWiretapContainer.Add(label);
+
+            if (animate && _root != null)
+            {
+                string target = text;
+                int cycles = 0;
+                var rng = new System.Random();
+                _root.schedule.Execute(() =>
+                {
+                    cycles++;
+                    if (cycles >= 8)
+                    {
+                        label.text = target;
+                        return;
+                    }
+                    label.text = ScramblePartial(target, 1f - cycles / 8f, rng);
+                }).Every(80).ForDuration(640);
+            }
+        }
+
+        private static string ScrambleText(string text)
+        {
+            const string glitchChars = "!@#$%^&*<>{}[]|/\\~";
+            var rng = new System.Random();
+            var chars = text.ToCharArray();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (chars[i] != ' ' && chars[i] != ':' && chars[i] != '[' && chars[i] != ']')
+                    chars[i] = glitchChars[rng.Next(glitchChars.Length)];
+            }
+            return new string(chars);
+        }
+
+        private static string ScramblePartial(string text, float scrambleFraction, System.Random rng)
+        {
+            const string glitchChars = "!@#$%^&*<>{}[]|/\\~";
+            var chars = text.ToCharArray();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (chars[i] != ' ' && chars[i] != ':' && rng.NextDouble() < scrambleFraction)
+                    chars[i] = glitchChars[rng.Next(glitchChars.Length)];
+            }
+            return new string(chars);
         }
 
         // ── Proceed ─────────────────────────────────────────
