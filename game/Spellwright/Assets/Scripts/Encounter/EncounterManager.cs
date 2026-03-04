@@ -464,6 +464,10 @@ namespace Spellwright.Encounter
         {
             int hpLoss = baseLoss;
 
+            // Wager damage bonus
+            if (Run.RunManager.Instance != null && Run.RunManager.Instance.WagerDamageBonus > 0)
+                hpLoss += Run.RunManager.Instance.WagerDamageBonus;
+
             // Double risk from mood bargain
             var bargainSystem = FindAnyObjectByType<MoodBargainSystem>();
             if (bargainSystem != null && bargainSystem.DoubleRiskActive)

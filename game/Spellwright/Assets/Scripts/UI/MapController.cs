@@ -526,6 +526,11 @@ namespace Spellwright.UI
                 AddIntelLine(entry, intel, IntelType.Weakness, "NPC weakness",
                     $"Weakness: {intel.WeaknessHint}");
             }
+
+            // Wager section (only for current node)
+            int currentIndex = Run.RunManager.Instance?.CurrentNodeIndex ?? -1;
+            if (entry.Index == currentIndex)
+                AddWagerSection(entry);
         }
 
         private void BuildBossDossier(DungeonNodeEntry entry, NPCDataSO npc, int encountersWon)
@@ -678,6 +683,78 @@ namespace Spellwright.UI
             btn.SetEnabled(false);
 
             // Update gold display
+            UpdateStats();
+        }
+
+        // ── Wager Section ─────────────────────────────────────
+
+        private void AddWagerSection(DungeonNodeEntry entry)
+        {
+            if (gameConfig == null) return;
+
+            var sep = new Label("> STAKE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+            sep.AddToClassList("map-screen__dossier-line");
+            sep.AddToClassList("map-screen__wager-separator");
+            entry.Dossier.Add(sep);
+
+            var container = new VisualElement();
+            container.AddToClassList("map-screen__wager-container");
+
+            int gold = Run.RunManager.Instance?.Gold ?? 0;
+
+            for (int i = 0; i < gameConfig.wagerCosts.Length; i++)
+            {
+                int cost = gameConfig.wagerCosts[i];
+                float mult = i < gameConfig.wagerMultipliers.Length ? gameConfig.wagerMultipliers[i] : 1f;
+                int dmg = i < gameConfig.wagerDamageBonus.Length ? gameConfig.wagerDamageBonus[i] : 0;
+
+                var btn = new Button();
+                string label = cost == 0
+                    ? $"[SKIP] {mult:F1}x"
+                    : $"[{cost}g] {mult:F1}x +{dmg}dmg";
+                btn.text = label;
+                btn.AddToClassList("map-screen__wager-btn");
+
+                if (cost == 0)
+                    btn.AddToClassList("map-screen__wager-btn--safe");
+                else if (cost > gold)
+                    btn.AddToClassList("map-screen__wager-btn--disabled");
+
+                int tierIndex = i;
+                btn.clicked += () => OnWagerClicked(tierIndex, container);
+                container.Add(btn);
+            }
+
+            entry.Dossier.Add(container);
+        }
+
+        private void OnWagerClicked(int tierIndex, VisualElement container)
+        {
+            if (Run.RunManager.Instance == null) return;
+            if (!Run.RunManager.Instance.PlaceWager(tierIndex)) return;
+
+            // Disable all wager buttons and mark selected
+            foreach (var child in container.Children())
+            {
+                if (child is Button btn)
+                {
+                    btn.SetEnabled(false);
+                    btn.AddToClassList("map-screen__wager-btn--disabled");
+                }
+            }
+
+            // Highlight the selected tier
+            int idx = 0;
+            foreach (var child in container.Children())
+            {
+                if (child is Button btn && idx == tierIndex)
+                {
+                    btn.RemoveFromClassList("map-screen__wager-btn--disabled");
+                    btn.AddToClassList("map-screen__wager-btn--selected");
+                }
+                idx++;
+            }
+
             UpdateStats();
         }
 

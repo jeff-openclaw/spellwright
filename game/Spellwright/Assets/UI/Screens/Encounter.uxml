@@ -48,6 +48,9 @@
             <ui:VisualElement class="encounter-screen__stat-chip encounter-screen__stat-chip--score">
                 <ui:Label name="score-text" text="* 0" class="text-stat" />
             </ui:VisualElement>
+            <ui:VisualElement name="wager-chip" class="encounter-screen__stat-chip encounter-screen__stat-chip--wager" style="display: none;">
+                <ui:Label name="wager-text" text="" class="text-stat" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Input area -->

@@ -56,6 +56,14 @@ namespace Spellwright.ScriptableObjects
         [Tooltip("Cost to unlock NPC weakness intel (easy/mid/hard)")]
         public Vector3Int intelCostWeakness = new Vector3Int(8, 10, 15);
 
+        [Header("Wager Tiers (Pre-Encounter Staking)")]
+        [Tooltip("Tier costs in gold (0 = no stake)")]
+        public int[] wagerCosts = { 0, 5, 10, 20 };
+        [Tooltip("Reward multipliers matching wager tiers")]
+        public float[] wagerMultipliers = { 1.0f, 1.5f, 2.0f, 3.0f };
+        [Tooltip("Extra HP damage per wrong guess, matching wager tiers")]
+        public int[] wagerDamageBonus = { 0, 1, 2, 3 };
+
         [Header("Difficulty Progression")]
         [Tooltip("Difficulty for encounters 1-2 (min, max)")]
         public Vector2Int earlyDifficulty = new Vector2Int(1, 2);

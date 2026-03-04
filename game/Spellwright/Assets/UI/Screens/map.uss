@@ -346,6 +346,65 @@
     opacity: 0.6;
 }
 
+/* ── Wager Section ── */
+
+.map-screen__wager-separator {
+    color: var(--color-amber);
+    margin-top: var(--space-sm);
+}
+
+.map-screen__wager-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.map-screen__wager-btn {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-amber);
+    background-color: transparent;
+    border-width: 1px;
+    border-color: var(--color-amber-dim);
+    padding: 2px var(--space-xs);
+    margin-right: var(--space-xs);
+    margin-bottom: 2px;
+    cursor: link;
+    transition: border-color 200ms ease-out, color 200ms ease-out, background-color 200ms ease-out;
+}
+
+.map-screen__wager-btn:hover {
+    border-color: var(--color-amber);
+    color: var(--color-amber);
+}
+
+.map-screen__wager-btn:active {
+    background-color: var(--color-amber);
+    color: var(--color-bg);
+}
+
+.map-screen__wager-btn--safe {
+    color: var(--color-phosphor);
+    border-color: var(--color-phosphor-dim);
+}
+
+.map-screen__wager-btn--safe:hover {
+    border-color: var(--color-phosphor);
+}
+
+.map-screen__wager-btn--disabled {
+    color: var(--color-phosphor-dim);
+    border-color: var(--color-phosphor-dim);
+    opacity: 0.4;
+}
+
+.map-screen__wager-btn--selected {
+    color: var(--color-amber);
+    border-color: var(--color-amber);
+    background-color: rgba(255, 176, 0, 0.1);
+    opacity: 1;
+}
+
 /* ── Footer ── */
 
 .map-screen__footer {

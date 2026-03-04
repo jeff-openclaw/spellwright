@@ -38,6 +38,8 @@ namespace Spellwright.UI
         private Label _goldTextLabel;
         private Label _guessesTextLabel;
         private Label _scoreTextLabel;
+        private VisualElement _wagerChip;
+        private Label _wagerTextLabel;
         private TextField _guessInput;
         private Button _submitBtn;
         private Button _solveBtn;
@@ -135,6 +137,8 @@ namespace Spellwright.UI
             _goldTextLabel = _root.Q<Label>("gold-text");
             _guessesTextLabel = _root.Q<Label>("guesses-text");
             _scoreTextLabel = _root.Q<Label>("score-text");
+            _wagerChip = _root.Q("wager-chip");
+            _wagerTextLabel = _root.Q<Label>("wager-text");
             _guessInput = _root.Q<TextField>("guess-input");
             _submitBtn = _root.Q<Button>("submit-btn");
             _solveBtn = _root.Q<Button>("solve-btn");
@@ -308,6 +312,7 @@ namespace Spellwright.UI
             _lastDisplayedScore = RunManager.Instance != null ? RunManager.Instance.Score : 0;
             UpdateStatus();
             UpdateTomeInfo();
+            UpdateWagerDisplay();
 
             // Enable input
             SetInputEnabled(true);
@@ -1051,6 +1056,22 @@ namespace Spellwright.UI
             {
                 _scoreTextLabel.text = $"Score: {RunManager.Instance.Score}";
                 _lastDisplayedScore = RunManager.Instance.Score;
+            }
+        }
+
+        private void UpdateWagerDisplay()
+        {
+            if (_wagerChip == null) return;
+            var rm = RunManager.Instance;
+            if (rm != null && rm.CurrentWager > 0)
+            {
+                _wagerChip.style.display = DisplayStyle.Flex;
+                if (_wagerTextLabel != null)
+                    _wagerTextLabel.text = $"STAKE: {rm.CurrentWager}g ({rm.WagerMultiplier:F1}x)";
+            }
+            else
+            {
+                _wagerChip.style.display = DisplayStyle.None;
             }
         }
 

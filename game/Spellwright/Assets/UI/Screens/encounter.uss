@@ -267,6 +267,14 @@
     color: var(--color-cyan);
 }
 
+.encounter-screen__stat-chip--wager {
+    border-color: var(--color-amber-dim);
+}
+
+.encounter-screen__stat-chip--wager .text-stat {
+    color: var(--color-amber);
+}
+
 .encounter-screen__hp-bar {
     width: 100%;
     height: 4px;

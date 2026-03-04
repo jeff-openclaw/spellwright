@@ -396,4 +396,14 @@ namespace Spellwright.Data
         public IntelType Type { get; set; }
         public int GoldSpent { get; set; }
     }
+
+    // ── Wager (Pre-Encounter Gold Staking) ──────────────
+
+    /// <summary>Fired when the player confirms a gold wager before an encounter.</summary>
+    public class WagerConfirmedEvent
+    {
+        public int GoldStaked { get; set; }
+        public float RewardMultiplier { get; set; }
+        public int DamageBonus { get; set; }
+    }
 }

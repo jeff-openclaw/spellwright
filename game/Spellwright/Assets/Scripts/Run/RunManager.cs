@@ -22,6 +22,11 @@ namespace Spellwright.Run
         private readonly List<NodeOutcome> _nodeOutcomes = new();
         private readonly Dictionary<int, NodeIntelData> _nodeIntel = new();
 
+        // Wager state
+        private int _currentWager;
+        private float _wagerMultiplier = 1f;
+        private int _wagerDamageBonus;
+
         // ── Properties ───────────────────────────────────────
 
         public bool IsRunActive => _state.IsRunActive;
@@ -34,6 +39,13 @@ namespace Spellwright.Run
         public IReadOnlyList<NodeType> NodeSequence => _state.NodeSequence;
         public int WaveNumber => _waveNumber;
         public IReadOnlyList<NodeOutcome> NodeOutcomes => _nodeOutcomes;
+
+        /// <summary>Current encounter wager amount (0 = no wager).</summary>
+        public int CurrentWager => _currentWager;
+        /// <summary>Current wager reward multiplier.</summary>
+        public float WagerMultiplier => _wagerMultiplier;
+        /// <summary>Extra HP damage per wrong guess from wager.</summary>
+        public int WagerDamageBonus => _wagerDamageBonus;
 
         /// <summary>The NodeType at the current index, or Encounter if out of range.</summary>
         public NodeType CurrentNodeType =>
@@ -188,29 +200,23 @@ namespace Spellwright.Run
             // Track encounters won
             if (evt.Won) EncountersWon++;
 
-            // Gold reward for winning — config-driven
+            // Gold reward for winning — config-driven, wager-multiplied
+            int goldReward = 0;
             if (evt.Won)
             {
                 int guessesRemaining = gameConfig != null
                     ? gameConfig.maxGuessesPerEncounter - evt.GuessCount
                     : 6 - evt.GuessCount;
-                int reward = gameConfig != null
+                int baseReward = gameConfig != null
                     ? gameConfig.CalculateGoldReward(guessesRemaining)
                     : 8 + 2 * guessesRemaining;
-                AddGold(reward);
-            }
+                goldReward = Mathf.RoundToInt(baseReward * _wagerMultiplier);
 
-            // Track per-node outcome for map display
-            int goldReward = 0;
-            if (evt.Won)
-            {
-                int guessesRem = gameConfig != null
-                    ? gameConfig.maxGuessesPerEncounter - evt.GuessCount
-                    : 6 - evt.GuessCount;
-                goldReward = gameConfig != null
-                    ? gameConfig.CalculateGoldReward(guessesRem)
-                    : 8 + 2 * guessesRem;
+                // Return staked gold + multiplied reward on win
+                AddGold(goldReward + _currentWager);
             }
+            // On loss, staked gold is already spent — no return
+
             _nodeOutcomes.Add(new NodeOutcome
             {
                 NodeIndex = _state.CurrentNodeIndex,
@@ -218,6 +224,8 @@ namespace Spellwright.Run
                 GuessCount = evt.GuessCount,
                 GoldEarned = goldReward
             });
+
+            ClearWager();
 
             // Track used words
             if (!string.IsNullOrEmpty(evt.TargetWord))
@@ -290,6 +298,44 @@ namespace Spellwright.Run
                 Debug.Log("[RunManager] HP depleted — ending run.");
                 EndRun(won: false);
             }
+        }
+
+        // ── Wager (Pre-Encounter Gold Staking) ──────────────
+
+        /// <summary>Places a wager for the upcoming encounter. Returns true on success.</summary>
+        public bool PlaceWager(int tierIndex)
+        {
+            if (!_state.IsRunActive || gameConfig == null) return false;
+            if (tierIndex < 0 || tierIndex >= gameConfig.wagerCosts.Length) return false;
+
+            int cost = gameConfig.wagerCosts[tierIndex];
+            float multiplier = tierIndex < gameConfig.wagerMultipliers.Length ? gameConfig.wagerMultipliers[tierIndex] : 1f;
+            int dmgBonus = tierIndex < gameConfig.wagerDamageBonus.Length ? gameConfig.wagerDamageBonus[tierIndex] : 0;
+
+            // Tier 0 is free (no stake)
+            if (cost > 0 && !SpendGold(cost)) return false;
+
+            _currentWager = cost;
+            _wagerMultiplier = multiplier;
+            _wagerDamageBonus = dmgBonus;
+
+            EventBus.Instance.Publish(new WagerConfirmedEvent
+            {
+                GoldStaked = cost,
+                RewardMultiplier = multiplier,
+                DamageBonus = dmgBonus
+            });
+
+            Debug.Log($"[RunManager] Wager placed: {cost}g, {multiplier:F1}x reward, +{dmgBonus} dmg/miss");
+            return true;
+        }
+
+        /// <summary>Clears the wager state after encounter ends.</summary>
+        public void ClearWager()
+        {
+            _currentWager = 0;
+            _wagerMultiplier = 1f;
+            _wagerDamageBonus = 0;
         }
 
         // ── Intel (Gold-for-Intel Economy) ──────────────────

@@ -24,8 +24,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 25 | Journey Screen Redesign: Design North Star | journey | ⏭️ Epic tracker (skip) | — |
 | 26 | ASCII Dungeon Map with Pipe-Connected Nodes | journey | ✅ Done | ee069ac |
 | 27 | Expandable NPC Dossier Panels | journey | ✅ Done | b10b5c0 |
-| 28 | Gold-for-Intel Economy | journey | ✅ Done | PENDING |
-| 29 | Pre-Encounter Gold Wagering | journey | ⏳ Queued | — |
+| 28 | Gold-for-Intel Economy | journey | ✅ Done | 95125d0 |
+| 29 | Pre-Encounter Gold Wagering | journey | ✅ Done | PENDING |
 | 30 | Dual-Pane Norton Commander Layout | journey | ⏳ Queued | — |
 | 31 | Boss Wiretap — Progressive Intel | journey | ⏳ Queued | — |
 | 32 | Tome Crucible — Sacrifice Two Tomes | journey | ⏳ Queued | — |
@@ -38,7 +38,19 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=28 | NEXT=29 | QUEUE_TOTAL=28
+LAST_COMPLETED=29 | NEXT=30 | QUEUE_TOTAL=28
+
+## Implementation Notes — #29
+- Added wager tier config to GameConfigSO: wagerCosts[0,5,10,20], wagerMultipliers[1.0,1.5,2.0,3.0], wagerDamageBonus[0,1,2,3]
+- Added WagerConfirmedEvent to GameDataModels
+- Added RunManager wager state: _currentWager, _wagerMultiplier, _wagerDamageBonus with PlaceWager(tierIndex) and ClearWager(). Properties exposed for EncounterManager/EncounterController
+- Modified RunManager.OnEncounterEnded: reward multiplied by _wagerMultiplier, staked gold returned on win (lost on defeat), ClearWager() after each encounter
+- Modified EncounterManager.ApplyHPLoss: adds WagerDamageBonus to base HP loss before bargain/tome modifiers
+- Added MapController.AddWagerSection(): tier buttons in current node's dossier with cost/multiplier/damage labels, OnWagerClicked() with selected state highlighting
+- Added wager USS: wager-separator (amber), wager-container (flex row), wager-btn (amber border, safe/disabled/selected variants)
+- Added wager chip to Encounter.uxml stats bar: shows "STAKE: Xg (Y.Zx)" during encounter
+- Added EncounterController.UpdateWagerDisplay(): shows/hides wager chip based on RunManager.CurrentWager
+- Added encounter.uss: stat-chip--wager style (amber)
 
 ## Implementation Notes — #28
 - Added IntelType enum (WordLength, FirstLetter, Weakness) and NodeIntelData class to GameDataModels, plus IntelUnlockedEvent
