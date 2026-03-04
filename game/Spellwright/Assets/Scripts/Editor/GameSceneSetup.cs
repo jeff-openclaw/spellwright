@@ -17,6 +17,7 @@ using UnityEngine.InputSystem.UI;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace Spellwright.Editor
 {
@@ -74,8 +75,8 @@ namespace Spellwright.Editor
             var shopPanel = CreateShopPanel(canvasGO.transform);
             var runEndPanel = CreateRunEndPanel(canvasGO.transform);
 
-            // Add CanvasGroup + UIAnimator to each panel for entrance animations
-            AddPanelAnimator(mainMenuPanel);
+            // Add CanvasGroup + UIAnimator to each uGUI panel for entrance animations
+            // MainMenuPanel uses UI Toolkit (USS handles animations)
             AddPanelAnimator(mapPanel);
             AddPanelAnimator(encounterPanel);
             AddPanelAnimator(shopPanel);
@@ -280,90 +281,52 @@ namespace Spellwright.Editor
 
         private static GameObject CreateMainMenuPanel(Transform parent)
         {
-            var panel = CreatePanel(parent, "MainMenuPanel");
-            AddPanelBorder(panel);
-            var menuUI = panel.AddComponent<MainMenuUI>();
+            // UI Toolkit-based main menu — root-level GameObject (not under Canvas)
+            var panelGO = new GameObject("MainMenuPanel");
 
-            // ── Corner brackets (decorative frame — larger, brighter) ──
-            Color frameColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.35f);
-            int frameSize = _theme != null ? _theme.decorativeTitleSize - 10 : 62;
-            CreateText(panel.transform, "CornerTL", "\u250C",
-                frameSize, frameColor,
-                TextAlignmentOptions.TopLeft, new Vector2(0.04f, 0.88f), new Vector2(0.12f, 0.97f));
-            CreateText(panel.transform, "CornerTR", "\u2510",
-                frameSize, frameColor,
-                TextAlignmentOptions.TopRight, new Vector2(0.88f, 0.88f), new Vector2(0.96f, 0.97f));
-            CreateText(panel.transform, "CornerBL", "\u2514",
-                frameSize, frameColor,
-                TextAlignmentOptions.BottomLeft, new Vector2(0.04f, 0.11f), new Vector2(0.12f, 0.20f));
-            CreateText(panel.transform, "CornerBR", "\u2518",
-                frameSize, frameColor,
-                TextAlignmentOptions.BottomRight, new Vector2(0.88f, 0.11f), new Vector2(0.96f, 0.20f));
+            // Create or load PanelSettings asset
+            var panelSettings = EnsurePanelSettings();
 
-            // ── Top decorative border (between corners, brighter) ──
-            CreateText(panel.transform, "TopBorder", new string('\u2500', 50),
-                _theme != null ? _theme.smallSize + 1 : 14, frameColor,
-                TextAlignmentOptions.Center, new Vector2(0.10f, 0.92f), new Vector2(0.90f, 0.96f));
+            // Add UIDocument with UXML and PanelSettings
+            var uiDoc = panelGO.AddComponent<UIDocument>();
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Screens/MainMenu.uxml");
+            if (uxml == null)
+                Debug.LogWarning("[GameSceneSetup] MainMenu.uxml not found at Assets/UI/Screens/MainMenu.uxml");
 
-            // ── Bottom decorative border (between corners, brighter) ──
-            CreateText(panel.transform, "BottomBorder", new string('\u2500', 50),
-                _theme != null ? _theme.smallSize + 1 : 14, frameColor,
-                TextAlignmentOptions.Center, new Vector2(0.10f, 0.14f), new Vector2(0.90f, 0.18f));
+            uiDoc.panelSettings = panelSettings;
+            uiDoc.visualTreeAsset = uxml;
 
-            // ── Title (VT323, large, with glow + amber-green gradient) ──
-            Color titleTop = new Color(1f, 0.9f, 0.5f); // warm amber-white
-            var title = TerminalUIHelper.CreateDecorativeText(panel.transform, "TitleText", "SPELLWRIGHT",
-                _theme, _theme != null ? _theme.decorativeTitleSize : 64, titleTop,
-                TextAlignmentOptions.Center, new Vector2(0.05f, 0.60f), new Vector2(0.95f, 0.86f), applyGlow: true);
-            TerminalUIHelper.ApplyVerticalGradient(title, titleTop, PhosphorGreen);
+            // Add MainMenuController
+            var controller = panelGO.AddComponent<MainMenuController>();
+            SetSerializedField(controller, "uiDocument", uiDoc);
 
-            // ── Title underline accent (amber, more visible) ──
-            Color underlineColor = new Color(AmberBright.r, AmberBright.g, AmberBright.b, 0.70f);
-            CreateText(panel.transform, "TitleUnderline", new string('\u2500', 22),
-                _theme != null ? _theme.labelSize + 2 : 24, underlineColor,
-                TextAlignmentOptions.Center, new Vector2(0.28f, 0.58f), new Vector2(0.72f, 0.62f));
+            return panelGO;
+        }
 
-            // ── Subtitle (typewriter-revealed by MainMenuUI, larger and brighter) ──
-            Color subtitleColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.85f);
-            var subtitle = CreateText(panel.transform, "SubtitleText", "",
-                _theme != null ? _theme.bodySize + 2 : 20, subtitleColor,
-                TextAlignmentOptions.Center, new Vector2(0.15f, 0.51f), new Vector2(0.85f, 0.58f));
+        /// <summary>Creates or loads the shared PanelSettings asset for UI Toolkit screens.</summary>
+        private static PanelSettings EnsurePanelSettings()
+        {
+            const string path = "Assets/UI/SpellwrightPanelSettings.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<PanelSettings>(path);
+            if (existing != null) return existing;
 
-            // ── Blinking cursor ──
-            var cursor = CreateText(panel.transform, "CursorBlink", "_",
-                _theme != null ? _theme.bodySize : 18, PhosphorGreen,
-                TextAlignmentOptions.Center, new Vector2(0.48f, 0.47f), new Vector2(0.52f, 0.52f));
+            var ps = ScriptableObject.CreateInstance<PanelSettings>();
 
-            // ── Separator ──
-            Color sepColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.35f);
-            TerminalUIHelper.CreateSeparator(panel.transform, "MenuSeparator",
-                _theme, sepColor, new Vector2(0.30f, 0.43f), new Vector2(0.70f, 0.47f));
+            // Assign terminal theme TSS
+            var tss = AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>("Assets/UI/Themes/terminal-theme.tss");
+            if (tss != null)
+                ps.themeStyleSheet = tss;
+            else
+                Debug.LogWarning("[GameSceneSetup] terminal-theme.tss not found — PanelSettings will have no theme.");
 
-            // ── Start button (amber-accented primary action) ──
-            var startBtn = CreatePrimaryButton(panel.transform, "StartButton", "[ START RUN ]",
-                new Vector2(0.34f, 0.28f), new Vector2(0.66f, 0.40f));
+            // Ensure directory exists
+            if (!AssetDatabase.IsValidFolder("Assets/UI"))
+                AssetDatabase.CreateFolder("Assets", "UI");
 
-            // ── Hint text below button ──
-            Color hintColor = Color.Lerp(PhosphorDim, PhosphorGreen, 0.40f);
-            CreateText(panel.transform, "HintText", "Press Enter or click to begin",
-                _theme != null ? _theme.labelSize : 22,
-                new Color(hintColor.r, hintColor.g, hintColor.b, 0.88f),
-                TextAlignmentOptions.Center, new Vector2(0.25f, 0.22f), new Vector2(0.75f, 0.28f));
-
-            // ── Version text ──
-            Color versionColor = new Color(PhosphorGreen.r, PhosphorGreen.g, PhosphorGreen.b, 0.55f);
-            var versionText = CreateText(panel.transform, "VersionText", "v0.1.0",
-                _theme != null ? _theme.smallSize : 13, versionColor,
-                TextAlignmentOptions.BottomRight, new Vector2(0.7f, 0.02f), new Vector2(0.96f, 0.08f));
-
-            SetSerializedField(menuUI, "titleText", title);
-            SetSerializedField(menuUI, "subtitleText", subtitle);
-            SetSerializedField(menuUI, "startButton", startBtn.GetComponent<Button>());
-            SetSerializedField(menuUI, "cursorBlink", cursor);
-            SetSerializedField(menuUI, "versionText", versionText);
-            SetSerializedField(menuUI, "theme", _theme);
-
-            return panel;
+            AssetDatabase.CreateAsset(ps, path);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[GameSceneSetup] Created PanelSettings at {path}");
+            return ps;
         }
 
         private static GameObject CreateMapPanel(Transform parent)

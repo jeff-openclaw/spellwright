@@ -136,6 +136,116 @@ namespace Spellwright.Editor
                 Debug.LogWarning($"{failed} check(s) failed. Review errors above.");
         }
 
+        [MenuItem("Spellwright/Tests/Verify MainMenu UI Toolkit")]
+        public static void VerifyMainMenuUIToolkit()
+        {
+            int passed = 0;
+            int failed = 0;
+
+            // Check MainMenu.uxml exists and loads
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Screens/MainMenu.uxml");
+            if (uxml != null)
+            {
+                Debug.Log("[PASS] MainMenu.uxml loaded");
+                passed++;
+            }
+            else
+            {
+                Debug.LogError("[FAIL] MainMenu.uxml not found at Assets/UI/Screens/MainMenu.uxml");
+                failed++;
+            }
+
+            // Check main-menu.uss loads
+            var uss = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/UI/Screens/main-menu.uss");
+            if (uss != null)
+            {
+                Debug.Log("[PASS] main-menu.uss loaded");
+                passed++;
+            }
+            else
+            {
+                Debug.LogError("[FAIL] main-menu.uss not found");
+                failed++;
+            }
+
+            // Instantiate UXML and verify expected elements exist
+            if (uxml != null)
+            {
+                var root = new VisualElement();
+                uxml.CloneTree(root);
+
+                string[] expectedNames = { "title", "subtitle", "cursor", "start-button", "version", "hint" };
+                foreach (var name in expectedNames)
+                {
+                    var el = root.Q(name);
+                    if (el != null)
+                    {
+                        Debug.Log($"[PASS] Element '{name}' found in MainMenu.uxml");
+                        passed++;
+                    }
+                    else
+                    {
+                        Debug.LogError($"[FAIL] Element '{name}' NOT found in MainMenu.uxml");
+                        failed++;
+                    }
+                }
+
+                // Verify start-button is a Button
+                var btn = root.Q<Button>("start-button");
+                if (btn != null)
+                {
+                    Debug.Log("[PASS] start-button is a Button element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] start-button is not a Button element");
+                    failed++;
+                }
+
+                // Verify CSS classes are applied
+                var menuRoot = root.Q(className: "main-menu");
+                if (menuRoot != null)
+                {
+                    Debug.Log("[PASS] .main-menu class found on root element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] .main-menu class not found");
+                    failed++;
+                }
+            }
+
+            // Check PanelSettings asset
+            var ps = AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/UI/SpellwrightPanelSettings.asset");
+            if (ps != null)
+            {
+                Debug.Log("[PASS] SpellwrightPanelSettings.asset found");
+                passed++;
+
+                if (ps.themeStyleSheet != null)
+                {
+                    Debug.Log("[PASS] PanelSettings has theme assigned");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogWarning("[WARN] PanelSettings has no theme — run Setup Game Scene first");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[WARN] SpellwrightPanelSettings.asset not found — will be created on Setup Game Scene");
+            }
+
+            Debug.Log($"\n=== MainMenu UI Toolkit Verification: {passed} passed, {failed} failed ===");
+            if (failed == 0)
+                Debug.Log("All MainMenu UI Toolkit checks passed!");
+            else
+                Debug.LogWarning($"{failed} check(s) failed. Review errors above.");
+        }
+
         [MenuItem("Spellwright/Tests/Preview Theme Test")]
         public static void PreviewThemeTest()
         {

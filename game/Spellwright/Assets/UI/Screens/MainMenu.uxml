@@ -1,0 +1,30 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../Screens/main-menu.uss" />
+    <ui:VisualElement name="main-menu-root" class="screen-root main-menu">
+        <ui:VisualElement class="main-menu__content col center">
+            <!-- Title -->
+            <ui:Label name="title" text="SPELLWRIGHT" class="text-title-decorative main-menu__title" />
+
+            <!-- Decorative underline -->
+            <ui:VisualElement class="main-menu__underline" />
+
+            <!-- Subtitle with typewriter effect (populated by C#) -->
+            <ui:VisualElement class="row main-menu__subtitle-row">
+                <ui:Label name="subtitle" text="" class="text-body main-menu__subtitle" />
+                <ui:Label name="cursor" text="_" class="text-body main-menu__cursor cursor-on" />
+            </ui:VisualElement>
+
+            <!-- Separator -->
+            <ui:VisualElement class="main-menu__separator" />
+
+            <!-- Start button -->
+            <ui:Button name="start-button" text="[ START RUN ]" class="btn btn-large main-menu__start-btn" />
+
+            <!-- Hint text -->
+            <ui:Label name="hint" text="Press Enter or click to begin" class="text-label main-menu__hint" />
+        </ui:VisualElement>
+
+        <!-- Version (absolute positioned bottom-right) -->
+        <ui:Label name="version" text="" class="text-small main-menu__version" />
+    </ui:VisualElement>
+</ui:UXML>

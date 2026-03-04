@@ -8,8 +8,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 37 | UI Overhaul: Design North Star | ui | ⏭️ Epic tracker (skip) | — |
 | 39 | Add CRT Audio Atmosphere | ui | ✅ Done | 902082f |
 | 40 | Evaluate Authentic CRT Terminal Fonts | ui | ✅ Done | 7a3e014 |
-| 41 | Create Terminal Design System (USS Theme) | ui | 🔄 In progress | — |
-| 42 | UI Toolkit Migration: MainMenuUI (Pilot) | ui | ⏳ Queued | — |
+| 41 | Create Terminal Design System (USS Theme) | ui | ✅ Done | ed21676 |
+| 42 | UI Toolkit Migration: MainMenuUI (Pilot) | ui | 🔄 In progress | — |
 | 43 | UI Toolkit Migration: MapUI (Journey Screen) | ui | ⏳ Queued | — |
 | 44 | UI Toolkit Migration: ShopUI | ui | ⏳ Queued | — |
 | 45 | UI Toolkit Migration: ResultUI | ui | ⏳ Queued | — |
@@ -38,7 +38,7 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=40 | NEXT=41 | QUEUE_TOTAL=28
+LAST_COMPLETED=41 | NEXT=42 | QUEUE_TOTAL=28
 
 ## Implementation Notes — #41
 - Created Assets/UI/ directory structure: Themes/, Styles/, Screens/
