@@ -1,0 +1,146 @@
+/* =============================================================
+   Spellwright Terminal Design System — Typography
+   ============================================================= */
+
+/* ── Title Styles ── */
+
+.text-title {
+    font-size: var(--font-size-title);
+    color: var(--color-phosphor);
+    -unity-font-definition: var(--font-primary);
+    -unity-text-align: middle-center;
+    letter-spacing: 4px;
+}
+
+.text-title-decorative {
+    font-size: var(--font-size-decorative);
+    color: var(--color-phosphor-bright);
+    -unity-font-definition: var(--font-primary);
+    -unity-text-align: middle-center;
+    letter-spacing: 6px;
+}
+
+/* ── Header Styles ── */
+
+.text-header {
+    font-size: var(--font-size-xl);
+    color: var(--color-phosphor);
+    -unity-font-definition: var(--font-primary);
+    -unity-text-align: middle-left;
+}
+
+.text-subheader {
+    font-size: var(--font-size-lg);
+    color: var(--color-phosphor);
+    -unity-font-definition: var(--font-primary);
+    -unity-text-align: middle-left;
+}
+
+/* ── Body Text ── */
+
+.text-body {
+    font-size: var(--font-size-md);
+    color: var(--color-phosphor);
+    -unity-font-definition: var(--font-primary);
+    -unity-text-align: middle-left;
+}
+
+.text-body-secondary {
+    font-size: var(--font-size-md);
+    color: var(--color-phosphor);
+    -unity-font-definition: var(--font-secondary);
+    -unity-text-align: middle-left;
+}
+
+/* ── Label / Small ── */
+
+.text-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-phosphor-dim);
+    -unity-font-definition: var(--font-primary);
+    -unity-text-align: middle-left;
+}
+
+.text-small {
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+    -unity-font-definition: var(--font-primary);
+}
+
+/* ── Stat Display ── */
+
+.text-stat {
+    font-size: var(--font-size-sm);
+    color: var(--color-phosphor);
+    -unity-font-definition: var(--font-secondary);
+    -unity-text-align: middle-center;
+}
+
+.text-stat-value {
+    font-size: var(--font-size-lg);
+    color: var(--color-phosphor-bright);
+    -unity-font-definition: var(--font-primary);
+    -unity-text-align: middle-center;
+}
+
+/* ── Color Modifiers ── */
+
+.text-amber {
+    color: var(--color-amber);
+}
+
+.text-cyan {
+    color: var(--color-cyan);
+}
+
+.text-magenta {
+    color: var(--color-magenta);
+}
+
+.text-danger {
+    color: var(--color-danger);
+}
+
+.text-success {
+    color: var(--color-success);
+}
+
+.text-warning {
+    color: var(--color-warning);
+}
+
+.text-inactive {
+    color: var(--color-inactive);
+}
+
+.text-boss {
+    color: var(--color-boss);
+}
+
+/* ── Alignment Modifiers ── */
+
+.text-center {
+    -unity-text-align: middle-center;
+}
+
+.text-right {
+    -unity-text-align: middle-right;
+}
+
+.text-left {
+    -unity-text-align: middle-left;
+}
+
+.text-upper-left {
+    -unity-text-align: upper-left;
+}
+
+/* ── Monospace (secondary font) ── */
+
+.mono {
+    -unity-font-definition: var(--font-secondary);
+}
+
+.mono-bold {
+    -unity-font-definition: var(--font-secondary-bold);
+}

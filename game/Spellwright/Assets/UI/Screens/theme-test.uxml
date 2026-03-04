@@ -1,0 +1,114 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement class="screen-root">
+        <!-- Title Section -->
+        <ui:Label text="SPELLWRIGHT" class="text-title-decorative mb-xl" />
+        <ui:VisualElement class="divider-thick" />
+
+        <!-- Typography Samples -->
+        <ui:VisualElement class="panel mt-lg mb-lg">
+            <ui:Label text="&gt; TYPOGRAPHY" class="text-header mb-md" />
+            <ui:Label text="Header Text" class="text-subheader mb-sm" />
+            <ui:Label text="Body text — The quick brown fox jumps over the lazy dog." class="text-body mb-sm" />
+            <ui:Label text="Body (mono) — 0123456789 ABCDEF" class="text-body-secondary mb-sm" />
+            <ui:Label text="LABEL TEXT" class="text-label mb-sm" />
+            <ui:Label text="Small text" class="text-small" />
+        </ui:VisualElement>
+
+        <!-- Color Samples -->
+        <ui:VisualElement class="row mb-lg" style="flex-wrap: wrap;">
+            <ui:Label text="[PHOSPHOR]" class="text-body mr-lg" />
+            <ui:Label text="[AMBER]" class="text-body text-amber mr-lg" />
+            <ui:Label text="[CYAN]" class="text-body text-cyan mr-lg" />
+            <ui:Label text="[MAGENTA]" class="text-body text-magenta mr-lg" />
+            <ui:Label text="[DANGER]" class="text-body text-danger mr-lg" />
+            <ui:Label text="[SUCCESS]" class="text-body text-success mr-lg" />
+            <ui:Label text="[WARNING]" class="text-body text-warning mr-lg" />
+            <ui:Label text="[INACTIVE]" class="text-body text-inactive" />
+        </ui:VisualElement>
+
+        <!-- Button Samples -->
+        <ui:VisualElement class="panel mb-lg">
+            <ui:Label text="&gt; BUTTONS" class="text-header mb-md" />
+            <ui:VisualElement class="row" style="flex-wrap: wrap;">
+                <ui:Button text="[ ENGAGE ]" class="btn mr-md mb-sm" />
+                <ui:Button text="[ SMALL ]" class="btn btn-small mr-md mb-sm" />
+                <ui:Button text="[ LARGE ]" class="btn btn-large mr-md mb-sm" />
+                <ui:Button text="[ ABORT ]" class="btn btn-danger mr-md mb-sm" />
+                <ui:Button text="[ DISABLED ]" class="btn mb-sm" enabled="false" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Component Samples -->
+        <ui:VisualElement class="row mb-lg" style="flex-wrap: wrap;">
+            <!-- Card -->
+            <ui:VisualElement class="card mr-md mb-sm" style="width: 200px;">
+                <ui:Label text="Tome of Wisdom" class="text-body mb-sm" />
+                <ui:Label text="+1 clue per encounter" class="text-label mb-md" />
+                <ui:VisualElement class="row justify-between">
+                    <ui:Label text="RARE" class="text-label rarity-rare" />
+                    <ui:Label text="12g" class="text-body text-amber" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Tile Cells -->
+            <ui:VisualElement class="col mr-md">
+                <ui:Label text="&gt; TILES" class="text-label mb-sm" />
+                <ui:VisualElement class="row">
+                    <ui:VisualElement class="tile-cell" style="width: 40px; height: 40px;">
+                        <ui:Label text="_" class="text-center" style="flex-grow: 1;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="tile-cell tile-cell--revealed ml-sm" style="width: 40px; height: 40px;">
+                        <ui:Label text="A" class="text-center" style="flex-grow: 1;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="tile-cell tile-cell--wrong ml-sm" style="width: 40px; height: 40px;">
+                        <ui:Label text="X" class="text-center" style="flex-grow: 1;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Map Nodes -->
+            <ui:VisualElement class="col">
+                <ui:Label text="&gt; MAP NODES" class="text-label mb-sm" />
+                <ui:VisualElement class="row">
+                    <ui:VisualElement class="map-node map-node--completed mr-sm">
+                        <ui:Label text="E1" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="map-node map-node--current mr-sm">
+                        <ui:Label text="E2" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="map-node map-node--future mr-sm">
+                        <ui:Label text="E3" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="map-node map-node--boss">
+                        <ui:Label text="BOSS" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- HP Bar -->
+        <ui:VisualElement class="panel mb-lg">
+            <ui:Label text="&gt; HP BAR" class="text-header mb-md" />
+            <ui:VisualElement class="progress-bar mb-sm">
+                <ui:VisualElement class="progress-bar__fill" style="width: 75%;" />
+            </ui:VisualElement>
+            <ui:VisualElement class="progress-bar mb-sm">
+                <ui:VisualElement class="progress-bar__fill progress-bar__fill--low" style="width: 35%;" />
+            </ui:VisualElement>
+            <ui:VisualElement class="progress-bar">
+                <ui:VisualElement class="progress-bar__fill progress-bar__fill--critical" style="width: 15%;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Rarity Colors -->
+        <ui:VisualElement class="row mb-lg">
+            <ui:Label text="[COMMON]" class="text-body rarity-common mr-lg" />
+            <ui:Label text="[UNCOMMON]" class="text-body rarity-uncommon mr-lg" />
+            <ui:Label text="[RARE]" class="text-body rarity-rare mr-lg" />
+            <ui:Label text="[LEGENDARY]" class="text-body rarity-legendary" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="divider" />
+        <ui:Label text="v0.1.0 — Terminal Design System Test" class="text-small text-inactive text-center" />
+    </ui:VisualElement>
+</ui:UXML>

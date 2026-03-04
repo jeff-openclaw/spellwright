@@ -1,0 +1,45 @@
+/* =============================================================
+   Spellwright — Result Screen Styles
+   Screen-specific overrides and layout for encounter results
+   ============================================================= */
+
+.result-screen {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.result-screen__outcome {
+    margin-bottom: var(--space-xl);
+}
+
+.result-screen__stats {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: var(--space-xl);
+}
+
+.result-screen__stat-row {
+    flex-direction: row;
+    justify-content: space-between;
+    min-width: 300px;
+    padding: var(--space-sm) 0;
+    border-bottom-width: var(--border-width);
+    border-bottom-color: var(--color-border);
+}
+
+.result-screen__rewards {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: var(--space-xl);
+}
+
+.result-screen__actions {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.result-screen__actions > .btn {
+    margin-left: var(--space-md);
+    margin-right: var(--space-md);
+}

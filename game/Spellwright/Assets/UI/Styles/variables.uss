@@ -1,0 +1,105 @@
+/* =============================================================
+   Spellwright Terminal Design System — CSS Variables
+   Aligned with TerminalThemeSO.cs color palette
+   ============================================================= */
+
+:root {
+    /* ── Terminal Palette ── */
+    --color-phosphor:          #1EFF73;   /* phosphorGreen (0.12, 1, 0.45) */
+    --color-phosphor-bright:   #4DFF99;   /* phosphorBright (0.3, 1, 0.6) */
+    --color-phosphor-dim:      #0D7333;   /* phosphorDim (0.05, 0.45, 0.2) */
+    --color-bg:                #030505;   /* terminalBg (0.01, 0.02, 0.02) */
+    --color-bg-panel:          rgba(5, 15, 10, 0.95);   /* panelBg */
+    --color-bg-panel-light:    rgba(10, 26, 15, 0.85);  /* panelBgLight */
+    --color-border:            rgba(13, 140, 64, 0.7);  /* borderColor */
+
+    /* ── Accent Colors ── */
+    --color-amber:             #FFC726;   /* amberBright (1, 0.78, 0.15) */
+    --color-amber-dim:         #99731A;   /* amberDim */
+    --color-cyan:              #26E6F2;   /* cyanInfo */
+    --color-cyan-dim:          #0D6673;   /* cyanDim */
+    --color-magenta:           #E640E6;   /* magentaMagic */
+
+    /* ── State Colors ── */
+    --color-success:           #1AE64D;   /* successColor */
+    --color-danger:            #FF2619;   /* damageColor */
+    --color-warning:           #FF9900;   /* warningColor */
+    --color-inactive:          #4D804D;   /* inactiveColor */
+    --color-boss:              #D91A1A;   /* bossAccent */
+
+    /* ── Component Colors ── */
+    --color-btn-bg:            rgba(8, 46, 20, 0.95);   /* buttonBg */
+    --color-btn-bg-hover:      rgba(15, 71, 31, 1);     /* buttonBgHover */
+    --color-btn-bg-danger:     rgba(89, 15, 15, 0.95);  /* buttonBgDanger */
+    --color-btn-text:          #1EFF73;   /* buttonText = phosphorGreen */
+    --color-btn-border:        rgba(31, 179, 89, 0.9);  /* buttonBorder */
+    --color-input-bg:          rgba(3, 13, 8, 0.95);    /* inputFieldBg */
+    --color-input-text:        #1EFF73;   /* inputFieldText */
+    --color-input-placeholder: rgba(13, 77, 38, 0.5);   /* inputPlaceholder */
+
+    /* ── Card Colors ── */
+    --color-card-bg:           rgba(8, 20, 10, 0.92);   /* cardBg */
+    --color-card-bg-hover:     rgba(13, 36, 18, 0.98);  /* cardBgHover */
+    --color-card-bg-sold:      rgba(5, 8, 5, 0.4);      /* cardBgSold */
+
+    /* ── HP Bar ── */
+    --color-hp-bg:             #1A261A;   /* hpBarBg */
+    --color-hp-fill:           #00CC40;   /* hpBarFill */
+    --color-hp-low:            #FF9900;   /* hpBarLow */
+    --color-hp-critical:       #FF2619;   /* hpBarCritical */
+
+    /* ── Flash Overlays ── */
+    --color-flash-damage:      rgba(204, 26, 26, 0.4);
+    --color-flash-success:     rgba(26, 204, 51, 0.4);
+    --color-flash-boss:        rgba(128, 0, 0, 0.3);
+
+    /* ── Map Node Colors ── */
+    --color-node-completed:    #0D8038;
+    --color-node-current:      #1EFF73;
+    --color-node-future:       #409966;
+    --color-node-boss:         #E61E1E;
+
+    /* ── Shop Rarity Colors ── */
+    --color-rarity-common:     #26CC66;
+    --color-rarity-uncommon:   #26E6F2;
+    --color-rarity-rare:       #738CFF;
+    --color-rarity-legendary:  #FFC726;
+
+    /* ── Typography ── */
+    --font-primary:            url("project://database/Assets/Fonts/VT323-Regular SDF.asset");
+    --font-secondary:          url("project://database/Assets/Fonts/IBMPlexMono-Regular SDF.asset");
+    --font-secondary-bold:     url("project://database/Assets/Fonts/IBMPlexMono-Bold SDF.asset");
+
+    --font-size-xs:            14px;
+    --font-size-sm:            18px;
+    --font-size-md:            22px;
+    --font-size-lg:            26px;
+    --font-size-xl:            30px;
+    --font-size-title:         56px;
+    --font-size-decorative:    72px;
+
+    /* ── Spacing ── */
+    --space-xs:                2px;
+    --space-sm:                4px;
+    --space-md:                8px;
+    --space-lg:                16px;
+    --space-xl:                24px;
+    --space-2xl:               32px;
+    --space-3xl:               48px;
+
+    /* ── Borders ── */
+    --border-width:            1px;
+    --border-width-thick:      2px;
+    --border-radius:           2px;
+
+    /* ── Transitions ── */
+    --transition-fast:         150ms;
+    --transition-normal:       300ms;
+    --transition-slow:         500ms;
+
+    /* ── Animation (matching TerminalThemeSO) ── */
+    --panel-fade-duration:     350ms;
+    --panel-slide-distance:    50px;
+    --button-hover-scale:      1.06;
+    --stagger-delay:           80ms;
+}

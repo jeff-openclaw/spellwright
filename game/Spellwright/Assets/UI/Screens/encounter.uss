@@ -1,0 +1,53 @@
+/* =============================================================
+   Spellwright — Encounter Screen Styles
+   Screen-specific overrides and layout for the encounter board
+   ============================================================= */
+
+.encounter-screen {
+    flex-direction: column;
+}
+
+.encounter-screen__header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.encounter-screen__npc-info {
+    flex-direction: column;
+}
+
+.encounter-screen__board {
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+}
+
+.encounter-screen__tile-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.encounter-screen__clue {
+    -unity-text-align: middle-center;
+    padding: var(--space-md);
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.encounter-screen__input {
+    flex-direction: row;
+    align-items: center;
+    padding-top: var(--space-md);
+    border-top-width: var(--border-width);
+    border-top-color: var(--color-border);
+}
+
+.encounter-screen__guessed-letters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: var(--space-sm);
+}

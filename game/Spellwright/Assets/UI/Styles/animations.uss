@@ -1,0 +1,128 @@
+/* =============================================================
+   Spellwright Terminal Design System — Animations & Transitions
+   USS transitions replace DOTween for hover/press/state changes.
+   For complex sequenced animations, use C# with schedule.Execute()
+   ============================================================= */
+
+/* ── Panel Entrance ──
+   Applied via C#: add .panel-enter, then remove it to trigger transition */
+
+.panel-enter {
+    opacity: 0;
+    translate: 0 50px;
+}
+
+.panel-visible {
+    opacity: 1;
+    translate: 0 0;
+    transition: opacity 350ms ease-out,
+                translate 350ms ease-out;
+}
+
+/* ── Fade In/Out ── */
+
+.fade-in {
+    opacity: 1;
+    transition: opacity 300ms ease-out;
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+}
+
+/* ── Cursor Blink (terminal prompt) ──
+   Toggle .cursor-on / .cursor-off via C# on a timer */
+
+.cursor-on {
+    opacity: 1;
+    transition: opacity 0ms;
+}
+
+.cursor-off {
+    opacity: 0;
+    transition: opacity 0ms;
+}
+
+/* ── Pulse (for attention / low HP) ──
+   Toggle .pulse-bright / .pulse-dim in C# */
+
+.pulse-bright {
+    opacity: 1;
+    transition: opacity 500ms ease-in-out;
+}
+
+.pulse-dim {
+    opacity: 0.4;
+    transition: opacity 500ms ease-in-out;
+}
+
+/* ── Stagger helper ──
+   Apply incrementing --stagger-index via C# for cascading entrance */
+
+.stagger-item {
+    opacity: 0;
+    translate: 0 20px;
+    transition: opacity 300ms ease-out,
+                translate 300ms ease-out;
+    transition-delay: 0ms;
+}
+
+.stagger-item.stagger-visible {
+    opacity: 1;
+    translate: 0 0;
+}
+
+/* ── Tile Reveal ── */
+
+.tile-reveal {
+    scale: 1.15 1.15;
+    transition: scale 200ms ease-out,
+                background-color 200ms ease-out;
+}
+
+/* ── Shake (wrong answer) ──
+   Apply .shake, remove after animation.
+   USS can't do keyframes, so this uses translate toggling in C# */
+
+.shake-left {
+    translate: -4px 0;
+    transition: translate 50ms;
+}
+
+.shake-right {
+    translate: 4px 0;
+    transition: translate 50ms;
+}
+
+.shake-center {
+    translate: 0 0;
+    transition: translate 50ms;
+}
+
+/* ── Scale Pop (score increment, gold change) ── */
+
+.scale-pop {
+    scale: 1.2 1.2;
+    transition: scale 150ms ease-out;
+}
+
+.scale-normal {
+    scale: 1 1;
+    transition: scale 150ms ease-out;
+}
+
+/* ── Glitch (wrong guess feedback) ──
+   Apply briefly, uses skew for a CRT-style glitch feel */
+
+.glitch {
+    translate: 2px -1px;
+    rotate: 0.5deg;
+    transition: translate 80ms, rotate 80ms;
+}
+
+.glitch-reset {
+    translate: 0 0;
+    rotate: 0deg;
+    transition: translate 80ms, rotate 80ms;
+}

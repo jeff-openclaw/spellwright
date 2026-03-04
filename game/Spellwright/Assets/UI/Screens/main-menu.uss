@@ -1,0 +1,29 @@
+/* =============================================================
+   Spellwright — MainMenu Screen Styles
+   Screen-specific overrides and layout for the main menu
+   ============================================================= */
+
+.main-menu {
+    justify-content: center;
+    align-items: center;
+}
+
+.main-menu__title {
+    margin-bottom: var(--space-3xl);
+}
+
+.main-menu__actions {
+    flex-direction: column;
+    align-items: center;
+}
+
+.main-menu__actions > .btn {
+    margin-bottom: var(--space-md);
+    min-width: 200px;
+}
+
+.main-menu__version {
+    position: absolute;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+}

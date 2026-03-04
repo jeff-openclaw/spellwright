@@ -1,0 +1,11 @@
+/* =============================================================
+   Spellwright Terminal Theme — Theme Style Sheet (TSS)
+   Entry point: assign this to PanelSettings.themeStyleSheet
+   ============================================================= */
+
+@import url("../Styles/variables.uss");
+@import url("../Styles/reset.uss");
+@import url("../Styles/typography.uss");
+@import url("../Styles/components.uss");
+@import url("../Styles/layout.uss");
+@import url("../Styles/animations.uss");

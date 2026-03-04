@@ -1,0 +1,58 @@
+/* =============================================================
+   Spellwright — Shop Screen Styles
+   Screen-specific overrides and layout for the shop
+   ============================================================= */
+
+.shop-screen {
+    flex-direction: column;
+}
+
+.shop-screen__header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+}
+
+.shop-screen__gold {
+    flex-direction: row;
+    align-items: center;
+}
+
+.shop-screen__items {
+    flex-grow: 1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.shop-screen__item {
+    width: 220px;
+    margin: var(--space-md);
+    flex-direction: column;
+}
+
+.shop-screen__item-name {
+    margin-bottom: var(--space-sm);
+}
+
+.shop-screen__item-desc {
+    margin-bottom: var(--space-md);
+    flex-grow: 1;
+}
+
+.shop-screen__item-price {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.shop-screen__footer {
+    flex-direction: row;
+    justify-content: center;
+    padding-top: var(--space-lg);
+    border-top-width: var(--border-width);
+    border-top-color: var(--color-border);
+    margin-top: var(--space-lg);
+}

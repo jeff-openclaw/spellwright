@@ -1,0 +1,42 @@
+/* =============================================================
+   Spellwright — Map Screen Styles
+   Screen-specific overrides and layout for the journey map
+   ============================================================= */
+
+.map-screen {
+    flex-direction: column;
+}
+
+.map-screen__header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--space-md);
+    border-bottom-width: var(--border-width);
+    border-bottom-color: var(--color-border);
+    margin-bottom: var(--space-lg);
+}
+
+.map-screen__stats {
+    flex-direction: row;
+}
+
+.map-screen__stats > * {
+    margin-left: var(--space-lg);
+}
+
+.map-screen__nodes {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.map-screen__footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    padding-top: var(--space-md);
+    border-top-width: var(--border-width);
+    border-top-color: var(--color-border);
+    margin-top: var(--space-lg);
+}

@@ -1,0 +1,69 @@
+/* =============================================================
+   Spellwright Terminal Design System — Reset
+   Normalize default UI Toolkit element styles
+   ============================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 0;
+    -unity-font-definition: var(--font-primary);
+    color: var(--color-phosphor);
+}
+
+.unity-button {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.unity-text-field {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.unity-text-field__input {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    color: var(--color-phosphor);
+    -unity-font-definition: var(--font-primary);
+}
+
+.unity-label {
+    padding: 0;
+    margin: 0;
+}
+
+.unity-scroll-view {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.unity-scroller--vertical > .unity-slider {
+    background-color: var(--color-bg);
+    border-width: var(--border-width);
+    border-color: var(--color-phosphor-dim);
+    width: 8px;
+}
+
+.unity-scroller--vertical .unity-base-slider__dragger {
+    background-color: var(--color-phosphor-dim);
+    border-radius: 0;
+}
+
+.unity-scroller--vertical .unity-base-slider__dragger:hover {
+    background-color: var(--color-phosphor);
+}
+
+.unity-toggle__checkmark {
+    background-color: var(--color-bg);
+    border-width: var(--border-width);
+    border-color: var(--color-phosphor-dim);
+    -unity-background-image-tint-color: var(--color-phosphor);
+}
+
+.unity-toggle:checked .unity-toggle__checkmark {
+    border-color: var(--color-phosphor);
+}

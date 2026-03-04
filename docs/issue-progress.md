@@ -1,5 +1,5 @@
 # Issue Progress
-Last updated: 2026-03-04
+Last updated: 2026-03-04T02
 Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 
 ## Queue
@@ -7,8 +7,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 |---|-------|-------|--------|--------|
 | 37 | UI Overhaul: Design North Star | ui | ⏭️ Epic tracker (skip) | — |
 | 39 | Add CRT Audio Atmosphere | ui | ✅ Done | 902082f |
-| 40 | Evaluate Authentic CRT Terminal Fonts | ui | ⏳ Queued | — |
-| 41 | Create Terminal Design System (USS Theme) | ui | ⏳ Queued | — |
+| 40 | Evaluate Authentic CRT Terminal Fonts | ui | ✅ Done | 7a3e014 |
+| 41 | Create Terminal Design System (USS Theme) | ui | 🔄 In progress | — |
 | 42 | UI Toolkit Migration: MainMenuUI (Pilot) | ui | ⏳ Queued | — |
 | 43 | UI Toolkit Migration: MapUI (Journey Screen) | ui | ⏳ Queued | — |
 | 44 | UI Toolkit Migration: ShopUI | ui | ⏳ Queued | — |
@@ -38,4 +38,17 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=39 | NEXT=40 | QUEUE_TOTAL=28
+LAST_COMPLETED=40 | NEXT=41 | QUEUE_TOTAL=28
+
+## Implementation Notes — #41
+- Created Assets/UI/ directory structure: Themes/, Styles/, Screens/
+- variables.uss: All colors aligned with TerminalThemeSO.cs values (phosphor green palette, accents, states, components, HP bar, map nodes, rarity)
+- reset.uss: Normalize defaults for UI Toolkit elements (buttons, inputs, scrollbars, toggles)
+- typography.uss: Text classes (.text-title, .text-body, .text-stat, etc.) + color/alignment modifiers
+- components.uss: Panel, button (with hover/active/disabled), card, input field, progress bar, tile cell, map node, rarity badge, tooltip
+- layout.uss: Flexbox utilities (row/col, alignment, grow/shrink, spacing, display)
+- animations.uss: USS transitions for panel entrance, fade, cursor blink, pulse, stagger, tile reveal, shake, scale pop, glitch
+- terminal-theme.tss: Entry point TSS importing all 6 USS files
+- 5 screen-specific USS stubs (main-menu, map, encounter, shop, result)
+- theme-test.uxml: Visual test page showing all components, typography, colors, tiles, nodes, HP bars, rarity colors
+- DesignSystemTests.cs: Editor menu test verifying all assets load correctly

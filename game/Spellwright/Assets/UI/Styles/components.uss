@@ -1,0 +1,279 @@
+/* =============================================================
+   Spellwright Terminal Design System — Components
+   ============================================================= */
+
+/* ── Panel ── */
+
+.panel {
+    background-color: var(--color-bg-panel);
+    border-width: var(--border-width);
+    border-color: var(--color-border);
+    border-radius: var(--border-radius);
+    padding: var(--space-lg);
+}
+
+.panel-light {
+    background-color: var(--color-bg-panel-light);
+    border-width: var(--border-width);
+    border-color: var(--color-border);
+    border-radius: var(--border-radius);
+    padding: var(--space-lg);
+}
+
+.panel-flush {
+    background-color: var(--color-bg-panel);
+    border-width: var(--border-width);
+    border-color: var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 0;
+}
+
+/* ── Button ── */
+
+.btn {
+    background-color: var(--color-btn-bg);
+    border-width: var(--border-width);
+    border-color: var(--color-btn-border);
+    border-radius: var(--border-radius);
+    color: var(--color-btn-text);
+    padding: var(--space-sm) var(--space-lg);
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-md);
+    -unity-text-align: middle-center;
+    transition: background-color 150ms ease-out,
+                border-color 150ms ease-out,
+                scale 120ms ease-out;
+}
+
+.btn:hover {
+    background-color: var(--color-btn-bg-hover);
+    border-color: var(--color-phosphor);
+    scale: 1.06 1.06;
+}
+
+.btn:active {
+    background-color: var(--color-phosphor);
+    color: var(--color-bg);
+    scale: 0.97 0.97;
+}
+
+.btn:disabled {
+    background-color: var(--color-bg);
+    border-color: var(--color-inactive);
+    color: var(--color-inactive);
+    scale: 1 1;
+}
+
+.btn-danger {
+    background-color: var(--color-btn-bg-danger);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.btn-danger:hover {
+    background-color: rgba(140, 20, 20, 1);
+    border-color: var(--color-danger);
+}
+
+.btn-danger:active {
+    background-color: var(--color-danger);
+    color: var(--color-bg);
+}
+
+.btn-small {
+    font-size: var(--font-size-sm);
+    padding: var(--space-xs) var(--space-md);
+}
+
+.btn-large {
+    font-size: var(--font-size-lg);
+    padding: var(--space-md) var(--space-xl);
+}
+
+/* ── Card (shop items, tome cards) ── */
+
+.card {
+    background-color: var(--color-card-bg);
+    border-width: var(--border-width);
+    border-color: var(--color-border);
+    border-radius: var(--border-radius);
+    padding: var(--space-md);
+    transition: background-color 150ms ease-out,
+                border-color 150ms ease-out;
+}
+
+.card:hover {
+    background-color: var(--color-card-bg-hover);
+    border-color: var(--color-phosphor);
+}
+
+.card-sold {
+    background-color: var(--color-card-bg-sold);
+    border-color: var(--color-inactive);
+}
+
+/* ── Input Field ── */
+
+.input-field {
+    background-color: var(--color-input-bg);
+    border-width: var(--border-width);
+    border-color: var(--color-phosphor-dim);
+    border-radius: var(--border-radius);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--color-input-text);
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-md);
+    transition: border-color 150ms ease-out;
+}
+
+.input-field:focus {
+    border-color: var(--color-phosphor);
+}
+
+/* ── Progress / HP Bar ── */
+
+.progress-bar {
+    background-color: var(--color-hp-bg);
+    border-width: var(--border-width);
+    border-color: var(--color-border);
+    height: 12px;
+    border-radius: 0;
+}
+
+.progress-bar__fill {
+    background-color: var(--color-hp-fill);
+    height: 100%;
+    transition: width 300ms ease-out,
+                background-color 300ms ease-out;
+}
+
+.progress-bar__fill--low {
+    background-color: var(--color-hp-low);
+}
+
+.progress-bar__fill--critical {
+    background-color: var(--color-hp-critical);
+}
+
+/* ── Divider ── */
+
+.divider {
+    height: var(--border-width);
+    background-color: var(--color-border);
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.divider-thick {
+    height: var(--border-width-thick);
+    background-color: var(--color-phosphor-dim);
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+/* ── Tile Cell (encounter board) ── */
+
+.tile-cell {
+    background-color: var(--color-bg);
+    border-width: var(--border-width);
+    border-color: var(--color-phosphor-dim);
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-lg);
+    color: var(--color-phosphor);
+    -unity-text-align: middle-center;
+    transition: background-color 300ms ease-out,
+                border-color 300ms ease-out,
+                scale 150ms ease-out;
+}
+
+.tile-cell--revealed {
+    background-color: var(--color-phosphor);
+    color: var(--color-bg);
+    border-color: var(--color-phosphor-bright);
+}
+
+.tile-cell--wrong {
+    background-color: var(--color-danger);
+    color: var(--color-bg);
+    border-color: var(--color-danger);
+}
+
+.tile-cell--blank {
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(0, 0, 0, 0);
+}
+
+/* ── Map Node ── */
+
+.map-node {
+    border-width: var(--border-width-thick);
+    border-radius: var(--border-radius);
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-sm);
+    -unity-text-align: middle-center;
+    padding: var(--space-sm) var(--space-md);
+    transition: background-color 150ms ease-out,
+                border-color 150ms ease-out,
+                scale 150ms ease-out;
+}
+
+.map-node--completed {
+    background-color: var(--color-bg);
+    border-color: var(--color-node-completed);
+    color: var(--color-node-completed);
+}
+
+.map-node--current {
+    background-color: var(--color-bg);
+    border-color: var(--color-node-current);
+    color: var(--color-node-current);
+}
+
+.map-node--current:hover {
+    background-color: rgba(30, 255, 115, 0.1);
+    scale: 1.06 1.06;
+}
+
+.map-node--future {
+    background-color: var(--color-bg);
+    border-color: var(--color-node-future);
+    color: var(--color-node-future);
+}
+
+.map-node--boss {
+    background-color: var(--color-bg);
+    border-color: var(--color-node-boss);
+    color: var(--color-node-boss);
+}
+
+/* ── Rarity Badge ── */
+
+.rarity-common {
+    color: var(--color-rarity-common);
+    border-color: var(--color-rarity-common);
+}
+
+.rarity-uncommon {
+    color: var(--color-rarity-uncommon);
+    border-color: var(--color-rarity-uncommon);
+}
+
+.rarity-rare {
+    color: var(--color-rarity-rare);
+    border-color: var(--color-rarity-rare);
+}
+
+.rarity-legendary {
+    color: var(--color-rarity-legendary);
+    border-color: var(--color-rarity-legendary);
+}
+
+/* ── Tooltip ── */
+
+.tooltip {
+    background-color: var(--color-bg-panel);
+    border-width: var(--border-width);
+    border-color: var(--color-phosphor-dim);
+    padding: var(--space-sm) var(--space-md);
+    position: absolute;
+}
