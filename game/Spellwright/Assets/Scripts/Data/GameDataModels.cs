@@ -19,7 +19,8 @@ namespace Spellwright.Data
         Shop,
         Boss,
         Rest,
-        Event
+        Event,
+        DeadDrop
     }
 
     /// <summary>High-level game flow states.</summary>

@@ -70,6 +70,11 @@ namespace Spellwright.UI
         private int _ghostNextIndex;
         private const int GhostPoolSize = 10;
 
+        // Intercept transmission
+        private VisualElement _interceptOverlay;
+        private Label _interceptPayload;
+        private Button _interceptDismissButton;
+
         private void OnEnable()
         {
             if (uiDocument == null) return;
@@ -113,6 +118,11 @@ namespace Spellwright.UI
             _tomeLoadoutContainer = _root.Q("tome-loadout");
             _bossWiretapContainer = _root.Q("boss-wiretap");
 
+            // Intercept overlay
+            _interceptOverlay = _root.Q("intercept-overlay");
+            _interceptPayload = _root.Q<Label>("intercept-payload");
+            _interceptDismissButton = _root.Q<Button>("intercept-dismiss");
+
             // Shop overlay
             _shopOverlay = _root.Q("shop-overlay");
             _shopBuyItems = _root.Q("shop-buy-items");
@@ -135,6 +145,10 @@ namespace Spellwright.UI
                 _shopCloseButton.clicked += CloseShop;
             if (_shopOverlay != null)
                 _shopOverlay.RegisterCallback<ClickEvent>(OnShopOverlayClicked);
+            if (_interceptDismissButton != null)
+                _interceptDismissButton.clicked += DismissIntercept;
+            if (_interceptOverlay != null)
+                _interceptOverlay.RegisterCallback<ClickEvent>(OnInterceptOverlayClicked);
         }
 
         private void UnwireEvents()
@@ -149,6 +163,10 @@ namespace Spellwright.UI
                 _shopCloseButton.clicked -= CloseShop;
             if (_shopOverlay != null)
                 _shopOverlay.UnregisterCallback<ClickEvent>(OnShopOverlayClicked);
+            if (_interceptDismissButton != null)
+                _interceptDismissButton.clicked -= DismissIntercept;
+            if (_interceptOverlay != null)
+                _interceptOverlay.UnregisterCallback<ClickEvent>(OnInterceptOverlayClicked);
         }
 
         private void SubscribeEventBus()
@@ -199,6 +217,9 @@ namespace Spellwright.UI
             PlayEntranceAnimation();
             StartSignalAnimation();
             StartGhostEcho();
+
+            // Check for intercept transmission (delayed for entrance animation)
+            _root?.schedule.Execute(CheckAndShowIntercept).ExecuteLater(1500);
         }
 
         private void AddPipeConnector()
@@ -234,10 +255,14 @@ namespace Spellwright.UI
             indicator.AddToClassList("map-screen__node-indicator");
             node.Add(indicator);
 
+            bool isDeadDrop = nodeType == NodeType.DeadDrop;
+
             // Room label (file listing style)
             string roomText = isBoss
                 ? "boss.enc.???"
-                : $"room_{index + 1:D2}.enc";
+                : isDeadDrop
+                    ? "\u2592\u2592\u2592\u2592\u2592\u2592" // ▒▒▒▒▒▒
+                    : $"room_{index + 1:D2}.enc";
             var roomLabel = new Label(roomText);
             roomLabel.AddToClassList("map-screen__node-room");
             node.Add(roomLabel);
@@ -280,8 +305,11 @@ namespace Spellwright.UI
                 DossierExpanded = false
             };
 
-            // Register click to toggle dossier
-            node.RegisterCallback<ClickEvent>(_ => ToggleDossier(entry));
+            // Register click handler
+            if (isDeadDrop)
+                node.RegisterCallback<ClickEvent>(_ => OnDeadDropClicked(entry));
+            else
+                node.RegisterCallback<ClickEvent>(_ => ToggleDossier(entry));
 
             _nodeEntries.Add(entry);
         }
@@ -299,6 +327,7 @@ namespace Spellwright.UI
             foreach (var entry in _nodeEntries)
             {
                 bool isBoss = entry.Type == NodeType.Boss;
+                bool isDeadDrop = entry.Type == NodeType.DeadDrop;
 
                 // Remove all state classes
                 RemoveStateClasses(entry);
@@ -307,24 +336,43 @@ namespace Spellwright.UI
                 {
                     // Completed
                     entry.Node.AddToClassList("map-screen__dungeon-node--completed");
-                    entry.Indicator.text = "[\u2713]"; // ✓
-                    entry.PermsLabel.text = "r--";
-
-                    // Find outcome for this node
-                    var nodeOutcome = outcomes.FirstOrDefault(o => o.NodeIndex == entry.Index);
-                    if (nodeOutcome.Won)
-                        entry.OutcomeLabel.text = $"+{nodeOutcome.GoldEarned}g";
+                    if (isDeadDrop)
+                    {
+                        entry.Indicator.text = "[\u2713]";
+                        entry.PermsLabel.text = "r--";
+                        var drop = Run.RunManager.Instance.GetOrGenerateDeadDrop(entry.Index);
+                        entry.OutcomeLabel.text = drop.Revealed ? "OPENED" : "SKIPPED";
+                    }
                     else
-                        entry.OutcomeLabel.text = "FAIL";
+                    {
+                        entry.Indicator.text = "[\u2713]"; // ✓
+                        entry.PermsLabel.text = "r--";
+
+                        // Find outcome for this node
+                        var nodeOutcome = outcomes.FirstOrDefault(o => o.NodeIndex == entry.Index);
+                        if (nodeOutcome.Won)
+                            entry.OutcomeLabel.text = $"+{nodeOutcome.GoldEarned}g";
+                        else
+                            entry.OutcomeLabel.text = "FAIL";
+                    }
                 }
                 else if (entry.Index == currentIndex)
                 {
                     // Current
-                    string stateClass = isBoss ? "map-screen__dungeon-node--current-boss" : "map-screen__dungeon-node--current";
-                    entry.Node.AddToClassList(stateClass);
-                    if (isBoss) entry.Node.AddToClassList("map-screen__dungeon-node--boss");
-                    entry.Indicator.text = "[\u25B6]"; // ▶
-                    entry.PermsLabel.text = "rwx";
+                    if (isDeadDrop)
+                    {
+                        entry.Node.AddToClassList("map-screen__dungeon-node--dead-drop");
+                        entry.Indicator.text = "[?]";
+                        entry.PermsLabel.text = "r-x";
+                    }
+                    else
+                    {
+                        string stateClass = isBoss ? "map-screen__dungeon-node--current-boss" : "map-screen__dungeon-node--current";
+                        entry.Node.AddToClassList(stateClass);
+                        if (isBoss) entry.Node.AddToClassList("map-screen__dungeon-node--boss");
+                        entry.Indicator.text = "[\u25B6]"; // ▶
+                        entry.PermsLabel.text = "rwx";
+                    }
                     entry.OutcomeLabel.text = "";
                 }
                 else
@@ -332,8 +380,16 @@ namespace Spellwright.UI
                     // Future
                     entry.Node.AddToClassList("map-screen__dungeon-node--future");
                     if (isBoss) entry.Node.AddToClassList("map-screen__dungeon-node--boss");
-                    entry.Indicator.text = isBoss ? "[\u2620]" : "[ ]"; // ☠ or empty
-                    entry.PermsLabel.text = isBoss ? "???" : "---";
+                    if (isDeadDrop)
+                    {
+                        entry.Indicator.text = "[?]";
+                        entry.PermsLabel.text = "???";
+                    }
+                    else
+                    {
+                        entry.Indicator.text = isBoss ? "[\u2620]" : "[ ]"; // ☠ or empty
+                        entry.PermsLabel.text = isBoss ? "???" : "---";
+                    }
                     entry.OutcomeLabel.text = "";
                 }
             }
@@ -801,6 +857,7 @@ namespace Spellwright.UI
             entry.Node.RemoveFromClassList("map-screen__dungeon-node--current-boss");
             entry.Node.RemoveFromClassList("map-screen__dungeon-node--future");
             entry.Node.RemoveFromClassList("map-screen__dungeon-node--boss");
+            entry.Node.RemoveFromClassList("map-screen__dungeon-node--dead-drop");
         }
 
         // ── Dossier ──────────────────────────────────────────
@@ -1244,6 +1301,124 @@ namespace Spellwright.UI
                 }
             }
             return new string(chars);
+        }
+
+        // ── Dead Drop ─────────────────────────────────────────
+
+        private void OnDeadDropClicked(DungeonNodeEntry entry)
+        {
+            if (Run.RunManager.Instance == null) return;
+            int currentIndex = Run.RunManager.Instance.CurrentNodeIndex;
+
+            // Only interact with current dead drop node
+            if (entry.Index != currentIndex) return;
+
+            var rm = Run.RunManager.Instance;
+            var outcome = rm.RevealDeadDrop(entry.Index);
+
+            // Show outcome in dossier
+            entry.Dossier.Clear();
+            var header = new Label($"DEAD DROP #{entry.Index:X4}");
+            header.AddToClassList("map-screen__dossier-line");
+            header.AddToClassList("map-screen__dead-drop-header");
+            entry.Dossier.Add(header);
+
+            // Type-out animation for the message
+            var msgLabel = new Label("");
+            msgLabel.AddToClassList("map-screen__dossier-line");
+            msgLabel.AddToClassList(outcome.Type == Run.RunManager.DeadDropType.Trap
+                ? "map-screen__dead-drop-trap"
+                : "map-screen__dead-drop-reward");
+            entry.Dossier.Add(msgLabel);
+
+            entry.Dossier.AddToClassList("map-screen__dossier--visible");
+            entry.DossierExpanded = true;
+
+            // Character typewriter effect
+            string fullText = outcome.Message;
+            int charIdx = 0;
+            _root?.schedule.Execute(() =>
+            {
+                if (charIdx < fullText.Length)
+                {
+                    charIdx = Mathf.Min(charIdx + 2, fullText.Length);
+                    msgLabel.text = fullText.Substring(0, charIdx);
+                }
+            }).Every(30).ForDuration((long)(fullText.Length * 15 + 200));
+
+            // Handle free tome outcome
+            if (outcome.Type == Run.RunManager.DeadDropType.FreeTome)
+            {
+                var tomeManager = Tomes.TomeManager.Instance;
+                if (tomeManager != null && tomeManager.TomeSystem != null && tomeManager.TomeSystem.HasFreeSlot)
+                {
+                    // Give a random equipped-able tome (reuse shop logic concept)
+                    var gm = Run.GameManager.Instance;
+                    if (gm != null)
+                        Debug.Log("[MapController] Dead drop: Free tome awarded (handled by TomeManager)");
+                }
+            }
+
+            // Update display
+            UpdateStats();
+            entry.Indicator.text = "[\u2713]";
+            entry.OutcomeLabel.text = "OPENED";
+        }
+
+        // ── Intercept Transmission ───────────────────────────
+
+        private void CheckAndShowIntercept()
+        {
+            var rm = Run.RunManager.Instance;
+            if (rm == null || !rm.InterceptPending) return;
+            if (_interceptOverlay == null) return;
+
+            rm.ConsumeIntercept();
+
+            // Generate garbled intel
+            var gm = Run.GameManager.Instance;
+            int currentIdx = rm.CurrentNodeIndex;
+            int futureIdx = Mathf.Min(currentIdx + 1, rm.NodeSequence.Count - 1);
+            string category = gm?.PreviewCategoryForNode(futureIdx) ?? "???";
+            var npc = gm?.PreviewNPCForNode(futureIdx, rm.NodeSequence[futureIdx]);
+            string npcName = npc?.displayName ?? "???";
+
+            var rng = new System.Random();
+            string[] fragments =
+            {
+                $"\"...the w\u2588rd is about {GarbleText(category, 0.4f)}...\"",
+                $"\"...be\u2588\u2588re of the {GarbleText(npcName, 0.5f)}...\"",
+                $"\"...diffic\u2588lty level is {(npc != null ? npc.difficultyModifier > 1.2f ? "HIGH" : "moderate" : "\u2588\u2588\u2588")}...\"",
+                $"\"...\u2588\u2588\u2588 category \u2588\u2588 {GarbleText(category, 0.3f)} \u2588\u2588\u2588...\""
+            };
+
+            // Some transmissions are garbage (unreliable)
+            bool isGarbage = rng.NextDouble() < 0.35;
+            string payload = isGarbage
+                ? $"\"...\u2588\u2588\u2588 {GarbleText("signal corrupted beyond recovery", 0.6f)} \u2588\u2588\u2588...\""
+                : fragments[rng.Next(fragments.Length)];
+
+            if (_interceptPayload != null)
+                _interceptPayload.text = $"payload: {payload}";
+
+            _interceptOverlay.AddToClassList("map-screen__intercept-overlay--visible");
+            _interceptOverlay.pickingMode = PickingMode.Position;
+
+            // Auto-dismiss after 5 seconds
+            _root?.schedule.Execute(DismissIntercept).ExecuteLater(5000);
+        }
+
+        private void DismissIntercept()
+        {
+            if (_interceptOverlay == null) return;
+            _interceptOverlay.RemoveFromClassList("map-screen__intercept-overlay--visible");
+            _interceptOverlay.pickingMode = PickingMode.Ignore;
+        }
+
+        private void OnInterceptOverlayClicked(ClickEvent evt)
+        {
+            if (evt.target == _interceptOverlay)
+                DismissIntercept();
         }
 
         // ── Ghost Input Echo ──────────────────────────────────

@@ -64,6 +64,18 @@ namespace Spellwright.ScriptableObjects
         [Tooltip("Extra HP damage per wrong guess, matching wager tiers")]
         public int[] wagerDamageBonus = { 0, 1, 2, 3 };
 
+        [Header("Intercept & Dead Drop")]
+        [Tooltip("Chance (0-1) to trigger an intercept transmission per wave")]
+        [Range(0f, 1f)]
+        public float interceptChance = 0.25f;
+        [Tooltip("Chance (0-1) to spawn a dead drop node per wave")]
+        [Range(0f, 1f)]
+        public float deadDropChance = 0.2f;
+        [Tooltip("Gold reward range for dead drop bonus gold outcome")]
+        public Vector2Int deadDropGoldRange = new Vector2Int(5, 15);
+        [Tooltip("HP loss range for dead drop trap outcome")]
+        public Vector2Int deadDropTrapHPRange = new Vector2Int(2, 4);
+
         [Header("Difficulty Progression")]
         [Tooltip("Difficulty for encounters 1-2 (min, max)")]
         public Vector2Int earlyDifficulty = new Vector2Int(1, 2);

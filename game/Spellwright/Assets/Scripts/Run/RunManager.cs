@@ -30,6 +30,13 @@ namespace Spellwright.Run
         // Guess history for atmospheric effects
         private readonly List<GhostLetter> _ghostLetters = new();
 
+        // Intercept transmission state
+        private bool _interceptUsedThisWave;
+        private bool _interceptPending;
+
+        // Dead drop outcome tracking
+        private readonly Dictionary<int, DeadDropOutcome> _deadDropOutcomes = new();
+
         /// <summary>Letter from a past guess, used for ghost phosphor atmosphere.</summary>
         public struct GhostLetter
         {
@@ -39,6 +46,119 @@ namespace Spellwright.Run
 
         /// <summary>Letters from past guesses in this run, for atmospheric effects.</summary>
         public IReadOnlyList<GhostLetter> GhostLetters => _ghostLetters;
+
+        /// <summary>Dead drop outcome types.</summary>
+        public enum DeadDropType { BossIntel, FreeTome, BonusGold, Trap }
+
+        /// <summary>Resolved outcome of a dead drop node.</summary>
+        public struct DeadDropOutcome
+        {
+            public DeadDropType Type;
+            public string Message;
+            public int GoldAmount;
+            public int HPLoss;
+            public bool Revealed;
+        }
+
+        /// <summary>Whether an intercept transmission should show this wave.</summary>
+        public bool InterceptPending => _interceptPending;
+
+        /// <summary>Marks the intercept as shown.</summary>
+        public void ConsumeIntercept() { _interceptPending = false; _interceptUsedThisWave = true; }
+
+        /// <summary>Gets the dead drop outcome for a node, generating it if needed.</summary>
+        public DeadDropOutcome GetOrGenerateDeadDrop(int nodeIndex)
+        {
+            if (_deadDropOutcomes.TryGetValue(nodeIndex, out var existing))
+                return existing;
+
+            var rng = new System.Random(nodeIndex * 37 + _waveNumber * 97);
+            float roll = (float)rng.NextDouble();
+            DeadDropOutcome outcome;
+
+            if (roll < 0.40f)
+            {
+                // Boss intel
+                var gm = GameManager.Instance;
+                string bossName = gm?.PreviewNPCForNode(NodeSequence.Count - 1, NodeType.Boss)?.displayName ?? "???";
+                string category = gm?.PreviewCategoryForNode(NodeSequence.Count - 1) ?? "???";
+                string garbled = GarbleDeadDropText($"Target {bossName} is from {category}", 0.3f, rng);
+                outcome = new DeadDropOutcome
+                {
+                    Type = DeadDropType.BossIntel,
+                    Message = $"PREVIOUS OPERATIVE LOG:\n\"{garbled}\"\n[Transmission ends]"
+                };
+            }
+            else if (roll < 0.65f)
+            {
+                outcome = new DeadDropOutcome
+                {
+                    Type = DeadDropType.FreeTome,
+                    Message = "DEAD DROP #{0:X4}:\nPackage found. Tome acquired.\n[Operative supplies cached]"
+                };
+                outcome.Message = string.Format(outcome.Message, rng.Next(0xFFFF));
+            }
+            else if (roll < 0.85f)
+            {
+                int gold = gameConfig != null
+                    ? rng.Next(gameConfig.deadDropGoldRange.x, gameConfig.deadDropGoldRange.y + 1)
+                    : rng.Next(5, 16);
+                outcome = new DeadDropOutcome
+                {
+                    Type = DeadDropType.BonusGold,
+                    Message = $"DEAD DROP #{rng.Next(0xFFFF):X4}:\nGold cache located. +{gold}g recovered.",
+                    GoldAmount = gold
+                };
+            }
+            else
+            {
+                int hp = gameConfig != null
+                    ? rng.Next(gameConfig.deadDropTrapHPRange.x, gameConfig.deadDropTrapHPRange.y + 1)
+                    : rng.Next(2, 5);
+                outcome = new DeadDropOutcome
+                {
+                    Type = DeadDropType.Trap,
+                    Message = $"DEAD DROP #{rng.Next(0xFFFF):X4}:\n[TRAP DETECTED] Signal was bait.\nCorrective shock applied. -{hp}HP",
+                    HPLoss = hp
+                };
+            }
+
+            _deadDropOutcomes[nodeIndex] = outcome;
+            return outcome;
+        }
+
+        /// <summary>Marks a dead drop as revealed and applies its effects.</summary>
+        public DeadDropOutcome RevealDeadDrop(int nodeIndex)
+        {
+            var outcome = GetOrGenerateDeadDrop(nodeIndex);
+            if (outcome.Revealed) return outcome;
+
+            outcome.Revealed = true;
+
+            switch (outcome.Type)
+            {
+                case DeadDropType.BonusGold:
+                    AddGold(outcome.GoldAmount);
+                    break;
+                case DeadDropType.Trap:
+                    TakeDamage(outcome.HPLoss);
+                    break;
+            }
+
+            _deadDropOutcomes[nodeIndex] = outcome;
+            return outcome;
+        }
+
+        private static string GarbleDeadDropText(string text, float garbleFraction, System.Random rng)
+        {
+            var chars = text.ToCharArray();
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (chars[i] != ' ' && rng.NextDouble() < garbleFraction)
+                    chars[i] = '\u2588'; // █
+            }
+            return new string(chars);
+        }
 
         // ── Properties ───────────────────────────────────────
 
@@ -135,6 +255,7 @@ namespace Spellwright.Run
             _nodeOutcomes.Clear();
             _nodeIntel.Clear();
             _ghostLetters.Clear();
+            _deadDropOutcomes.Clear();
 
             // Generate wave 1: (E-S)×5 + B
             _state.NodeSequence.Clear();
@@ -160,12 +281,26 @@ namespace Spellwright.Run
             EventBus.Instance.Publish(new RunStartedEvent { State = _state });
         }
 
-        /// <summary>Appends one wave of nodes: E×5 + B. Shop is shown post-encounter, not as a map node.</summary>
+        /// <summary>Appends one wave of nodes: E×5 + optional DeadDrop + B. Shop is shown post-encounter, not as a map node.</summary>
         private void AppendWaveNodes()
         {
+            // Determine dead drop insertion
+            float dropChance = gameConfig != null ? gameConfig.deadDropChance : 0.2f;
+            bool insertDeadDrop = Random.value < dropChance;
+            int dropAfterIndex = insertDeadDrop ? Random.Range(1, 4) : -1; // Insert after encounter 1-3
+
             for (int i = 0; i < 5; i++)
+            {
                 _state.NodeSequence.Add(NodeType.Encounter);
+                if (i == dropAfterIndex)
+                    _state.NodeSequence.Add(NodeType.DeadDrop);
+            }
             _state.NodeSequence.Add(NodeType.Boss);
+
+            // Determine intercept
+            float interceptChance = gameConfig != null ? gameConfig.interceptChance : 0.25f;
+            _interceptUsedThisWave = false;
+            _interceptPending = Random.value < interceptChance;
         }
 
         /// <summary>

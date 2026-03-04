@@ -590,6 +590,107 @@
     opacity: 1;
 }
 
+/* ── Dead Drop Node ── */
+
+.map-screen__dungeon-node--dead-drop {
+    background-color: rgba(255, 176, 0, 0.04);
+    border-width: var(--border-width);
+    border-color: var(--color-amber-dim);
+}
+
+.map-screen__dungeon-node--dead-drop .map-screen__node-indicator {
+    color: var(--color-amber);
+}
+
+.map-screen__dungeon-node--dead-drop .map-screen__node-room {
+    color: var(--color-amber-dim);
+    -unity-font-style: italic;
+}
+
+.map-screen__dead-drop-header {
+    color: var(--color-amber);
+    -unity-font-style: bold;
+}
+
+.map-screen__dead-drop-reward {
+    color: var(--color-phosphor);
+    white-space: normal;
+}
+
+.map-screen__dead-drop-trap {
+    color: var(--color-danger);
+    white-space: normal;
+}
+
+/* ── Intercept Transmission ── */
+
+.map-screen__intercept-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+}
+
+.map-screen__intercept-overlay--visible {
+    display: flex;
+    opacity: 1;
+}
+
+.map-screen__intercept-popup {
+    min-width: 300px;
+    max-width: 400px;
+    border-width: 1px;
+    border-color: var(--color-cyan);
+    background-color: var(--color-bg);
+    padding: var(--space-sm);
+    flex-direction: column;
+}
+
+.map-screen__intercept-title {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-sm);
+    color: var(--color-cyan);
+    -unity-text-align: middle-center;
+    margin-bottom: var(--space-xs);
+}
+
+.map-screen__intercept-line {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+    margin-bottom: 1px;
+}
+
+.map-screen__intercept-payload {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor);
+    white-space: normal;
+    margin-top: var(--space-xs);
+    margin-bottom: var(--space-sm);
+    padding: var(--space-xs);
+    border-width: 1px;
+    border-color: var(--color-phosphor-dim);
+}
+
+.map-screen__intercept-dismiss-btn {
+    color: var(--color-phosphor-dim);
+    border-color: var(--color-phosphor-dim);
+    align-self: flex-end;
+}
+
+.map-screen__intercept-dismiss-btn:hover {
+    color: var(--color-phosphor);
+    border-color: var(--color-phosphor);
+}
+
 /* ── Ghost Input Echo ── */
 
 .map-screen__ghost-letter {

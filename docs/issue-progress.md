@@ -31,14 +31,26 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 32 | Tome Crucible — Sacrifice Two Tomes | journey | ✅ Done | e4e85d4 |
 | 33 | Inline Shop as Terminal Overlay | journey | ✅ Done | 53a97b5 |
 | 34 | Signal Strength Oscilloscope | journey | ✅ Done | d15a54b |
-| 35 | Ghost Input Echo — Phosphor Atmosphere | journey | ✅ Done | PENDING |
-| 36 | Intercept Transmission Events & Dead Drops | journey | ⏳ Queued | — |
+| 35 | Ghost Input Echo — Phosphor Atmosphere | journey | ✅ Done | 9bf4862 |
+| 36 | Intercept Transmission Events & Dead Drops | journey | ✅ Done | PENDING |
 
 ## Blocked
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=35 | NEXT=36 | QUEUE_TOTAL=28
+LAST_COMPLETED=36 | NEXT=none | QUEUE_TOTAL=28
+
+## Implementation Notes — #36
+- Added DeadDrop to NodeType enum in GameDataModels
+- GameConfigSO: interceptChance (0.25), deadDropChance (0.2), deadDropGoldRange (5-15), deadDropTrapHPRange (2-4)
+- RunManager.AppendWaveNodes: 20% chance to insert a DeadDrop node between encounters 1-3; 25% chance to set _interceptPending for the wave
+- RunManager dead drop system: GetOrGenerateDeadDrop() with weighted outcomes (40% boss intel, 25% free tome, 20% gold, 15% trap), RevealDeadDrop() applies effects (gold/HP damage), GarbleDeadDropText for corrupted messages
+- RunManager intercept: InterceptPending property, ConsumeIntercept() marks as shown
+- MapController dead drop: special rendering with ▒▒▒▒▒▒ label, [?] indicator, amber border. OnDeadDropClicked reveals outcome with typewriter animation (2 chars per 30ms)
+- MapController intercept: CheckAndShowIntercept() fires 1.5s after map opens, shows garbled intel about future encounters. 35% chance of garbage transmission. Auto-dismisses after 5s. Popup has cyan border
+- GameManager: DeadDrop nodes in ProceedToCurrentNode call ReturnToMap() (advance past them — they're handled inline)
+- Intercept overlay added to Map.uxml with src/dst/payload/dismiss button
+- USS: dead drop node amber styling, intercept overlay cyan-bordered popup, dead drop outcome colors (reward green, trap red)
 
 ## Implementation Notes — #35
 - Added GhostLetter struct and GhostLetters list to RunManager — tracks (Letter, Correct) from all guesses via GuessSubmittedEvent subscription

@@ -161,6 +161,10 @@ namespace Spellwright.Run
                 case NodeType.Boss:
                     TransitionTo(GameState.Boss);
                     break;
+                case NodeType.DeadDrop:
+                    // Dead drops are handled inline on the map — just advance past them
+                    ReturnToMap();
+                    break;
                 default:
                     TransitionTo(GameState.Encounter);
                     break;
