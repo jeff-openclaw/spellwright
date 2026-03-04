@@ -334,6 +334,26 @@ namespace Spellwright.Run
             return regularNPCs[npcIndex];
         }
 
+        /// <summary>Returns the NPC that would be assigned to a given node index. Used for map dossier preview.</summary>
+        public NPCDataSO PreviewNPCForNode(int nodeIndex, NodeType nodeType)
+        {
+            if (nodeType == NodeType.Boss)
+                return bossNPC;
+
+            // Simulate encounter number based on node index (non-boss nodes before this one)
+            int encounterNumber = nodeIndex + 1;
+            return SelectNPCForEncounter(encounterNumber);
+        }
+
+        /// <summary>Returns the word category for a given node index. Used for map dossier preview.</summary>
+        public string PreviewCategoryForNode(int nodeIndex)
+        {
+            var pools = ActiveWordPools;
+            if (pools == null || pools.Length == 0) return "???";
+            int poolIndex = nodeIndex % pools.Length;
+            return pools[poolIndex] != null ? pools[poolIndex].name : "???";
+        }
+
         private void StartBossEncounter()
         {
             var bossPools = ActiveWordPools;

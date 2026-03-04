@@ -22,8 +22,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 23 | Mood Bargain (Mid-Encounter Deal) | ai-visibility | ✅ Done | b07ef2d |
 | 24 | Letter Sacrifice (Strategic Tile Trade) | ai-visibility | ✅ Done | b8cdb6b |
 | 25 | Journey Screen Redesign: Design North Star | journey | ⏭️ Epic tracker (skip) | — |
-| 26 | ASCII Dungeon Map with Pipe-Connected Nodes | journey | ✅ Done | PENDING |
-| 27 | Expandable NPC Dossier Panels | journey | ⏳ Queued | — |
+| 26 | ASCII Dungeon Map with Pipe-Connected Nodes | journey | ✅ Done | ee069ac |
+| 27 | Expandable NPC Dossier Panels | journey | ✅ Done | PENDING |
 | 28 | Gold-for-Intel Economy | journey | ⏳ Queued | — |
 | 29 | Pre-Encounter Gold Wagering | journey | ⏳ Queued | — |
 | 30 | Dual-Pane Norton Commander Layout | journey | ⏳ Queued | — |
@@ -38,7 +38,15 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=26 | NEXT=27 | QUEUE_TOTAL=28
+LAST_COMPLETED=27 | NEXT=28 | QUEUE_TOTAL=28
+
+## Implementation Notes — #27
+- Added PreviewNPCForNode(int nodeIndex, NodeType nodeType) and PreviewCategoryForNode(int nodeIndex) to GameManager for map dossier preview without affecting encounter flow
+- Extended MapController with expandable dossier panels: ToggleDossier() click handler, BuildDossierContent() dispatches to BuildRegularDossier() or BuildBossDossier(), CollapseAllDossiers() on map refresh
+- Regular dossier: redacted NPC name (RedactText 40% visible), threat level bar (▓░ 1-5 scale), garbled category (GarbleText 50% corrupted)
+- Boss dossier: classified state when <1 encounter won, progressive legibility (name reveal, threat bar, caution text) based on encountersWon/5 fraction
+- Added dossier USS styles: expandable panel with opacity+max-height transition, line color modifiers (subject/threat/category/classified), separator with box-drawing character
+- Nodes are clickable (expandable cursor hint class), completed nodes skip dossier expand, accordion behavior (only one dossier open at a time)
 
 ## Implementation Notes — #26
 - Completely redesigned Map.uxml: ASCII box-drawing frame (╔═╗║╚═╝╠╣) wrapping status bars and dungeon nodes. Stats rendered inline in frame rows (WAVE, HP block bar, GOLD, SCORE, RIVAL). Node container as ScrollView inside frame

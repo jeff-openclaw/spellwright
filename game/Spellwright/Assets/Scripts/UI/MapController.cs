@@ -196,16 +196,28 @@ namespace Spellwright.UI
 
             _nodeContainer.Add(row);
 
-            _nodeEntries.Add(new DungeonNodeEntry
+            // Dossier panel (hidden by default, expandable on click)
+            var dossier = new VisualElement();
+            dossier.AddToClassList("map-screen__dossier");
+            _nodeContainer.Add(dossier);
+
+            var entry = new DungeonNodeEntry
             {
                 Row = row,
                 Node = node,
                 Indicator = indicator,
                 RoomLabel = roomLabel,
                 OutcomeLabel = outcome,
+                Dossier = dossier,
                 Index = index,
-                Type = nodeType
-            });
+                Type = nodeType,
+                DossierExpanded = false
+            };
+
+            // Register click to toggle dossier
+            node.RegisterCallback<ClickEvent>(_ => ToggleDossier(entry));
+
+            _nodeEntries.Add(entry);
         }
 
         // ── Node States ─────────────────────────────────────
@@ -408,6 +420,7 @@ namespace Spellwright.UI
         {
             _nodeContainer?.Clear();
             _nodeEntries.Clear();
+            _expandedDossierIndex = -1;
         }
 
         private static void RemoveStateClasses(DungeonNodeEntry entry)
@@ -419,6 +432,170 @@ namespace Spellwright.UI
             entry.Node.RemoveFromClassList("map-screen__dungeon-node--boss");
         }
 
+        // ── Dossier ──────────────────────────────────────────
+
+        private int _expandedDossierIndex = -1;
+
+        private void ToggleDossier(DungeonNodeEntry entry)
+        {
+            if (Run.RunManager.Instance == null) return;
+            int currentIndex = Run.RunManager.Instance.CurrentNodeIndex;
+
+            // Don't expand completed nodes
+            if (entry.Index < currentIndex) return;
+
+            // Collapse any existing expanded dossier
+            if (_expandedDossierIndex >= 0 && _expandedDossierIndex < _nodeEntries.Count)
+            {
+                var prev = _nodeEntries[_expandedDossierIndex];
+                prev.Dossier.RemoveFromClassList("map-screen__dossier--visible");
+                prev.DossierExpanded = false;
+            }
+
+            // Toggle this one
+            if (entry.DossierExpanded || entry.Index == _expandedDossierIndex)
+            {
+                _expandedDossierIndex = -1;
+                return;
+            }
+
+            // Build dossier content
+            BuildDossierContent(entry);
+            entry.Dossier.AddToClassList("map-screen__dossier--visible");
+            entry.DossierExpanded = true;
+            _expandedDossierIndex = entry.Index;
+        }
+
+        private void BuildDossierContent(DungeonNodeEntry entry)
+        {
+            entry.Dossier.Clear();
+            bool isBoss = entry.Type == NodeType.Boss;
+
+            var gm = Run.GameManager.Instance;
+            if (gm == null) return;
+
+            var npcData = gm.PreviewNPCForNode(entry.Index, entry.Type);
+            string category = gm.PreviewCategoryForNode(entry.Index);
+
+            if (isBoss)
+            {
+                // Boss: classified dossier with increasing legibility
+                int encountersWon = Run.RunManager.Instance?.EncountersWon ?? 0;
+                BuildBossDossier(entry, npcData, encountersWon);
+            }
+            else
+            {
+                BuildRegularDossier(entry, npcData, category);
+            }
+
+            // Add separator
+            var sep = new Label("\u2560" + new string('\u2550', 36));
+            sep.AddToClassList("map-screen__dossier-sep");
+            entry.Dossier.Add(sep);
+        }
+
+        private void BuildRegularDossier(DungeonNodeEntry entry, NPCDataSO npc, string category)
+        {
+            string npcName = npc != null ? npc.displayName : "Unknown";
+            float diff = npc != null ? npc.difficultyModifier : 1.0f;
+
+            // Redacted NPC name: show first and last char, block rest
+            string redactedName = RedactText(npcName, 0.4f);
+            AddDossierLine(entry.Dossier, $"SUBJECT: {redactedName}", "map-screen__dossier-line--subject");
+
+            // Threat level bar
+            int threatLevel = Mathf.RoundToInt(diff * 3);
+            threatLevel = Mathf.Clamp(threatLevel, 1, 5);
+            string threatBar = new string('\u2593', threatLevel) + new string('\u2591', 5 - threatLevel);
+            string threatName = threatLevel <= 2 ? "LOW" : threatLevel <= 3 ? "MODERATE" : "HIGH";
+            AddDossierLine(entry.Dossier, $"THREAT:  {threatBar} ({threatName})", "map-screen__dossier-line--threat");
+
+            // Garbled category
+            string garbledCategory = GarbleText(category, 0.5f);
+            AddDossierLine(entry.Dossier, $"CATEGORY: {garbledCategory}", "map-screen__dossier-line--category");
+        }
+
+        private void BuildBossDossier(DungeonNodeEntry entry, NPCDataSO npc, int encountersWon)
+        {
+            // Boss becomes more legible with each encounter won
+            float legibility = Mathf.Clamp01(encountersWon / 5f);
+
+            if (legibility < 0.2f)
+            {
+                AddDossierLine(entry.Dossier, "[CLASSIFIED]", "map-screen__dossier-line--classified");
+                AddDossierLine(entry.Dossier, "SUBJECT: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588", "map-screen__dossier-line--classified");
+                AddDossierLine(entry.Dossier, "THREAT:  \u2588\u2588\u2588\u2588\u2588 (???)", "map-screen__dossier-line--classified");
+            }
+            else
+            {
+                string bossName = npc != null ? npc.displayName : "???";
+                string redacted = RedactText(bossName, legibility);
+                AddDossierLine(entry.Dossier, $"SUBJECT: {redacted}", "map-screen__dossier-line--classified");
+
+                float diff = npc != null ? npc.difficultyModifier : 2.0f;
+                int threat = Mathf.RoundToInt(diff * 3);
+                threat = Mathf.Clamp(threat, 3, 5);
+                string bar = new string('\u2593', threat) + new string('\u2591', 5 - threat);
+                AddDossierLine(entry.Dossier, $"THREAT:  {bar} (EXTREME)", "map-screen__dossier-line--classified");
+
+                if (legibility > 0.5f)
+                    AddDossierLine(entry.Dossier, "CAUTION: Defeat means run termination", "map-screen__dossier-line--classified");
+            }
+        }
+
+        private static void AddDossierLine(VisualElement parent, string text, string className)
+        {
+            var line = new Label(text);
+            line.AddToClassList("map-screen__dossier-line");
+            line.AddToClassList(className);
+            parent.Add(line);
+        }
+
+        /// <summary>Redacts text, keeping a fraction of characters visible.</summary>
+        private static string RedactText(string text, float showFraction)
+        {
+            if (string.IsNullOrEmpty(text)) return "\u2588\u2588\u2588";
+            var chars = text.ToCharArray();
+            int toShow = Mathf.Max(1, Mathf.RoundToInt(chars.Length * showFraction));
+
+            // Always show first char, then random others
+            var visible = new HashSet<int> { 0 };
+            var rng = new System.Random(text.GetHashCode());
+            while (visible.Count < toShow)
+                visible.Add(rng.Next(chars.Length));
+
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (!visible.Contains(i) && chars[i] != ' ')
+                    chars[i] = '\u2588'; // █
+            }
+            return new string(chars);
+        }
+
+        /// <summary>Garbles text, replacing a fraction of characters with random ASCII.</summary>
+        private static string GarbleText(string text, float garbleFraction)
+        {
+            if (string.IsNullOrEmpty(text)) return "???";
+            var chars = text.ToCharArray();
+            var rng = new System.Random(text.GetHashCode() + 42);
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (chars[i] != ' ' && rng.NextDouble() < garbleFraction)
+                    chars[i] = (char)('a' + rng.Next(26));
+            }
+            return new string(chars);
+        }
+
+        private void CollapseAllDossiers()
+        {
+            foreach (var entry in _nodeEntries)
+            {
+                entry.Dossier.RemoveFromClassList("map-screen__dossier--visible");
+                entry.DossierExpanded = false;
+            }
+            _expandedDossierIndex = -1;
+        }
+
         private class DungeonNodeEntry
         {
             public VisualElement Row;
@@ -426,8 +603,10 @@ namespace Spellwright.UI
             public Label Indicator;
             public Label RoomLabel;
             public Label OutcomeLabel;
+            public VisualElement Dossier;
             public int Index;
             public NodeType Type;
+            public bool DossierExpanded;
         }
     }
 }

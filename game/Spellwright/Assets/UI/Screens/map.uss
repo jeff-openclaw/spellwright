@@ -226,6 +226,61 @@
     -unity-font-style: bold;
 }
 
+/* ── Dossier Panel (expandable inline) ── */
+
+.map-screen__dossier {
+    display: none;
+    flex-direction: column;
+    margin: var(--space-xs) 0;
+    padding: var(--space-xs) var(--space-sm);
+    padding-left: 44px;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 300ms ease-out, max-height 300ms ease-out;
+}
+
+.map-screen__dossier--visible {
+    display: flex;
+    opacity: 1;
+    max-height: 200px;
+}
+
+.map-screen__dossier-line {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+    margin-bottom: 1px;
+}
+
+.map-screen__dossier-line--subject {
+    color: var(--color-phosphor);
+}
+
+.map-screen__dossier-line--threat {
+    color: var(--color-amber);
+}
+
+.map-screen__dossier-line--category {
+    color: var(--color-cyan);
+}
+
+.map-screen__dossier-line--classified {
+    color: var(--color-danger);
+}
+
+.map-screen__dossier-sep {
+    -unity-font-definition: var(--font-primary);
+    font-size: var(--font-size-xs);
+    color: var(--color-phosphor-dim);
+    margin-top: var(--space-xs);
+}
+
+/* Clickable cursor hint for expandable nodes */
+.map-screen__dungeon-node--expandable {
+    cursor: link;
+}
+
 /* ── Footer ── */
 
 .map-screen__footer {
