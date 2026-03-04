@@ -94,6 +94,10 @@ namespace Spellwright.Editor
             var ultimatumGO = new GameObject("UltimatumSystem");
             ultimatumGO.AddComponent<UltimatumSystem>();
 
+            // RivalSystem (persistent antagonist arc)
+            var rivalGO = new GameObject("RivalSystem");
+            rivalGO.AddComponent<RivalSystem>();
+
             // ShopManager (on shopPanel for convenience)
             var shopMgr = shopPanel.AddComponent<ShopManager>();
             WireShopManager(shopMgr);

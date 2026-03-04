@@ -282,6 +282,24 @@ namespace Spellwright.Data
         public string Source { get; set; }
     }
 
+    /// <summary>Fired when a rival NPC is designated at run start.</summary>
+    public class RivalDesignatedEvent
+    {
+        public NPCPromptData Rival { get; set; }
+    }
+
+    /// <summary>Fired when a rival encounter begins.</summary>
+    public class RivalEncounterStartedEvent
+    {
+        public int Tier { get; set; }
+    }
+
+    /// <summary>Fired when the player defeats the rival NPC.</summary>
+    public class RivalDefeatedEvent
+    {
+        public int Tier { get; set; }
+    }
+
     /// <summary>Fired when the player reaches their final guess, triggering the ultimatum sequence.</summary>
     public class UltimatumTriggeredEvent
     {

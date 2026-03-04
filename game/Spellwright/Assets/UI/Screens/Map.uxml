@@ -9,6 +9,7 @@
                 <ui:Label name="hp" text="HP --/--" class="text-stat map-screen__stat map-screen__stat--hp" />
                 <ui:Label name="gold" text="$ --g" class="text-stat map-screen__stat map-screen__stat--gold" />
                 <ui:Label name="score" text="* --" class="text-stat map-screen__stat map-screen__stat--score" />
+                <ui:Label name="rival-info" text="" class="text-stat map-screen__stat map-screen__stat--rival" />
             </ui:VisualElement>
         </ui:VisualElement>
 

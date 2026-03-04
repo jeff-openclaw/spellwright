@@ -57,12 +57,14 @@ namespace Spellwright.Run
         {
             EventBus.Instance.Subscribe<EncounterEndedEvent>(OnEncounterEnded);
             EventBus.Instance.Subscribe<HPChangedEvent>(OnHPChanged);
+            EventBus.Instance.Subscribe<RivalDefeatedEvent>(OnRivalDefeated);
         }
 
         private void OnDisable()
         {
             EventBus.Instance.Unsubscribe<EncounterEndedEvent>(OnEncounterEnded);
             EventBus.Instance.Unsubscribe<HPChangedEvent>(OnHPChanged);
+            EventBus.Instance.Unsubscribe<RivalDefeatedEvent>(OnRivalDefeated);
         }
 
         private void OnDestroy()
@@ -254,6 +256,16 @@ namespace Spellwright.Run
                 Debug.Log("[RunManager] HP depleted — ending run.");
                 EndRun(won: false);
             }
+        }
+
+        private void OnRivalDefeated(RivalDefeatedEvent evt)
+        {
+            if (!_state.IsRunActive) return;
+
+            // Bonus gold: 5g per rival tier
+            int bonus = 5 * evt.Tier;
+            AddGold(bonus);
+            Debug.Log($"[RunManager] Rival defeated (tier {evt.Tier})! Bonus gold: +{bonus}g");
         }
 
         private void OnHPChanged(HPChangedEvent evt)

@@ -28,6 +28,7 @@ namespace Spellwright.UI
         private Label _hpLabel;
         private Label _goldLabel;
         private Label _scoreLabel;
+        private Label _rivalInfoLabel;
         private ScrollView _nodeContainer;
         private Button _proceedButton;
         private Button _langToggleButton;
@@ -64,6 +65,7 @@ namespace Spellwright.UI
             _hpLabel = _root.Q<Label>("hp");
             _goldLabel = _root.Q<Label>("gold");
             _scoreLabel = _root.Q<Label>("score");
+            _rivalInfoLabel = _root.Q<Label>("rival-info");
             _nodeContainer = _root.Q<ScrollView>("node-container");
             _proceedButton = _root.Q<Button>("proceed");
             _langToggleButton = _root.Q<Button>("lang-toggle");
@@ -267,6 +269,15 @@ namespace Spellwright.UI
                 _goldLabel.text = $"$ {Run.RunManager.Instance.Gold}g";
             if (_scoreLabel != null)
                 _scoreLabel.text = $"* {Run.RunManager.Instance.Score}";
+
+            // Rival info
+            if (_rivalInfoLabel != null)
+            {
+                var rival = Run.RivalSystem.Instance;
+                _rivalInfoLabel.text = rival != null && rival.HasRival
+                    ? $"RIVAL: {rival.RivalDisplayName}"
+                    : "";
+            }
         }
 
         // ── Language Toggle ─────────────────────────────────

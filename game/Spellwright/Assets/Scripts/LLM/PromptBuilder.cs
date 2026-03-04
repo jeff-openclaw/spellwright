@@ -121,6 +121,20 @@ namespace Spellwright.LLM
                 sb.AppendLine($"- BOSS CONSTRAINT: {npc.BossConstraint}");
             }
 
+            // Rival personality escalation
+            var rivalSystem = Run.RivalSystem.Instance;
+            if (rivalSystem != null && rivalSystem.HasRival && rivalSystem.IsRival(npc.Archetype))
+            {
+                sb.AppendLine();
+                int tier = rivalSystem.RivalTier;
+                if (tier <= 1)
+                    sb.AppendLine("RIVAL CONTEXT: This is a newcomer. Be dismissive and unimpressed. You doubt they'll last.");
+                else if (tier == 2)
+                    sb.AppendLine("RIVAL CONTEXT: This player has beaten you before. You're irritated. Be more aggressive and competitive.");
+                else
+                    sb.AppendLine("RIVAL CONTEXT: This player keeps coming back and winning. You're desperate. Your pride is wounded. Be intense, dramatic, and pull no punches.");
+            }
+
             // Tome modifiers
             if (activeTomeEffects != null && activeTomeEffects.Count > 0)
             {

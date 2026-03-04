@@ -180,6 +180,10 @@
     color: var(--color-boss);
 }
 
+.encounter-screen__npc-name--rival {
+    color: var(--color-danger);
+}
+
 .encounter-screen__clue-area {
     margin-top: var(--space-xs);
 }

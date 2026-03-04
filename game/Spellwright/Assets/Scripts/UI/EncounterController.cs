@@ -186,6 +186,7 @@ namespace Spellwright.UI
             EventBus.Instance.Subscribe<UltimatumTriggeredEvent>(OnUltimatumTriggered);
             EventBus.Instance.Subscribe<UltimatumLineReceivedEvent>(OnUltimatumLineReceived);
             EventBus.Instance.Subscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
+            EventBus.Instance.Subscribe<RivalEncounterStartedEvent>(OnRivalEncounterStarted);
         }
 
         private void UnsubscribeEventBus()
@@ -203,6 +204,7 @@ namespace Spellwright.UI
             EventBus.Instance.Unsubscribe<UltimatumTriggeredEvent>(OnUltimatumTriggered);
             EventBus.Instance.Unsubscribe<UltimatumLineReceivedEvent>(OnUltimatumLineReceived);
             EventBus.Instance.Unsubscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
+            EventBus.Instance.Unsubscribe<RivalEncounterStartedEvent>(OnRivalEncounterStarted);
         }
 
         // ── Event Handlers ──────────────────────────────────
@@ -230,6 +232,7 @@ namespace Spellwright.UI
             {
                 _npcNameLabel.text = evt.NPC.DisplayName;
                 _npcNameLabel.RemoveFromClassList("encounter-screen__npc-name--boss");
+                _npcNameLabel.RemoveFromClassList("encounter-screen__npc-name--rival");
             }
 
             // Portrait
@@ -422,6 +425,16 @@ namespace Spellwright.UI
                 default:
                     _signalStatusLabel.text = "";
                     break;
+            }
+        }
+
+        private void OnRivalEncounterStarted(RivalEncounterStartedEvent evt)
+        {
+            // Show [RIVAL] tag next to NPC name
+            if (_npcNameLabel != null)
+            {
+                _npcNameLabel.text += " [RIVAL]";
+                _npcNameLabel.AddToClassList("encounter-screen__npc-name--rival");
             }
         }
 

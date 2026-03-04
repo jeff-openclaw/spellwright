@@ -17,8 +17,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 48 | Remove Legacy uGUI Dependencies | ui | ✅ Done | 927b8bd |
 | 19 | AI Visibility: Design North Star | ai-visibility | ⏭️ Epic tracker (skip) | — |
 | 20 | NPC Adaptive Difficulty (Mercy/Cruelty) | ai-visibility | ✅ Done | 3513835 |
-| 21 | NPC Ultimatum (Endgame Showdown) | ai-visibility | ⏳ Queued | — |
-| 22 | NPC Rival System (Persistent Antagonist) | ai-visibility | ⏳ Queued | — |
+| 21 | NPC Ultimatum (Endgame Showdown) | ai-visibility | ✅ Done | 5d3ac65 |
+| 22 | NPC Rival System (Persistent Antagonist) | ai-visibility | ✅ Done | PENDING |
 | 23 | Mood Bargain (Mid-Encounter Deal) | ai-visibility | ⏳ Queued | — |
 | 24 | Letter Sacrifice (Strategic Tile Trade) | ai-visibility | ⏳ Queued | — |
 | 25 | Journey Screen Redesign: Design North Star | journey | ⏳ Queued | — |
@@ -38,7 +38,31 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=20 | NEXT=21 | QUEUE_TOTAL=28
+LAST_COMPLETED=22 | NEXT=23 | QUEUE_TOTAL=28
+
+## Implementation Notes — #22
+- Created RivalSystem.cs: singleton MonoBehaviour, subscribes to RunStartedEvent/EncounterStartedEvent/EncounterEndedEvent. On run start picks random non-boss/non-guide NPC archetype as rival (Riddlemaster, TricksterMerchant, SilentLibrarian), publishes RivalDesignatedEvent. Tracks rival encounter count as RivalTier, publishes RivalEncounterStartedEvent on encounter start and RivalDefeatedEvent on encounter win
+- Added RivalDesignatedEvent, RivalEncounterStartedEvent, RivalDefeatedEvent to GameDataModels
+- Modified PromptBuilder.BuildSystemPrompt(): injects rival tier context (dismissive at tier 1, grudging respect at 2, obsession at 3+)
+- Modified MapController: caches rival-info Label, shows "RIVAL: {name}" in stats bar via UpdateStats()
+- Modified Map.uxml: added rival-info Label in stats area
+- Modified map.uss: added stat--rival style (danger color, red border)
+- Modified EncounterController: subscribes to RivalEncounterStartedEvent, appends " [RIVAL]" to NPC name label, adds npc-name--rival CSS class
+- Modified encounter.uss: added npc-name--rival style (color: danger)
+- Modified RunManager: subscribes to RivalDefeatedEvent, awards bonus gold (5g per rival tier)
+- Updated GameSceneSetup: creates RivalSystem GameObject
+
+## Implementation Notes — #21
+- Created UltimatumSystem.cs: subscribes to GuessSubmitted/EncounterStarted/ClueReceived/EncounterEnded events. Triggers when GuessesRemaining==1. Activates CRT clean mode, fires UltimatumTriggeredEvent, requests LLM ultimatum line, runs 15s countdown. Countdown expiry fires UltimatumExpiredEvent
+- Added CRTSettings.SetCleanMode(bool): caches and zeroes scanlineIntensity, noiseIntensity, chromaticAberration, phosphorIntensity. Restores cached values when disabled
+- Added LLMManager.GenerateUltimatumLineAsync(): uses PromptBuilder.BuildUltimatumPrompt for dramatic NPC line, falls back to generic line if LLM unavailable
+- Added PromptBuilder.BuildUltimatumPrompt(): short high-drama prompt for NPC's final words, mood-aware, language-aware
+- Added UltimatumTriggeredEvent, UltimatumExpiredEvent, UltimatumLineReceivedEvent to GameDataModels
+- Added ultimatum-overlay to Encounter.uxml with ultimatum-text and countdown-text labels
+- Added USS: ultimatum overlay with dim background transition, text fade-in, countdown blink at <5s
+- Modified EncounterController: subscribes to 3 ultimatum events, manages countdown display via schedule.Execute().Every(250), hides on encounter start/end
+- Modified EncounterManager: subscribes to UltimatumExpiredEvent, auto-fails encounter on expiry
+- Updated GameSceneSetup: creates UltimatumSystem GameObject
 
 ## Implementation Notes — #20
 - Created AdaptiveDifficultyMod.cs: subscribes to ClueReceivedEvent, maps mood→DifficultyShift (Mercy/Normal/Cruel), publishes DifficultyShiftChangedEvent. Mood mapping: frustrated/encouraging→Mercy, amused/taunting/menacing→Cruel, others→Normal

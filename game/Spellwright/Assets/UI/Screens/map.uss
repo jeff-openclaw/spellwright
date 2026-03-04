@@ -55,6 +55,11 @@
     border-color: rgba(38, 230, 242, 0.3);
 }
 
+.map-screen__stat--rival {
+    color: var(--color-danger);
+    border-color: rgba(255, 60, 60, 0.3);
+}
+
 /* ── Node container ── */
 
 .map-screen__nodes {
