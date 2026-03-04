@@ -337,11 +337,54 @@
     min-width: 80px;
 }
 
+.encounter-screen__input-controls {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 var(--space-sm);
+}
+
 .encounter-screen__input-mode {
     color: var(--color-phosphor-dim);
-    margin-left: var(--space-sm);
     margin-top: var(--space-xs);
     font-size: var(--font-size-xs);
+}
+
+.encounter-screen__sacrifice-btn {
+    font-size: var(--font-size-xs);
+    min-width: 120px;
+    color: var(--color-magenta);
+    border-color: rgba(204, 51, 255, 0.3);
+    display: none;
+}
+
+.encounter-screen__sacrifice-btn--visible {
+    display: flex;
+}
+
+.encounter-screen__sacrifice-btn--active {
+    color: var(--color-phosphor-bright);
+    border-color: var(--color-magenta);
+    background-color: rgba(204, 51, 255, 0.1);
+}
+
+.encounter-screen__sacrifice-btn--spent {
+    color: var(--color-phosphor-dim);
+    border-color: rgba(128, 128, 128, 0.2);
+    opacity: 0.5;
+}
+
+/* ── Tile sacrifice state ── */
+
+.encounter-tile--sacrifice-target {
+    border-color: var(--color-magenta);
+    border-width: 2px;
+}
+
+.encounter-tile--shatter {
+    scale: 0 0;
+    opacity: 0;
+    transition: scale 300ms ease-in, opacity 300ms ease-in;
 }
 
 /* ── Bottom Panels (History + Tomes) ── */

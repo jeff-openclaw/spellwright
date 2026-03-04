@@ -57,7 +57,10 @@
             <ui:Button name="submit-btn" text="[ GUESS ]" class="btn encounter-screen__submit-btn" />
             <ui:Button name="solve-btn" text="[ SOLVE ]" class="btn encounter-screen__solve-btn" />
         </ui:VisualElement>
-        <ui:Label name="input-mode" text="LETTER MODE" class="text-small encounter-screen__input-mode" />
+        <ui:VisualElement class="encounter-screen__input-controls">
+            <ui:Label name="input-mode" text="LETTER MODE" class="text-small encounter-screen__input-mode" />
+            <ui:Button name="sacrifice-btn" text="[ SACRIFICE: OFF ]" class="btn encounter-screen__sacrifice-btn" />
+        </ui:VisualElement>
 
         <!-- History + Tomes split -->
         <ui:VisualElement class="encounter-screen__bottom-panels">

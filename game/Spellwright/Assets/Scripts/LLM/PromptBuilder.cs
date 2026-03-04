@@ -28,10 +28,11 @@ namespace Spellwright.LLM
             List<string> previousGuesses,
             List<string> activeTomeEffects,
             GameLanguage language = GameLanguage.English,
-            DifficultyShift difficultyShift = DifficultyShift.Normal)
+            DifficultyShift difficultyShift = DifficultyShift.Normal,
+            char sacrificedLetter = '\0')
         {
             var system = BuildSystemPrompt(npc, category, clueNumber, activeTomeEffects, language);
-            var user = BuildUserMessage(targetWord, category, clueNumber, previousGuesses, language, difficultyShift);
+            var user = BuildUserMessage(targetWord, category, clueNumber, previousGuesses, language, difficultyShift, sacrificedLetter);
             return (system, user);
         }
 
@@ -172,7 +173,8 @@ namespace Spellwright.LLM
             int clueNumber,
             List<string> previousGuesses,
             GameLanguage language = GameLanguage.English,
-            DifficultyShift difficultyShift = DifficultyShift.Normal)
+            DifficultyShift difficultyShift = DifficultyShift.Normal,
+            char sacrificedLetter = '\0')
         {
             var sb = new StringBuilder();
 
@@ -202,6 +204,10 @@ namespace Spellwright.LLM
                 sb.AppendLine("The player is struggling. Give a clearer, more direct hint.");
             else if (difficultyShift == DifficultyShift.Cruel)
                 sb.AppendLine("The player is doing well. Be more oblique and challenging with your hint.");
+
+            // Letter sacrifice context — player gave up a revealed letter for a better clue
+            if (sacrificedLetter != '\0')
+                sb.AppendLine($"The player has SACRIFICED a revealed letter '{char.ToUpper(sacrificedLetter)}' to demand a better clue. Reward their sacrifice with a more direct, helpful hint that brings them closer to solving.");
 
             if (language == GameLanguage.Romanian)
                 sb.AppendLine("Scrie indiciul in romana. Raspunde DOAR cu JSON.");

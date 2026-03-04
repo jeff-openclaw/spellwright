@@ -346,6 +346,21 @@ namespace Spellwright.Data
     /// <summary>Fired when a bargain offer expires without being accepted.</summary>
     public class BargainExpiredEvent { }
 
+    // ── Letter Sacrifice Events ─────────────────────────────
+
+    /// <summary>Fired when the player sacrifices a revealed letter for a better clue.</summary>
+    public class LetterSacrificedEvent
+    {
+        public char Letter { get; set; }
+        public int TileIndex { get; set; }
+    }
+
+    /// <summary>Fired when sacrifice mode is toggled on/off.</summary>
+    public class SacrificeModeToggledEvent
+    {
+        public bool Active { get; set; }
+    }
+
     /// <summary>Fired by Tome effects to request board reveals via EncounterManager.</summary>
     public class TomeRevealRequestEvent
     {

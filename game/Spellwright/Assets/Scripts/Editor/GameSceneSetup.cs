@@ -102,6 +102,10 @@ namespace Spellwright.Editor
             var bargainGO = new GameObject("MoodBargainSystem");
             bargainGO.AddComponent<MoodBargainSystem>();
 
+            // LetterSacrificeSystem (trade revealed letters for better clues)
+            var sacrificeGO = new GameObject("LetterSacrificeSystem");
+            sacrificeGO.AddComponent<LetterSacrificeSystem>();
+
             // ShopManager (on shopPanel for convenience)
             var shopMgr = shopPanel.AddComponent<ShopManager>();
             WireShopManager(shopMgr);

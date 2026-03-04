@@ -19,8 +19,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 20 | NPC Adaptive Difficulty (Mercy/Cruelty) | ai-visibility | ✅ Done | 3513835 |
 | 21 | NPC Ultimatum (Endgame Showdown) | ai-visibility | ✅ Done | 5d3ac65 |
 | 22 | NPC Rival System (Persistent Antagonist) | ai-visibility | ✅ Done | 0c51da3 |
-| 23 | Mood Bargain (Mid-Encounter Deal) | ai-visibility | ✅ Done | PENDING |
-| 24 | Letter Sacrifice (Strategic Tile Trade) | ai-visibility | ⏳ Queued | — |
+| 23 | Mood Bargain (Mid-Encounter Deal) | ai-visibility | ✅ Done | b07ef2d |
+| 24 | Letter Sacrifice (Strategic Tile Trade) | ai-visibility | ✅ Done | PENDING |
 | 25 | Journey Screen Redesign: Design North Star | journey | ⏳ Queued | — |
 | 26 | ASCII Dungeon Map with Pipe-Connected Nodes | journey | ⏳ Queued | — |
 | 27 | Expandable NPC Dossier Panels | journey | ⏳ Queued | — |
@@ -38,7 +38,19 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=23 | NEXT=24 | QUEUE_TOTAL=28
+LAST_COMPLETED=24 | NEXT=25 | QUEUE_TOTAL=28
+
+## Implementation Notes — #24
+- Created LetterSacrificeSystem.cs: MonoBehaviour tracking sacrifice state (used/active), toggles sacrifice mode, calls BoardState.RehideTile on tile click, publishes LetterSacrificedEvent and SacrificeModeToggledEvent. Limited to one sacrifice per encounter
+- Added BoardState.RehideTile(int index): sets revealed tile back to Hidden state, returns the character
+- Added LetterSacrificedEvent + SacrificeModeToggledEvent to GameDataModels
+- Modified PromptBuilder.BuildCluePrompt/BuildUserMessage: added optional sacrificedLetter param, injects sacrifice context ("The player has SACRIFICED a revealed letter...") into LLM prompt
+- Modified LLMManager.GenerateClueAsync/TryLLMClueAsync: pass through sacrificedLetter param to PromptBuilder
+- Modified EncounterManager: subscribes to LetterSacrificedEvent, RequestSacrificeClue() generates sacrifice-context clue (no guess consumed, no letter reveals)
+- Added sacrifice-btn to Encounter.uxml in new input-controls row alongside input-mode label
+- Added encounter.uss: sacrifice button styles (magenta, active/spent states), sacrifice-target tile highlight, shatter animation (scale-to-zero + opacity)
+- Modified EncounterController: sacrifice toggle button, SacrificeModeToggledEvent handler with target tile highlights and ClickEvent registration, LetterSacrificedEvent handler with shatter animation + spent state, UpdateSacrificeButtonVisibility (shows after 3+ tiles revealed)
+- Updated GameSceneSetup: creates LetterSacrificeSystem GameObject
 
 ## Implementation Notes — #23
 - Created MoodBargainSystem.cs: subscribes to ClueReceivedEvent, detects mood changes, offers time-limited bargains (8s) based on NPC archetype + mood. Bargain table: Guide (generous: free vowel/heal), Riddlemaster (fair: vowel-for-guess/double-stakes), TricksterMerchant (risky: vowel-for-guess/double-stakes), SilentLibrarian (cryptic: vowel/skip-guess). Timer runs in Update(), publishes BargainExpiredEvent on timeout

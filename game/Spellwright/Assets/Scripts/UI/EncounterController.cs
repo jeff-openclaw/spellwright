@@ -62,6 +62,8 @@ namespace Spellwright.UI
         private Button _bargainAcceptBtn;
         private VisualElement _bargainTimerFill;
 
+        private Button _sacrificeBtn;
+
         // State
         private EncounterManager _encounter;
         private bool _isProcessing;
@@ -70,6 +72,7 @@ namespace Spellwright.UI
         private bool _bargainActive;
         private BargainEffect _pendingBargainEffect;
         private IVisualElementScheduledItem _bargainTimerSchedule;
+        private bool _sacrificeModeActive;
         private float _targetHPFill;
         private float _currentHPFill;
         private int _lastDisplayedGold;
@@ -155,6 +158,7 @@ namespace Spellwright.UI
             _bargainCostLabel = _root.Q<Label>("bargain-cost");
             _bargainAcceptBtn = _root.Q<Button>("bargain-accept");
             _bargainTimerFill = _root.Q("bargain-timer-fill");
+            _sacrificeBtn = _root.Q<Button>("sacrifice-btn");
         }
 
         private void WireEvents()
@@ -172,6 +176,8 @@ namespace Spellwright.UI
             }
             if (_bargainAcceptBtn != null)
                 _bargainAcceptBtn.clicked += OnBargainAcceptClicked;
+            if (_sacrificeBtn != null)
+                _sacrificeBtn.clicked += OnSacrificeToggle;
         }
 
         private void UnwireEvents()
@@ -189,6 +195,8 @@ namespace Spellwright.UI
             }
             if (_bargainAcceptBtn != null)
                 _bargainAcceptBtn.clicked -= OnBargainAcceptClicked;
+            if (_sacrificeBtn != null)
+                _sacrificeBtn.clicked -= OnSacrificeToggle;
         }
 
         private void SubscribeEventBus()
@@ -209,6 +217,8 @@ namespace Spellwright.UI
             EventBus.Instance.Subscribe<RivalEncounterStartedEvent>(OnRivalEncounterStarted);
             EventBus.Instance.Subscribe<BargainOfferedEvent>(OnBargainOffered);
             EventBus.Instance.Subscribe<BargainExpiredEvent>(OnBargainExpired);
+            EventBus.Instance.Subscribe<SacrificeModeToggledEvent>(OnSacrificeModeToggled);
+            EventBus.Instance.Subscribe<LetterSacrificedEvent>(OnLetterSacrificed);
         }
 
         private void UnsubscribeEventBus()
@@ -229,6 +239,8 @@ namespace Spellwright.UI
             EventBus.Instance.Unsubscribe<RivalEncounterStartedEvent>(OnRivalEncounterStarted);
             EventBus.Instance.Unsubscribe<BargainOfferedEvent>(OnBargainOffered);
             EventBus.Instance.Unsubscribe<BargainExpiredEvent>(OnBargainExpired);
+            EventBus.Instance.Unsubscribe<SacrificeModeToggledEvent>(OnSacrificeModeToggled);
+            EventBus.Instance.Unsubscribe<LetterSacrificedEvent>(OnLetterSacrificed);
         }
 
         // ── Event Handlers ──────────────────────────────────
@@ -248,9 +260,10 @@ namespace Spellwright.UI
 
         private void OnEncounterStarted(EncounterStartedEvent evt)
         {
-            // Hide result overlay and bargain
+            // Hide result overlay, bargain, and reset sacrifice
             HideResult();
             HideBargain();
+            ResetSacrificeUI();
 
             // NPC info
             if (_npcNameLabel != null)
@@ -370,6 +383,7 @@ namespace Spellwright.UI
         {
             if (evt.RevealedPositions == null) return;
             RevealTilesAnimated(evt.RevealedPositions);
+            UpdateSacrificeButtonVisibility();
         }
 
         private void OnEncounterEnded(EncounterEndedEvent evt)
@@ -1201,6 +1215,132 @@ namespace Spellwright.UI
             _bargainTimerSchedule?.Pause();
             _bargainTimerSchedule = null;
             _bargainOverlay?.RemoveFromClassList("encounter-screen__bargain-overlay--visible");
+        }
+
+        // ── Letter Sacrifice ─────────────────────────────────
+
+        private void OnSacrificeToggle()
+        {
+            var system = FindAnyObjectByType<LetterSacrificeSystem>();
+            if (system == null) return;
+
+            system.ToggleSacrificeMode();
+        }
+
+        private void OnSacrificeModeToggled(SacrificeModeToggledEvent evt)
+        {
+            _sacrificeModeActive = evt.Active;
+
+            if (_sacrificeBtn != null)
+            {
+                _sacrificeBtn.text = evt.Active ? "[ SACRIFICE: ON ]" : "[ SACRIFICE: OFF ]";
+                if (evt.Active)
+                    _sacrificeBtn.AddToClassList("encounter-screen__sacrifice-btn--active");
+                else
+                    _sacrificeBtn.RemoveFromClassList("encounter-screen__sacrifice-btn--active");
+            }
+
+            // Toggle sacrifice-target highlight on revealed tiles
+            UpdateSacrificeTargetHighlights(evt.Active);
+        }
+
+        private void OnLetterSacrificed(LetterSacrificedEvent evt)
+        {
+            // Shatter animation on the sacrificed tile
+            if (evt.TileIndex >= 0 && evt.TileIndex < _tileElements.Count && _tileElements[evt.TileIndex] != null)
+            {
+                var tile = _tileElements[evt.TileIndex];
+                tile.AddToClassList("encounter-tile--shatter");
+
+                // After shatter, rebuild as hidden
+                _root.schedule.Execute(() =>
+                {
+                    tile.RemoveFromClassList("encounter-tile--shatter");
+                    tile.RemoveFromClassList("encounter-tile--revealed");
+                    tile.RemoveFromClassList("encounter-tile--sacrifice-target");
+                    tile.style.scale = new StyleScale(Vector2.one);
+                    tile.style.opacity = 1f;
+                }).ExecuteLater(350);
+            }
+
+            // Update sacrifice button to spent state
+            if (_sacrificeBtn != null)
+            {
+                _sacrificeBtn.text = "[ SACRIFICE: SPENT ]";
+                _sacrificeBtn.RemoveFromClassList("encounter-screen__sacrifice-btn--active");
+                _sacrificeBtn.AddToClassList("encounter-screen__sacrifice-btn--spent");
+                _sacrificeBtn.SetEnabled(false);
+            }
+
+            // Clear all target highlights
+            UpdateSacrificeTargetHighlights(false);
+            _sacrificeModeActive = false;
+        }
+
+        private void UpdateSacrificeTargetHighlights(bool show)
+        {
+            if (_encounter?.Board == null) return;
+
+            var tiles = _encounter.Board.Tiles;
+            for (int i = 0; i < tiles.Length && i < _tileElements.Count; i++)
+            {
+                if (_tileElements[i] == null) continue;
+                if (show && tiles[i].Type == TileType.Letter && tiles[i].State == TileState.Revealed)
+                    _tileElements[i].AddToClassList("encounter-tile--sacrifice-target");
+                else
+                    _tileElements[i].RemoveFromClassList("encounter-tile--sacrifice-target");
+            }
+
+            // Register/unregister click handlers on revealed tiles
+            for (int i = 0; i < tiles.Length && i < _tileElements.Count; i++)
+            {
+                if (_tileElements[i] == null) continue;
+                _tileElements[i].UnregisterCallback<ClickEvent>(OnTileClickedForSacrifice);
+                if (show && tiles[i].Type == TileType.Letter && tiles[i].State == TileState.Revealed)
+                    _tileElements[i].RegisterCallback<ClickEvent>(OnTileClickedForSacrifice);
+            }
+        }
+
+        private void OnTileClickedForSacrifice(ClickEvent evt)
+        {
+            if (!_sacrificeModeActive) return;
+
+            var tileEl = evt.currentTarget as VisualElement;
+            if (tileEl == null) return;
+
+            // Find tile index from element name
+            string name = tileEl.name;
+            if (name != null && name.StartsWith("tile-") && int.TryParse(name.Substring(5), out int idx))
+            {
+                var system = FindAnyObjectByType<LetterSacrificeSystem>();
+                system?.SacrificeTile(idx);
+            }
+        }
+
+        private void UpdateSacrificeButtonVisibility()
+        {
+            if (_sacrificeBtn == null || _encounter?.Board == null) return;
+
+            var system = FindAnyObjectByType<LetterSacrificeSystem>();
+            bool show = system != null && !system.SacrificeUsed && _encounter.Board.RevealedLetterCount >= 3;
+            if (show)
+                _sacrificeBtn.AddToClassList("encounter-screen__sacrifice-btn--visible");
+            else
+                _sacrificeBtn.RemoveFromClassList("encounter-screen__sacrifice-btn--visible");
+        }
+
+        private void ResetSacrificeUI()
+        {
+            _sacrificeModeActive = false;
+            if (_sacrificeBtn != null)
+            {
+                _sacrificeBtn.text = "[ SACRIFICE: OFF ]";
+                _sacrificeBtn.RemoveFromClassList("encounter-screen__sacrifice-btn--active");
+                _sacrificeBtn.RemoveFromClassList("encounter-screen__sacrifice-btn--spent");
+                _sacrificeBtn.RemoveFromClassList("encounter-screen__sacrifice-btn--visible");
+                _sacrificeBtn.SetEnabled(true);
+            }
+            UpdateSacrificeTargetHighlights(false);
         }
     }
 }

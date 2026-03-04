@@ -135,13 +135,14 @@ namespace Spellwright.LLM
             string category,
             int clueNumber,
             List<string> previousGuesses = null,
-            List<string> activeTomeEffects = null)
+            List<string> activeTomeEffects = null,
+            char sacrificedLetter = '\0')
         {
             // Try LLM first
             if (IsModelLoaded)
             {
                 var llmClue = await TryLLMClueAsync(npc, word, category, clueNumber,
-                    previousGuesses, activeTomeEffects);
+                    previousGuesses, activeTomeEffects, sacrificedLetter);
                 if (llmClue != null)
                     return llmClue;
 
@@ -189,7 +190,8 @@ namespace Spellwright.LLM
             string category,
             int clueNumber,
             List<string> previousGuesses,
-            List<string> activeTomeEffects)
+            List<string> activeTomeEffects,
+            char sacrificedLetter = '\0')
         {
             try
             {
@@ -201,7 +203,8 @@ namespace Spellwright.LLM
                     previousGuesses ?? new List<string>(),
                     activeTomeEffects ?? new List<string>(),
                     llmLang,
-                    shift);
+                    shift,
+                    sacrificedLetter);
 
                 var sw = Stopwatch.StartNew();
                 var raw = await _llmService.ChatAsync(systemPrompt, userMessage, _cts.Token);

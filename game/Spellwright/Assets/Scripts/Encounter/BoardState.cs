@@ -97,6 +97,20 @@ namespace Spellwright.Encounter
         }
 
         /// <summary>
+        /// Re-hides a revealed letter tile. Returns the character that was hidden, or '\0' if invalid.
+        /// </summary>
+        public char RehideTile(int index)
+        {
+            if (index < 0 || index >= _tiles.Length) return '\0';
+            if (_tiles[index].Type != TileType.Letter || _tiles[index].State != TileState.Revealed)
+                return '\0';
+
+            char letter = _tiles[index].Character;
+            _tiles[index].State = TileState.Hidden;
+            return letter;
+        }
+
+        /// <summary>
         /// Reveals a single random hidden vowel tile. Returns its index, or -1 if no hidden vowels.
         /// </summary>
         public int RevealRandomVowel()

@@ -54,6 +54,7 @@ namespace Spellwright.Encounter
             EventBus.Instance.Subscribe<TomeRevealRequestEvent>(OnTomeRevealRequest);
             EventBus.Instance.Subscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
             EventBus.Instance.Subscribe<BargainAcceptedEvent>(OnBargainAccepted);
+            EventBus.Instance.Subscribe<LetterSacrificedEvent>(OnLetterSacrificed);
         }
 
         private void OnDisable()
@@ -61,6 +62,7 @@ namespace Spellwright.Encounter
             EventBus.Instance.Unsubscribe<TomeRevealRequestEvent>(OnTomeRevealRequest);
             EventBus.Instance.Unsubscribe<UltimatumExpiredEvent>(OnUltimatumExpired);
             EventBus.Instance.Unsubscribe<BargainAcceptedEvent>(OnBargainAccepted);
+            EventBus.Instance.Unsubscribe<LetterSacrificedEvent>(OnLetterSacrificed);
         }
 
         // ── Encounter Lifecycle ──────────────────────────────
@@ -512,6 +514,50 @@ namespace Spellwright.Encounter
                 if (_guesses.Count >= maxGuesses)
                     EndEncounter(false, 0);
             }
+        }
+
+        // ── Letter Sacrifice Handler ─────────────────────────
+
+        private async void OnLetterSacrificed(LetterSacrificedEvent evt)
+        {
+            if (!_isActive) return;
+
+            Debug.Log($"[EncounterManager] Letter '{evt.Letter}' sacrificed — requesting sacrifice clue.");
+
+            // Request a new clue with sacrifice context (does NOT consume a guess)
+            await RequestSacrificeClue(evt.Letter);
+        }
+
+        private async Task RequestSacrificeClue(char sacrificedLetter)
+        {
+            _clueNumber++;
+
+            if (LLMManager.Instance == null || !LLMManager.Instance.IsReady)
+            {
+                Debug.LogWarning("[EncounterManager] LLMManager not ready for sacrifice clue.");
+                return;
+            }
+
+            DiscardPreGeneratedClue();
+
+            var clue = await LLMManager.Instance.GenerateClueAsync(
+                _npcData,
+                _targetWord.Word,
+                _targetWord.Category,
+                _clueNumber,
+                _guesses,
+                TomeManager.Instance?.GetActiveEffectNames() ?? new List<string>(),
+                sacrificedLetter
+            );
+
+            EventBus.Instance.Publish(new ClueReceivedEvent
+            {
+                Clue = clue,
+                ClueNumber = _clueNumber
+            });
+
+            // No letter reveals for sacrifice clues — the sacrifice IS the cost
+            TryPreGenerateNextClue();
         }
 
         // ── Tome Reveal Handler ─────────────────────────────
