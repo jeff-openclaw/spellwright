@@ -1284,3 +1284,368 @@ Ideas killed across passes 1-20: Clue Echo Trail, Vowel Scarcity Radar, AI Confi
 ### Design North Star
 
 **"Every guess is a conversation with an opponent who remembers, reacts, and retaliates — the AI is not behind the curtain, it IS the curtain."**
+
+---
+
+# Journey Screen Redesign Brainstorm
+
+> **Goal:** Replace the flat "Your Journey" map screen with something that builds anticipation
+> **Process:** 20 iterative passes rotating Visual Designer → UX Designer → Critic → Synthesizer
+
+## JOURNEY SCREEN — Pass 1 | 2026-03-04 | Visual Designer
+### Proposed this pass
+- **Terminal Descent Map**: The screen renders as a top-down vertical "dungeon crawl" where each node is a glowing green room connected by flickering ASCII pipe characters (║, ═, ╬), with the boss node at the bottom pulsing red-shifted green and casting a subtle scanline "shadow" upward — completed nodes dim to dark green with a checkmark, the current node blinks with a cursor, and upcoming nodes show faint static interference that increases as you approach the boss. Stats are rendered as a persistent phosphor "status bar" at the top styled like a mainframe readout (HP shown as a depleting bar of █ blocks, gold as a counter, score as a rolling odometer). | ✅✅✅✅✅
+- **Signal Radar Sweep**: The journey is displayed as a circular radar/sonar sweep where the player sits at the center and encounter nodes are blips arranged in a spiral outward, with the boss as a large hostile signature at the outermost ring — the sweep line rotates slowly leaving phosphor trails, completed encounters fade into dim afterimages, the next encounter pulses brighter on each sweep pass, and the boss blip jitters erratically with increasing intensity as fewer encounters remain. Stats render as cockpit-style readouts in the corners. | ❌ Radial layout obscures sequential progression; players cannot read "how many encounters until boss" at a glance
+- **Corrupted File System**: The map presents as a terminal file browser (like `ls -la` or a Norton Commander panel) where each encounter is a "file" with metadata columns — NPC name as filename, difficulty as file size, status as permissions (rwx for upcoming, r-- for completed, ??? for boss) — the boss entry at the bottom is visually corrupted with glitched characters and redacted text that partially reveals as you get closer. The entire panel has a slow vertical scroll jitter and occasional full-line corruption flickers. Stats display as disk usage / system resources in a header bar. | ✅✅✅✅✅
+- **Waveform Timeline** (replacement for Radar): The journey renders as a horizontal oscilloscope waveform where each node is a peak in the signal — regular encounters are steady sine peaks and the boss is a massive distorted spike at the end that clips the display. A bright playhead cursor moves left-to-right marking current progress, completed peaks flatten into resolved low-amplitude waves, and the boss spike crackles with noise artifacts. Stats sit in a bottom ticker styled like oscilloscope measurements (amplitude = HP, frequency = score, voltage = gold). | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+- **Terminal Descent Map** — vertical ASCII dungeon with pipe-connected rooms, boss shadow, phosphor status bar
+- **Corrupted File System** — Norton Commander file browser metaphor with glitched boss entry and metadata columns
+- **Waveform Timeline** — horizontal oscilloscope with encounter peaks, distorted boss spike, and playhead cursor
+### Killed this pass
+- **Signal Radar Sweep** — radial layout obscures sequential progression; fails "gives more info" check
+### Resume token
+JOURNEY_LAST_PASS=1 | SURVIVING=3 | NEXT_ROLE=UX Designer
+
+## JOURNEY SCREEN — Pass 2 | 2026-03-04 | UX Designer
+### Proposed this pass
+- **Recon Peek**: Before proceeding, the player can "scan" the next upcoming node to preview a redacted NPC dossier — name, a single garbled clue category hint, and a difficulty bar rendered as terminal load percentage — giving them just enough intel to feel strategic tension about whether to proceed or linger in the shop. Scanning is instant (one click/key) and entirely optional, so it never gates progression. | ✅✅✅✅✅
+- **Tome Loadout Hotswap**: The map screen doubles as a loadout terminal where players can review and reorder their equipped Tomes via a sidebar panel, seeing projected synergy effects against the next encounter's difficulty tier — making the map a decision point, not a passthrough. The sidebar is collapsed by default (a single `[TAB] LOADOUT` prompt in the corner) so players who want to rush can still just hit PROCEED. | ✅✅✅✅✅
+- **Run Log / Black Box**: A scrollable terminal history buffer (toggled with `[L] LOG`) accumulates one-line entries for every encounter outcome, guess accuracy percentage, gold earned, and HP lost — functioning as both a mid-run stats screen and an emergent narrative of the player's descent. It evokes dread on bad runs ("ENCOUNTER 3... 12% accuracy... -8 HP") and pride on clean ones, all in monospace green text that fits the aesthetic natively. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+- **Terminal Descent Map** — vertical ASCII dungeon with pipe-connected rooms, boss shadow, phosphor status bar
+- **Corrupted File System** — Norton Commander file browser metaphor with glitched boss entry and metadata columns
+- **Waveform Timeline** — horizontal oscilloscope with encounter peaks, distorted boss spike, and playhead cursor
+- **Recon Peek** — optional one-click scan of next node for redacted NPC intel and difficulty preview
+- **Tome Loadout Hotswap** — collapsed sidebar for reviewing/reordering Tomes with synergy hints
+- **Run Log / Black Box** — toggle-able scrolling terminal history of all encounter outcomes and run stats
+### Killed this pass
+- (none — all three passed validation)
+### Resume token
+JOURNEY_LAST_PASS=2 | SURVIVING=6 | NEXT_ROLE=Critic
+
+## JOURNEY SCREEN — Pass 3 | 2026-03-04 | Critic
+### Proposed this pass
+- **Ghost Echo Replay**: When hovering/selecting a completed node on the map, a translucent terminal overlay rapid-fires a compressed replay of that encounter — the word materializing letter by letter, wrong guesses flickering red then fading, final solve flashing bright green, total damage/gold scrolling like a receipt printout. Takes 2-3 seconds, entirely optional, makes past encounters feel like recovered black box data from a dead terminal. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. **Terminal Descent Map** — vertical ASCII dungeon with pipe-connected rooms, boss pulsing at bottom
+2. **Corrupted File System** — Norton Commander file browser with encounters as files, boss entry glitched
+3. **Recon Peek** — one-click scan of next node for redacted NPC dossier
+4. **Tome Loadout Hotswap** — collapsed sidebar for reviewing/reordering Tomes with synergy projection
+5. **Run Log / Black Box** — toggle-able scrolling terminal history of all encounter outcomes
+6. **Ghost Echo Replay** — hover-triggered compressed replay of completed encounters as recovered terminal data
+### Killed this pass
+- **Waveform Timeline** — Horizontal oscilloscope metaphor reads as a monitoring tool, not a place you're navigating. Signal peaks as nodes are visually ambiguous. Conflicts spatially with the tile board. Two stronger map candidates (Terminal Descent, Corrupted File System) communicate progress more intuitively.
+### Resume token
+JOURNEY_LAST_PASS=3 | SURVIVING=6 | NEXT_ROLE=Synthesizer
+
+## JOURNEY SCREEN — Pass 4 | 2026-03-04 | Synthesizer
+### Proposed this pass
+- **Terminal Descent Dossier** (combines Terminal Descent Map + Recon Peek): The vertical ASCII dungeon map becomes the primary navigation AND intelligence-gathering surface. Hovering or clicking any upcoming node triggers an inline "scan" animation — the room's pipe borders flicker, then a redacted NPC dossier renders directly inside the room cell (name with partial ██ redaction, difficulty as a tiny bar of █ blocks, category hint garbled with random characters that periodically flash the real letter). Completed nodes dim but retain a one-line outcome summary ("SOLVED 4/6 +12g") visible without clicking. The boss room at the bottom pulses with corrupted dossier fragments that grow more legible as the player approaches, building dread. The map IS the recon tool, and every glance downward reminds you what's coming. | ✅✅✅✅✅
+- **Black Box File System** (combines Corrupted File System + Run Log / Black Box): The Norton Commander dual-pane file browser serves double duty — the left pane shows upcoming encounters as "files" with metadata columns (NPC filename, difficulty as filesize, status permissions), while the right pane is a live-scrolling `run.log` file that records every encounter outcome, guess accuracy percentage, gold earned, and HP lost in timestamped terminal entries. Selecting a completed encounter "file" in the left pane auto-scrolls the right pane to its corresponding log block, highlighted in brighter green. The boss entry shows a corrupted filename, and its log entry is just `[ENCRYPTED] AWAITING DECRYPTION...` until defeated. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. **Terminal Descent Map** — vertical ASCII dungeon with pipe-connected rooms, boss pulsing at bottom
+2. **Corrupted File System** — Norton Commander file browser with encounter metadata columns
+3. **Recon Peek** — one-click scan for redacted NPC dossier
+4. **Tome Loadout Hotswap** — collapsed sidebar for reviewing/reordering Tomes with synergy projection
+5. **Run Log / Black Box** — toggle-able scrolling terminal history of encounter outcomes
+6. **Ghost Echo Replay** — hover-triggered compressed replay of completed encounters
+7. **Terminal Descent Dossier** — map-as-recon-tool with inline dossiers, boss dread escalation (combines 1+3)
+8. **Black Box File System** — dual-pane commander with encounter files and live run log (combines 2+5)
+### Killed this pass
+- (Synthesizer does not kill ideas)
+### Resume token
+JOURNEY_LAST_PASS=4 | SURVIVING=8 | NEXT_ROLE=Visual Designer
+
+## JOURNEY SCREEN — Pass 5 | 2026-03-04 | Visual Designer
+### Proposed this pass
+- **Signal Decay Meter**: A horizontal waveform/oscilloscope bar pinned to the top of the encounter screen that visualizes "signal strength" degrading with each wrong guess — the wave flattens, static increases, and the phosphor green dims toward amber then red, giving visceral dread as you feel the connection dying. Works as both a health/progress indicator and an atmospheric device. | ✅✅✅✅✅
+- **Typewriter Tribunal**: When the NPC delivers a clue, each character hammer-strikes onto the screen with per-letter delay, screen-shake micro-jitter, and ink-splatter particles, as if a teletype is physically printing a classified interrogation transcript. Wrong guesses trigger a harsh REDACTED block stamp animation over the failed word. | ✅✅✅✅✅
+- **Glitch Veil**: The unsolved word's blank tiles are overlaid with a semi-transparent corruption effect (shifting ASCII garbage, misaligned scanlines, datamosh-style pixel smear) that progressively clears as correct letters are placed, like decrypting a signal from noise. The visual reward of watching chaos resolve into clarity creates curiosity and excitement per letter reveal. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. **Terminal Descent Map** — vertical ASCII dungeon with pipe-connected rooms, boss pulsing at bottom
+2. **Corrupted File System** — Norton Commander file browser with encounters as files, metadata columns
+3. **Recon Peek** — one-click scan for redacted NPC dossier
+4. **Tome Loadout Hotswap** — collapsed sidebar for reviewing/reordering Tomes with synergy projection
+5. **Run Log / Black Box** — toggle-able scrolling terminal history of encounter outcomes
+6. **Ghost Echo Replay** — hover-triggered compressed replay of completed encounters
+7. **Terminal Descent Dossier** — COMBINED: map as recon tool with inline dossiers (1+3)
+8. **Black Box File System** — COMBINED: dual-pane commander with files + run.log (2+5)
+9. **Signal Decay Meter** — oscilloscope waveform that degrades with wrong guesses
+10. **Typewriter Tribunal** — teletype hammer-strike clue delivery with REDACTED stamps
+11. **Glitch Veil** — corruption shader over blank tiles that clears as letters are solved
+### Killed this pass
+- (none — all three passed)
+### Resume token
+JOURNEY_LAST_PASS=5 | SURVIVING=11 | NEXT_ROLE=UX Designer
+
+## JOURNEY SCREEN — Pass 6 | 2026-03-04 | UX Designer
+### Proposed this pass
+- **Frequency Tuning**: Before entering an encounter, the player can rotate a dial (arrow keys/drag) across a static-filled frequency band to "tune in" the NPC's signal — landing closer to center reveals a fragment of the word's category or length, while edges yield garbled text. Takes 2 seconds, entirely optional, dial position persists as green waveform thumbnail on the map node. | ✅✅✅✅✅
+- **Terminal Wager / Stake Command**: At any map node before entering, a blinking `>STAKE?_` prompt lets the player type a gold amount (or skip). Staking gold raises the encounter's reward multiplier but increases HP loss on wrong guesses. Auto-dismisses after 3 seconds of inactivity so it never blocks flow. | ✅✅✅✅✅
+- **Intercept Transmission**: Between map nodes, a `[SIGNAL INTERCEPTED]` notification occasionally flickers on screen. Clicking it opens a brief corrupted text fragment — a partial clue, scrambled word, or torn NPC dialogue from a future encounter. Some signals are genuine intel, others randomized garbage, building paranoia. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. **Terminal Descent Map** — vertical ASCII dungeon with pipe-connected rooms, boss pulsing at bottom
+2. **Corrupted File System** — Norton Commander file browser with encounters as files
+3. **Recon Peek** — one-click scan for redacted NPC dossier
+4. **Tome Loadout Hotswap** — collapsed sidebar for Tomes with synergy projection
+5. **Run Log / Black Box** — toggle-able scrolling terminal history
+6. **Ghost Echo Replay** — hover-triggered compressed replay of completed encounters
+7. **Terminal Descent Dossier** — COMBINED: map as recon tool with inline dossiers (1+3)
+8. **Black Box File System** — COMBINED: dual-pane commander with files + run.log (2+5)
+9. **Signal Decay Meter** — oscilloscope waveform that degrades with wrong guesses
+10. **Typewriter Tribunal** — teletype hammer-strike clue delivery with REDACTED stamps
+11. **Glitch Veil** — corruption shader over blank tiles clearing as letters solved
+12. **Frequency Tuning** — optional dial to extract partial encounter intel
+13. **Terminal Wager / Stake Command** — pre-encounter gold stake for risk/reward multiplier
+14. **Intercept Transmission** — intermittent corrupted signal fragments teasing future encounters
+### Killed this pass
+- (none killed)
+### Resume token
+JOURNEY_LAST_PASS=6 | SURVIVING=14 | NEXT_ROLE=Critic
+
+## JOURNEY SCREEN — Pass 7 | 2026-03-04 | Critic
+### Proposed this pass
+- **Packet Sniffer Clue Feed**: A scrolling raw-packet terminal panel behind the tile board that intercepts and displays LLM clue fragments as they arrive — styled as sniffed network traffic with hex addresses, timestamps, and partial redactions. Each new clue animates in as a captured packet; wrong guesses inject corruption/noise lines into the feed, making the terminal feel like a surveillance tool. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. **Terminal Descent Map** — vertical ASCII dungeon with pipe-connected rooms
+2. **Corrupted File System** — Norton Commander file browser with encounters as files
+3. **Recon Peek** — one-click scan for redacted NPC dossier
+4. **Tome Loadout Hotswap** — collapsed sidebar for Tomes with synergy projection
+5. **Run Log / Black Box** — toggle-able terminal history of encounter outcomes
+6. **Ghost Echo Replay** — hover-triggered compressed replay of completed encounters
+7. **Terminal Descent Dossier** — COMBINED: map as recon tool with inline dossiers (1+3)
+8. **Black Box File System** — COMBINED: dual-pane commander with files + run.log (2+5)
+9. **Signal Decay Meter** — oscilloscope waveform degrading with wrong guesses
+10. **Typewriter Tribunal** — teletype clue delivery with REDACTED stamps
+11. **Glitch Veil** — corruption shader over tiles clearing as letters solved
+13. **Terminal Wager / Stake Command** — pre-encounter gold stake for risk/reward
+14. **Intercept Transmission** — corrupted signal fragments teasing future encounters
+15. **Packet Sniffer Clue Feed** — scrolling captured-packet display for clues with corruption on wrong guesses
+### Killed this pass
+- **Frequency Tuning** — Mechanically redundant with Recon Peek and Intercept Transmission. "Dial" is analog-radio, not terminal-native. Demands a unique input metaphor (rotary/slider) that nothing else uses. Info provided is strictly less interesting than existing intel ideas.
+### Resume token
+JOURNEY_LAST_PASS=7 | SURVIVING=14 | NEXT_ROLE=Synthesizer
+
+## JOURNEY SCREEN — Pass 8 | 2026-03-04 | Synthesizer
+### Proposed this pass
+- **Dossier Wager Terminal** (combines Terminal Descent Dossier + Terminal Wager): The vertical ASCII dungeon map doubles as a recon-and-risk console — each room node expands inline to show a redacted NPC dossier, and below the dossier sits a `> STAKE ___ g` prompt. Staking more gold unlocks additional dossier lines (word length, first-letter hint), so the map becomes a push-your-luck intelligence market: spend gold to de-fog the encounter or go in blind for a higher payout multiplier. The boss node shows a classified dossier that cannot be bought at any price. | ✅✅✅✅✅
+- **Signal Decay Sniffer** (combines Signal Decay Meter + Packet Sniffer Clue Feed): During encounters, the clue area is a dual-band terminal — top band is scrolling packet-capture log where AI clues arrive as intercepted transmissions with hex-dump decoration, bottom band is a live oscilloscope waveform representing "signal integrity." Wrong guesses inject noise into the waveform and corrupt packet headers with `[CHECKSUM FAIL]`. Correct letters clean the waveform. Two stacked UI panels using TMP mono text and a sine-wave LineRenderer. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. **Terminal Descent Map** — vertical ASCII dungeon with pipe-connected rooms
+2. **Corrupted File System** — Norton Commander file browser encounters
+3. **Recon Peek** — one-click redacted NPC dossier scan
+4. **Tome Loadout Hotswap** — collapsed sidebar with synergy projection
+5. **Run Log / Black Box** — toggle-able terminal history
+6. **Ghost Echo Replay** — hover-triggered compressed encounter replay
+7. **Terminal Descent Dossier** — map as recon tool with inline NPC dossiers (1+3)
+8. **Black Box File System** — dual-pane commander with run.log (2+5)
+9. **Signal Decay Meter** — oscilloscope waveform degrading with wrong guesses
+10. **Typewriter Tribunal** — teletype clue delivery with REDACTED stamps
+11. **Glitch Veil** — corruption shader over tiles clearing as letters solved
+13. **Terminal Wager / Stake Command** — pre-encounter gold stake for risk/reward
+14. **Intercept Transmission** — corrupted signal fragments teasing future encounters
+15. **Packet Sniffer Clue Feed** — scrolling captured-packet clue display
+16. **Dossier Wager Terminal** — map nodes with buyable intel + stake prompt (7+13)
+17. **Signal Decay Sniffer** — dual-band packet-capture + oscilloscope encounter display (9+15)
+### Killed this pass
+- (Synthesizer does not kill ideas)
+### Resume token
+JOURNEY_LAST_PASS=8 | SURVIVING=16 | NEXT_ROLE=Visual Designer
+
+## JOURNEY SCREEN — Pass 9 | 2026-03-04 | Visual Designer
+### Proposed this pass
+- **MUD Room Description Map**: Each encounter node renders as a classic MUD "room" with ASCII box-drawn exits and a one-line room description ("A flickering terminal hums in a dark alcove..."), stacked vertically so the journey reads like a text adventure transcript the player is living through. Completed rooms show loot summary, future rooms show `[UNEXPLORED]`. | ✅✅✅✅✅
+- **Hex Editor Memory Dump**: The journey displays as a hex editor view where each node is a 16-byte row — left column shows memory addresses (0x0000, 0x0010...), center shows hex pairs encoding node state (completed = green, current = blink, future = ??), right column shows ASCII interpretation revealing NPC names and word fragments as decoded plaintext. | ✅✅✅✅✅
+- **Boot Sequence POST Log**: The journey renders as a Power-On Self-Test scrolling log — completed encounters appear as passed hardware checks (`[OK] NPC_GUARD ... WORD RESOLVED ... 850ms`), current node shows blinking cursor mid-check, future nodes display as `[ -- ] PENDING DIAGNOSTIC`, boss node as `CRITICAL SYSTEM CHECK` in brighter intensity. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. **Terminal Descent Map** — vertical ASCII dungeon
+2. **Corrupted File System** — Norton Commander file browser
+3. **Recon Peek** — one-click redacted NPC dossier
+4. **Tome Loadout Hotswap** — collapsed sidebar with synergy projection
+5. **Run Log / Black Box** — toggle-able terminal history
+6. **Ghost Echo Replay** — hover-triggered compressed encounter replay
+7. **Terminal Descent Dossier** — map as recon tool (1+3)
+8. **Black Box File System** — dual-pane commander with run.log (2+5)
+9. **Signal Decay Meter** — oscilloscope waveform degrading
+10. **Typewriter Tribunal** — teletype clue delivery
+11. **Glitch Veil** — corruption shader clearing as letters solved
+13. **Terminal Wager / Stake Command** — gold stake for risk/reward
+14. **Intercept Transmission** — corrupted signal fragments
+15. **Packet Sniffer Clue Feed** — packet-capture clue display
+16. **Dossier Wager Terminal** — buyable intel + stake (7+13)
+17. **Signal Decay Sniffer** — packet-capture + oscilloscope (9+15)
+18. **MUD Room Description Map** — text adventure room descriptions
+19. **Hex Editor Memory Dump** — hex editor view of journey state
+20. **Boot Sequence POST Log** — system POST check log
+### Killed this pass
+- (none — all three passed)
+### Resume token
+JOURNEY_LAST_PASS=9 | SURVIVING=19 | NEXT_ROLE=UX Designer
+
+## JOURNEY SCREEN — Pass 10 | 2026-03-04 | UX Designer
+### Proposed this pass
+- **Signal Decoder (Inline Shop)**: The map screen itself becomes the shop — a persistent terminal sidebar lets players `>BUY`, `>SELL`, `>HEAL` via typed commands directly on the journey view, with inventory and gold always visible as a system status block. Eliminates the separate shop screen transition, keeps players in context, makes resource management feel like operating a terminal. | ✅✅✅✅✅
+- **Threat Matrix (Difficulty Heatmap)**: Each upcoming node displays a pulsing intensity indicator — ASCII bar graph (`▁▃▅▇`) showing relative word difficulty, NPC hostility, and potential gold yield, revealed progressively. Hovering expands a `>SCAN` readout with partial intel (word length, category hint, NPC trait). | ✅✅✅✅✅
+- **Contingency Protocol (Pre-Encounter Loadout Ritual)**: Before confirming entry, a `>PREP SEQUENCE` prompt lets the player spend gold on one-time tactical buffs — extra starting letters, free wrong-guess shield, clue quality boost — displayed as terminal command confirmations (`DEPLOYING LETTER PROBE... COST: 5g [Y/N]`). Single keypress per option, under 3 seconds. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. **Terminal Descent Map** 2. **Corrupted File System** 3. **Recon Peek** 4. **Tome Loadout Hotswap** 5. **Run Log / Black Box** 6. **Ghost Echo Replay** 7. **Terminal Descent Dossier** (1+3) 8. **Black Box File System** (2+5) 9. **Signal Decay Meter** 10. **Typewriter Tribunal** 11. **Glitch Veil** 13. **Terminal Wager** 14. **Intercept Transmission** 15. **Packet Sniffer Clue Feed** 16. **Dossier Wager Terminal** (7+13) 17. **Signal Decay Sniffer** (9+15) 18. **MUD Room Description Map** 19. **Hex Editor Memory Dump** 20. **Boot Sequence POST Log** 21. **Signal Decoder (Inline Shop)** 22. **Threat Matrix (Difficulty Heatmap)** 23. **Contingency Protocol (Pre-Encounter Loadout Ritual)**
+### Killed this pass
+- (none — all three passed)
+### Resume token
+JOURNEY_LAST_PASS=10 | SURVIVING=22 | NEXT_ROLE=Critic
+
+## JOURNEY SCREEN — Pass 11 | 2026-03-04 | Critic
+### Proposed this pass
+- **Keystroke Forensics (Encounter Recap)**: After each encounter, the tile board briefly replays your solve sequence as a fast-forwarded keystroke log — green letters stamping in order, wrong guesses flashing red and striking through — giving a 2-second "forensic playback" of your performance. Unlike Ghost Echo (passive hover), this fires automatically, delivers instant pride or regret, and doubles as a skill-learning tool. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. **Terminal Descent Map** 2. **Corrupted File System** 3. **Recon Peek** 4. **Tome Loadout Hotswap** 5. **Run Log / Black Box** 6. **Terminal Descent Dossier** (1+3) 7. **Black Box File System** (2+5) 8. **Signal Decay Meter** 9. **Typewriter Tribunal** 10. **Glitch Veil** 11. **Terminal Wager** 12. **Intercept Transmission** 13. **Packet Sniffer Clue Feed** 14. **Dossier Wager Terminal** (7+13) 15. **Signal Decay Sniffer** (9+15) 16. **MUD Room Description Map** 17. **Hex Editor Memory Dump** 18. **Boot Sequence POST Log** 19. **Signal Decoder (Inline Shop)** 20. **Threat Matrix** 21. **Contingency Protocol** 22. **Keystroke Forensics**
+### Killed this pass
+- **Ghost Echo Replay** — Passive archaeology tool in a forward-momentum game. Demands deliberate hover on completed nodes for zero new info, zero mechanical benefit, zero emotional payoff beyond first-use curiosity. A feature that exists to be demoed, not played.
+### Resume token
+JOURNEY_LAST_PASS=11 | SURVIVING=22 | NEXT_ROLE=Synthesizer
+
+## JOURNEY SCREEN — Pass 12 | 2026-03-04 | Synthesizer
+### Proposed this pass
+- **Dossier Decay Terminal** (combines Terminal Descent Dossier + Signal Decay Sniffer): The vertical ASCII dungeon map doubles as a live signal monitor — each pipe-connected room node pulses with a tiny oscilloscope waveform showing NPC "signal strength." Clicking a node opens the recon dossier, but dossier text arrives as intercepted packets assembling in real-time, with signal quality degrading the further down the map (harder = noisier, more redacted). During encounters, the same oscilloscope persists as clue-health meter — the map's signal preview pays off as encounter feedback. | ✅✅✅✅✅
+- **Keystroke Wager Replay** (combines Keystroke Forensics + Terminal Wager): After each encounter, a rapid auto-replay types out your solve sequence — but first, a wager prompt: "STAKE [X]g — predict your rating: CLEAN / MESSY / BRUTAL." Match the computed rating (based on wrong guesses, time, efficiency) and win double; miss and lose it. Replay takes 3-5 seconds, turning passive review into a tense betting game rewarding self-awareness. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. Terminal Descent Map 2. Corrupted File System 3. Recon Peek 4. Tome Loadout Hotswap 5. Run Log / Black Box 6. Terminal Descent Dossier 7. Black Box File System 8. Signal Decay Meter 9. Typewriter Tribunal 10. Glitch Veil 11. Terminal Wager 12. Intercept Transmission 13. Packet Sniffer Clue Feed 14. Dossier Wager Terminal 15. Signal Decay Sniffer 16. MUD Room Description Map 17. Hex Editor Memory Dump 18. Boot Sequence POST Log 19. Signal Decoder (Inline Shop) 20. Threat Matrix 21. Contingency Protocol 22. Keystroke Forensics 23. Dossier Decay Terminal (6+15) 24. Keystroke Wager Replay (22+11)
+### Killed this pass
+- (Synthesizer does not kill ideas)
+### Resume token
+JOURNEY_LAST_PASS=12 | SURVIVING=24 | NEXT_ROLE=Visual Designer
+
+## JOURNEY SCREEN — Pass 13 | 2026-03-04 | Visual Designer
+### Proposed this pass
+- **Traceroute Cascade**: The journey renders as a live `traceroute` readout — each encounter is a network hop with columns for hop number, latency (maps to difficulty), hostname (NPC name as a FQDN like `riddlemaster.spellwright.local`), and packet loss percentage (maps to wrong guesses/remaining HP risk). Completed hops show green RTT values and `* * *` timeout markers on failed guesses; the current hop blinks with `PROBING...`; future hops display `???` hostnames that resolve one field at a time as you approach; the boss hop renders with extreme latency spikes and intermittent `!H` (host unreachable) warnings that flicker ominously. Stats sit in a footer as connection diagnostics (`TTL=30 PKT_LOSS=0% BANDWIDTH=85g`). The sequential top-to-bottom format naturally maps to linear progression, each row is information-dense, and the latency numbers give an at-a-glance difficulty preview that the current list lacks entirely. | ✅✅✅✅✅
+- **Process Tree Monitor (htop)**: The screen mimics a full-screen `htop` / `ps aux` process monitor — each encounter is a running process with PID, CPU% (difficulty), MEM% (reward potential), TIME+ (estimated duration), and COMMAND column showing NPC invocation strings (`/usr/sbin/riddlemaster --difficulty=3 --mood=cryptic`). Completed encounters show as zombie processes (`Z`) with exit codes (0 for clean solve, 1+ for wrong guesses); the current encounter is highlighted in the htop selection bar with `R` (running) status; future encounters show `S` (sleeping) and reveal their COMMAND args progressively. A load average bar at top (`load: 2.4 / 3.0 / 1.8`) visualizes wave difficulty curve as a sparkline, and a memory usage bar doubles as HP. Kill signals (`SIGTERM`, `SIGKILL`) appear as boss threat warnings. The dense columnar layout packs more data per pixel than any prior idea while being immediately legible to anyone who has seen a task manager. | ✅✅✅✅✅
+- **Punch Card Reader**: Each encounter is visualized as a physical IBM punch card rendered in phosphor green — a rectangular card with rows of punched holes encoding encounter data, a printed header strip showing NPC name and category, and edge-notch marks for difficulty level. Completed cards slide left into a "READ" tray with a satisfying mechanical ka-chunk animation, holes illuminated green to show decoded results (word solved, score, gold). The current card sits in the reader slot with a blinking `READING...` indicator and holes punching in real-time as the encounter progresses. Unread cards in the right hopper show only their header strips, teasingly visible. The boss card is physically wider, printed on different stock (amber tint), with a `CLASSIFIED` stamp. Stats display as the card counter and accumulated punch totals. The tactile physicality — cards feeding through a machine — creates anticipation through implied momentum and gives a strong "something is being processed" feeling that static lists cannot. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1. Terminal Descent Map 2. Corrupted File System 3. Recon Peek 4. Tome Loadout Hotswap 5. Run Log / Black Box 6. Terminal Descent Dossier 7. Black Box File System 8. Signal Decay Meter 9. Typewriter Tribunal 10. Glitch Veil 11. Terminal Wager 12. Intercept Transmission 13. Packet Sniffer Clue Feed 14. Dossier Wager Terminal 15. Signal Decay Sniffer 16. MUD Room Description Map 17. Hex Editor Memory Dump 18. Boot Sequence POST Log 19. Signal Decoder (Inline Shop) 20. Threat Matrix 21. Contingency Protocol 22. Keystroke Forensics 23. Dossier Decay Terminal (6+15) 24. Keystroke Wager Replay (22+11) 25. Traceroute Cascade 26. Process Tree Monitor (htop) 27. Punch Card Reader
+### Killed this pass
+- (none — all three passed)
+### Resume token
+JOURNEY_LAST_PASS=13 | SURVIVING=27 | NEXT_ROLE=UX Designer
+
+## JOURNEY SCREEN — Pass 13 | 2026-03-04 | Visual Designer
+### Proposed this pass
+- **Traceroute Cascade**: The journey renders as a live `traceroute` readout — each encounter is a network hop with columns for hop number, latency (difficulty), hostname (NPC as FQDN like `riddlemaster.spellwright.local`), and packet loss % (risk). Completed hops show green RTT values while the boss hop renders with extreme latency spikes and `!H` (host unreachable) warnings. Stats as connection diagnostics (`TTL=30 PKT_LOSS=0% BANDWIDTH=85g`). | ✅✅✅✅✅
+- **Process Tree Monitor (htop)**: Screen mimics `htop` where each encounter is a process with PID, CPU% (difficulty), MEM% (reward), COMMAND column showing NPC invocation (`/usr/sbin/riddlemaster --difficulty=3 --mood=cryptic`). Completed = zombie processes (`Z`) with exit codes, future = sleeping (`S`), load average bar visualizes wave difficulty. Dense columnar layout packs maximum data per pixel. | ✅✅✅✅✅
+- **Punch Card Reader**: Each encounter is an IBM punch card in phosphor green with punched holes encoding data and printed header strip (NPC name). Completed cards slide into "READ" tray with mechanical animation, current card sits in reader with `READING...`, boss card is wider with amber tint and `CLASSIFIED` stamp. Tactile feeding-through-machine physicality creates anticipation. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1-24. [all previous] 25. **Traceroute Cascade** 26. **Process Tree Monitor (htop)** 27. **Punch Card Reader**
+### Killed this pass
+- (none — all three passed)
+### Resume token
+JOURNEY_LAST_PASS=13 | SURVIVING=27 | NEXT_ROLE=UX Designer
+
+## JOURNEY SCREEN — Pass 14 | 2026-03-04 | UX Designer
+### Proposed this pass
+- **Ghost Signal**: Previously failed encounter nodes occasionally emit a faint, flickering "ghost" transmission — a corrupted fragment of the word you lost to — pulsing like a dying radio signal. Hovering reveals a garbled clue from the NPC that beat you, tempting mental re-engagement with past failure. | ✅✅✅✅✅
+- **Frequency Drift**: Between encounters, background static subtly shifts frequency. If the player catches and clicks a drifting signal bar at the right moment, they intercept a "pirate broadcast" — a free micro-hint (letter category, word length, NPC weakness) for any upcoming node. Missing costs nothing; catching feels like finding a secret. | ✅✅✅✅✅
+- **Dead Drop Node**: A rare, unmarked node appears as a blinking cursor with no label — selecting reveals an anonymous terminal message from a "previous operative" containing either a cryptic boss warning, a hidden one-use Tome, or a trap costing 2 HP. No way to know which until you commit. Risk/reward + lore that others walked this path. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1-27. [all previous] 28. **Ghost Signal** 29. **Frequency Drift** 30. **Dead Drop Node**
+### Killed this pass
+- (none — all three passed)
+### Resume token
+JOURNEY_LAST_PASS=14 | SURVIVING=30 | NEXT_ROLE=Critic
+
+## JOURNEY SCREEN — Pass 15 | 2026-03-04 | Critic
+### Proposed this pass
+- **Kernel Panic Stack Trace**: When the player loses HP or makes a wrong guess, the screen flashes a kernel panic / stack trace dump where each line is a thematic hint about encounter state (remaining guesses, NPC frustration, tome effects) — dramatic damage feedback AND at-a-glance status summary disguised as a system crash log. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1-27 [previous] minus **Packet Sniffer Clue Feed** (absorbed into Signal Decay Sniffer) + 28. Ghost Signal + 29. Frequency Drift + 30. Dead Drop Node + 31. **Kernel Panic Stack Trace**
+### Killed this pass
+- **Packet Sniffer Clue Feed** — Fully absorbed into Signal Decay Sniffer combination. Zero standalone value remaining; every element already better contextualized within the combination. Dead weight cluttering decision space.
+### Resume token
+JOURNEY_LAST_PASS=15 | SURVIVING=30 | NEXT_ROLE=Synthesizer
+
+## JOURNEY SCREEN — Pass 16 | 2026-03-04 | Synthesizer
+### Proposed this pass
+- **Traceroute Loadout Terminal** (combines Traceroute Cascade + Tome Loadout Hotswap + Contingency Protocol): The map renders as a live traceroute readout where each hop is an encounter node showing latency-as-difficulty (`HOP 3 ... 142ms TIMEOUT RISK`). A collapsed Tome sidebar docks to the left — before committing, the player can drag Tomes into active slots and spend gold on contingency buffs. The hop plays a `ROUTING...` animation as it resolves into the encounter. Navigation, loadout, and pre-encounter wagering in one screen that feels like configuring a network probe before sending it into hostile infrastructure. | ✅✅✅✅✅
+- **Dossier Decay Sniffer** (combines Dossier Decay Terminal + Signal Decoder (Inline Shop) + Dead Drop Node): Each map node emits a decaying oscilloscope signal — stronger = more dossier fragments intercepted, weaker = going blind. A `SIGNAL SHOP` inline panel lets the player spend gold to boost antenna gain on any node, pulling more dossier packets (shop-as-recon). Occasionally a node flickers with `DEAD DROP` signature — no dossier, could yield rare Tome, bonus gold, or trap. Map becomes triage: read signals, invest in intel, weigh known-risk vs tantalizing unknowns. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1-30. [all previous] + 31. **Traceroute Loadout Terminal** + 32. **Dossier Decay Sniffer**
+### Killed this pass
+- (Synthesizer does not kill ideas)
+### Resume token
+JOURNEY_LAST_PASS=16 | SURVIVING=32 | NEXT_ROLE=Visual Designer
+
+## JOURNEY SCREEN — Pass 17 | 2026-03-04 | Visual Designer
+### Proposed this pass
+- **BBS Door Game Map**: Journey renders as a classic BBS door game screen — bordered window with ANSI box-drawing characters, `[Room 03]` labels with line connectors, status bar (`SysOp: ONLINE | Baud: 9600 | Nodes: 5/6`), completed rooms change from single `│` to double `║` with loot summary. Player position marked by blinking `►`. Deep BBS nostalgia. | ✅✅✅✅✅
+- **Mainframe Operator Console**: IBM 3270-style mainframe — nodes as batch JOB entries in scrolling queue (`JOB 001 SPELL.ENCOUNTER STATUS=COMPLETED RC=0`), blinking `READY` prompt, system messages in MVS format (`IEF404I JOB WAVE01 - STARTED`). Return codes show run health (RC=0 flawless, RC=4 HP lost). | ✅✅✅✅✅
+- **Dial-Up Modem Handshake**: Each node is a stage in modem negotiation — scrolling `ATZ OK / ATDT 555-0103... CONNECT 14400` log. Completed = `CONNECT` with transfer stats, current = `RING... RING...`, future = `NO CARRIER`. Waveform at top draws modem screech as animated oscillating line. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1-32. [all previous] + 33. **BBS Door Game Map** + 34. **Mainframe Operator Console** + 35. **Dial-Up Modem Handshake**
+### Killed this pass
+- (none — all three passed)
+### Resume token
+JOURNEY_LAST_PASS=17 | SURVIVING=35 | NEXT_ROLE=UX Designer
+
+## JOURNEY SCREEN — Pass 18 | 2026-03-04 | UX Designer
+### Proposed this pass
+- **Signal Decay Timer**: Each encounter has a visible "signal strength" bar that degrades in real-time as you take longer to solve — higher signal at completion = bonus gold/score, but decay rate is hidden and varies per NPC. Pulsing CRT static overlay intensifies as signal drops, creating urgent tension without mechanical lockout. | ✅✅✅✅✅
+- **Tome Crucible**: Between encounters, a `>CRUCIBLE` command lets you sacrifice two Tomes to forge one upgraded Tome with combined/amplified effect. Fusion result previewed as flickering glitch-text stabilizing over 2 seconds. Adds genuine build-crafting decision layer. | ✅✅✅✅✅
+- **Boss Wiretap**: From encounter 3 onward, a faint corrupted boss transmission bleeds into the top of the screen — each completed encounter decrypts one more fragment, gradually revealing boss's word category, difficulty modifier, or personality quirk. Fragments render as scrambled text unscrambling letter-by-letter with CRT flicker, building dread across the entire wave. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+1-35. [all previous] + 36. **Signal Decay Timer** + 37. **Tome Crucible** + 38. **Boss Wiretap**
+### Killed this pass
+- (none)
+### Resume token
+JOURNEY_LAST_PASS=18 | SURVIVING=38 | NEXT_ROLE=Critic
+
+## JOURNEY SCREEN — Pass 19 | 2026-03-04 | Critic
+### Proposed this pass
+- **Ghost Input Echo**: When navigating the map, faint green "ghost" keystrokes from previous encounters (correct/wrong guesses) briefly flicker across the terminal background like residual CRT phosphor memory — right answers glow brighter, wrong ones decay faster. Purely atmospheric, zero interaction cost, reinforces run history without a menu. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+All previous minus **Recon Peek** (absorbed) + **Ghost Input Echo** = 38 total
+### Killed this pass
+- **Recon Peek** — Fully absorbed into Terminal Descent Dossier and Dossier Wager Terminal. Every function (pre-encounter info glimpse) delivered better by combined ideas. Zero remaining unique identity.
+### Resume token
+JOURNEY_LAST_PASS=19 | SURVIVING=38 | NEXT_ROLE=Synthesizer
+
+## JOURNEY SCREEN — Pass 20 | 2026-03-04 | Synthesizer
+### Proposed this pass
+- **Mainframe Dossier Terminal** (combines Dossier Wager Terminal + Black Box File System + Boss Wiretap + Tome Crucible + Boot Sequence POST Log): The screen opens with a 2-second POST boot log scrolling system checks ("LEXICON SUBSYSTEM OK… TOME ARRAY LOADED… HOSTILE SIGNAL DETECTED"), then resolves into a dual-pane Norton Commander layout. Left pane: traceroute-style node map as file directory — each encounter is a "dossier file" with padlock; spending gold unlocks intel lines (NPC name, difficulty tier, weakness hints) typing character-by-character. Right pane: persistent run log with encounter history, Tome loadout with `>CRUCIBLE` command for Tome fusion, and slowly decrypting boss wiretap feed at bottom revealing one more line per completed encounter. Gold wagering at node selection — stake for multiplied rewards. Shop slides in as Midnight Commander popup overlay. | ✅✅✅✅✅
+- **Traceroute Sniffer Console** (combines Dossier Decay Sniffer + Traceroute Loadout Terminal + Keystroke Wager Replay + Ghost Input Echo + Intercept Transmission + Mainframe Operator Console): IBM 3270-style operator console where encounters are network hops in a live traceroute, each pulsing with signal-strength bar — stronger signal = more readable intel, weaker = corrupted fragments. After each encounter, keystroke replay ticker with confidence wager. Tome sidebar as job queue with uptime counters. Random `INTERCEPT TRANSMISSION` events flash corrupted intel or dead drops. Shop via `>REQUISITION` command inline. Ambient scan-line drift and terminal hum. | ✅✅✅✅✅
+### Surviving ideas (cumulative)
+- Total: 40 (38 previous + 2 new final syntheses)
+### Killed this pass
+- (Synthesizer does not kill ideas)
+### Resume token
+JOURNEY_LAST_PASS=20 | SURVIVING=40 | NEXT_ROLE=COMPLETE
+
+---
+
+## JOURNEY SCREEN SUMMARY
+
+> 20 iterative design passes complete. 40 ideas generated across Visual Design, UX Interaction, Encounter Visuals, and multi-idea Syntheses. 4 ideas killed by critics (Signal Radar Sweep, Waveform Timeline, Frequency Tuning, Ghost Echo Replay, Packet Sniffer Clue Feed, Recon Peek — all absorbed into superior combinations or judged redundant). Below are the top 3 surviving ideas ranked by checklist score, critic survival, and synthesis evolution depth.
+
+### #1: Mainframe Dossier Terminal (RECOMMENDED — Best Overall)
+**Evolution chain:** Terminal Descent Map → Terminal Descent Dossier → Dossier Wager Terminal → Mainframe Dossier Terminal (4 generations of refinement)
+
+The player sees a 2-second POST boot sequence ("LEXICON SUBSYSTEM OK… HOSTILE SIGNAL DETECTED…") that resolves into a dual-pane Norton Commander terminal. The LEFT PANE displays the wave's 6 nodes (5 encounters + boss) as a file directory tree — each is a locked "dossier file" that the player can spend gold to unlock, revealing NPC name, word difficulty tier, category hints, and weakness intel line-by-line with typewriter animation. Unlocking costs gold but reduces risk; going in blind costs nothing but leaves you vulnerable. The boss dossier at the bottom is permanently encrypted, showing only garbled fragments that decrypt one line per completed encounter (Boss Wiretap). The RIGHT PANE shows a persistent run log (encounter history with accuracy/gold/HP stats), your Tome loadout with a `>CRUCIBLE` command for sacrificing two Tomes to forge one upgraded Tome, and the shop accessible as a Midnight Commander-style popup overlay (`>REQUISITION`). Before entering any node, a blinking `>STAKE ___g` prompt lets you wager gold for multiplied rewards. The entire wave plays out on this one screen — no separate shop, no separate map, no separate loadout. It IS the game between encounters.
+
+**Why #1:** Deepest evolution (survived 4 synthesis rounds), addresses ALL pain points (shop integration, Tome management, anticipation building, information density), and the Norton Commander metaphor is instantly readable to the target audience while feeling native to the CRT aesthetic. The gold-for-intel economy adds a genuine decision layer that didn't exist before.
+
+### #2: Traceroute Sniffer Console (Best Atmosphere)
+**Evolution chain:** Traceroute Cascade → Traceroute Loadout Terminal → Traceroute Sniffer Console (3 generations)
+
+The player sees an IBM 3270 mainframe operator console where the wave's encounters are network hops in a live traceroute display. Each hop pulses with a signal-strength oscilloscope bar — stronger signal reveals more NPC intel (silhouette, word category, difficulty pips), weaker signal shows corrupted fragments. After each completed encounter, a keystroke replay ticker ghosts your guess history across the bottom while prompting a confidence wager ("RATE PERFORMANCE: STAKE 0-15g"). Tomes display as a process job queue sidebar with uptime counters. Random `[INTERCEPT TRANSMISSION]` events flash corrupted intel about future encounters or reveal dead drop nodes (mystery hops that could yield free Tomes, bonus gold, or traps). Shop via inline `>REQUISITION` command. Ambient scan-line drift and terminal hum throughout.
+
+**Why #2:** The signal-decay mechanic across the map creates atmospheric tension that #1 lacks — you can SEE the danger increasing as signals weaken toward the boss. The keystroke wager replay adds a unique post-encounter ritual. However, it's more complex to implement and the signal-strength UI requires more custom work.
+
+### #3: Dossier Wager Terminal (Best Quick Win — LOWEST EFFORT TO PROTOTYPE)
+**Evolution chain:** Terminal Descent Map + Recon Peek → Terminal Descent Dossier + Terminal Wager → Dossier Wager Terminal (2 generations)
+
+The player sees a vertical ASCII dungeon map with pipe-connected room nodes (║, ═, ╬). Clicking any upcoming node expands it inline to show a redacted NPC dossier — name with ██ blocks, difficulty bar, category hint garbled with random characters. Below each dossier: a `>STAKE ___g` prompt where gold unlocks additional intel lines (word length, first-letter hint) or can be wagered for reward multipliers. Completed nodes dim with one-line outcome summaries ("SOLVED 4/6 +12g"). The boss node at the bottom pulses with corrupted dossier fragments that grow more legible as the player approaches. Stats render as phosphor status bar with █ HP blocks, gold counter, score odometer.
+
+**Why #3 / Quick Win:** This requires the LEAST new UI infrastructure — it's essentially the existing vertical node list with (a) expandable dossier panels per node, (b) a gold input prompt, and (c) ASCII pipe characters between nodes. No dual-pane layout, no inline shop, no oscilloscope LineRenderers. Could be prototyped in 1-2 days using existing TextMeshPro and DOTween systems. If it works, it becomes the foundation for evolving toward #1.
+
+### Implementation Path
+**Phase 1 (Quick Win):** Build #3 (Dossier Wager Terminal) — replaces flat list with expandable ASCII map + gold-for-intel
+**Phase 2 (Upgrade):** Evolve into #1 (Mainframe Dossier Terminal) — add right pane run log, Tome crucible, inline shop, Boss Wiretap
+**Phase 3 (Polish):** Cherry-pick atmospheric elements from #2 (signal-strength oscilloscope, ghost input echoes, intercept transmissions)
