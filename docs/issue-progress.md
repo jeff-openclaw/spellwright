@@ -1,5 +1,5 @@
 # Issue Progress
-Last updated: 2026-03-04T02
+Last updated: 2026-03-04T03
 Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 
 ## Queue
@@ -10,8 +10,8 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 | 40 | Evaluate Authentic CRT Terminal Fonts | ui | ✅ Done | 7a3e014 |
 | 41 | Create Terminal Design System (USS Theme) | ui | ✅ Done | ed21676 |
 | 42 | UI Toolkit Migration: MainMenuUI (Pilot) | ui | ✅ Done | 2b2be4c |
-| 43 | UI Toolkit Migration: MapUI (Journey Screen) | ui | ⏳ Queued | — |
-| 44 | UI Toolkit Migration: ShopUI | ui | ⏳ Queued | — |
+| 43 | UI Toolkit Migration: MapUI (Journey Screen) | ui | ✅ Done | bfc5a1f |
+| 44 | UI Toolkit Migration: ShopUI | ui | 🔄 In progress | — |
 | 45 | UI Toolkit Migration: ResultUI | ui | ⏳ Queued | — |
 | 46 | UI Toolkit Migration: EncounterUI | ui | ⏳ Queued | — |
 | 48 | Remove Legacy uGUI Dependencies | ui | ⏳ Queued | — |
@@ -38,7 +38,15 @@ Framework for UI: Unity UI Toolkit (UXML + USS) — per docs/ui-research.md
 (none yet)
 
 ## Resume token
-LAST_COMPLETED=42 | NEXT=43 | QUEUE_TOTAL=28
+LAST_COMPLETED=43 | NEXT=44 | QUEUE_TOTAL=28
+
+## Implementation Notes — #43
+- Map.uxml: UXML layout with stats bar (wave/HP/gold/score chips), ScrollView node container, footer with lang toggle + proceed button
+- map.uss: Comprehensive screen styles — node cards with state modifiers (completed/current/future/boss), color stripe classes, stat chip styling, breathing glow animation, entrance animations
+- MapController.cs: UIDocument-based controller replacing uGUI MapUI — dynamic node creation via VisualElement/Label, staggered entrance with stagger-item/stagger-visible classes, breathing glow via schedule.Execute(), EventBus subscriptions for RunStarted/RunStateChanged
+- GameSceneSetup: CreateMapPanel now creates UIDocument GO (like MainMenu), removed AddPanelAnimator for map; added `using Button = UnityEngine.UI.Button` and `using Image = UnityEngine.UI.Image` aliases to fix ambiguity with UIElements namespace
+- DesignSystemTests: Added VerifyMapUIToolkit test (14 checks: 8 named elements, 2 Button types, 1 ScrollView, 1 CSS class, 2 asset loads)
+- Old MapUI.cs NOT deleted yet (will be removed in #48 "Remove Legacy uGUI Dependencies")
 
 ## Implementation Notes — #42
 - MainMenu.uxml: UXML layout with title, subtitle+cursor row, underline, separator, start button, hint, version

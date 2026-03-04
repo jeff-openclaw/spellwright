@@ -5,54 +5,266 @@
 
 .shop-screen {
     flex-direction: column;
+    padding: var(--space-lg);
 }
 
+/* ── Header ── */
 .shop-screen__header {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-md);
 }
 
-.shop-screen__gold {
+.shop-screen__title {
+    color: var(--color-amber);
+    -unity-font-style: bold;
+}
+
+.shop-screen__stats {
     flex-direction: row;
     align-items: center;
 }
 
-.shop-screen__items {
-    flex-grow: 1;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
+.shop-screen__stat {
+    margin-left: var(--space-md);
 }
 
-.shop-screen__item {
-    width: 220px;
-    margin: var(--space-md);
+.shop-screen__stat--gold {
+    color: var(--color-amber);
+}
+
+.shop-screen__stat--hp {
+    color: var(--color-phosphor);
+}
+
+/* ── Section Headers ── */
+.shop-screen__section-header {
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-sm);
+    -unity-font-style: bold;
+}
+
+.shop-screen__section-header--buy {
+    color: var(--color-amber);
+}
+
+.shop-screen__section-header--sell {
+    color: var(--color-magenta);
+}
+
+/* ── Item Containers ── */
+.shop-screen__items {
+    flex-grow: 1;
+    min-height: 120px;
+    max-height: 45%;
+}
+
+.shop-screen__sell-items {
+    flex-grow: 0;
+    min-height: 60px;
+    max-height: 25%;
+}
+
+/* ── Item Card ── */
+.shop-screen__card {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+    background-color: var(--color-card-bg);
+    border-width: var(--border-width);
+    border-color: var(--color-border);
+    border-radius: var(--border-radius);
+    transition-property: background-color, scale;
+    transition-duration: var(--transition-fast);
+}
+
+.shop-screen__card:hover {
+    background-color: var(--color-card-bg-hover);
+    scale: 1.02 1.02;
+}
+
+.shop-screen__card--sold {
+    background-color: var(--color-card-bg-sold);
+    opacity: 0.5;
+}
+
+.shop-screen__card--sold:hover {
+    background-color: var(--color-card-bg-sold);
+    scale: 1 1;
+}
+
+/* Card left stripe (rarity indicator) */
+.shop-screen__card-stripe {
+    width: 3px;
+    align-self: stretch;
+    margin-right: var(--space-md);
+    border-radius: 1px;
+}
+
+/* Card content area */
+.shop-screen__card-content {
+    flex-grow: 1;
     flex-direction: column;
 }
 
-.shop-screen__item-name {
+.shop-screen__card-name {
+    margin-bottom: var(--space-xs);
+    -unity-font-style: bold;
+}
+
+.shop-screen__card-desc {
+    color: var(--color-phosphor-dim);
+    font-size: var(--font-size-sm);
+}
+
+/* Card right area (price + action) */
+.shop-screen__card-right {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 70px;
+    margin-left: var(--space-md);
+}
+
+.shop-screen__card-price {
+    color: var(--color-amber);
+    -unity-font-style: bold;
+    margin-bottom: var(--space-xs);
+}
+
+.shop-screen__card-action {
+    color: var(--color-btn-text);
+    font-size: var(--font-size-sm);
+}
+
+/* ── Rarity Color Classes ── */
+.shop-card-stripe--common {
+    background-color: var(--color-rarity-common);
+}
+
+.shop-card-stripe--uncommon {
+    background-color: var(--color-rarity-uncommon);
+}
+
+.shop-card-stripe--rare {
+    background-color: var(--color-rarity-rare);
+}
+
+.shop-card-stripe--legendary {
+    background-color: var(--color-rarity-legendary);
+}
+
+.shop-card-stripe--heal {
+    background-color: var(--color-success);
+}
+
+.shop-card-name--common {
+    color: var(--color-rarity-common);
+}
+
+.shop-card-name--uncommon {
+    color: var(--color-rarity-uncommon);
+}
+
+.shop-card-name--rare {
+    color: var(--color-rarity-rare);
+}
+
+.shop-card-name--legendary {
+    color: var(--color-rarity-legendary);
+}
+
+.shop-card-name--heal {
+    color: var(--color-success);
+}
+
+.shop-card-name--sold {
+    color: var(--color-inactive);
+}
+
+/* ── Sell Card ── */
+.shop-screen__sell-card {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-xs);
+    background-color: var(--color-card-bg);
+    border-width: var(--border-width);
+    border-color: var(--color-border);
+    border-radius: var(--border-radius);
+    transition-property: background-color, scale;
+    transition-duration: var(--transition-fast);
+}
+
+.shop-screen__sell-card:hover {
+    background-color: var(--color-card-bg-hover);
+    scale: 1.02 1.02;
+}
+
+.shop-screen__sell-name {
+    flex-grow: 1;
+    -unity-font-style: bold;
+}
+
+.shop-screen__sell-price {
+    color: var(--color-amber);
+    margin-left: var(--space-md);
+    margin-right: var(--space-md);
+    font-size: var(--font-size-sm);
+}
+
+.shop-screen__sell-action {
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+}
+
+/* ── Feedback ── */
+.shop-screen__feedback {
+    color: var(--color-amber);
+    -unity-text-align: middle-center;
+    min-height: 24px;
+    margin-top: var(--space-sm);
     margin-bottom: var(--space-sm);
 }
 
-.shop-screen__item-desc {
-    margin-bottom: var(--space-md);
-    flex-grow: 1;
-}
-
-.shop-screen__item-price {
+/* ── Footer ── */
+.shop-screen__footer {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-}
-
-.shop-screen__footer {
-    flex-direction: row;
-    justify-content: center;
-    padding-top: var(--space-lg);
+    padding-top: var(--space-md);
     border-top-width: var(--border-width);
     border-top-color: var(--color-border);
-    margin-top: var(--space-lg);
+    margin-top: var(--space-sm);
+}
+
+.shop-screen__heal-btn {
+    background-color: rgba(15, 71, 31, 0.95);
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+.shop-screen__heal-btn:hover {
+    background-color: rgba(26, 102, 51, 1);
+}
+
+.shop-screen__heal-btn--disabled {
+    opacity: 0.4;
+}
+
+/* ── Entrance Animation (stagger) ── */
+.shop-screen__card,
+.shop-screen__sell-card {
+    opacity: 0;
+    translate: -20px 0;
+}
+
+.shop-card--visible {
+    opacity: 1;
+    translate: 0 0;
+    transition-property: opacity, translate;
+    transition-duration: 250ms;
+    transition-timing-function: ease-out;
 }

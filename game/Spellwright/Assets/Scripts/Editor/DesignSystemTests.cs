@@ -360,6 +360,133 @@ namespace Spellwright.Editor
                 Debug.LogWarning($"{failed} check(s) failed. Review errors above.");
         }
 
+        [MenuItem("Spellwright/Tests/Verify Shop UI Toolkit")]
+        public static void VerifyShopUIToolkit()
+        {
+            int passed = 0;
+            int failed = 0;
+
+            // Check Shop.uxml exists and loads
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Screens/Shop.uxml");
+            if (uxml != null)
+            {
+                Debug.Log("[PASS] Shop.uxml loaded");
+                passed++;
+            }
+            else
+            {
+                Debug.LogError("[FAIL] Shop.uxml not found at Assets/UI/Screens/Shop.uxml");
+                failed++;
+            }
+
+            // Check shop.uss loads
+            var uss = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/UI/Screens/shop.uss");
+            if (uss != null)
+            {
+                Debug.Log("[PASS] shop.uss loaded");
+                passed++;
+            }
+            else
+            {
+                Debug.LogError("[FAIL] shop.uss not found");
+                failed++;
+            }
+
+            // Instantiate UXML and verify expected elements exist
+            if (uxml != null)
+            {
+                var root = new VisualElement();
+                uxml.CloneTree(root);
+
+                string[] expectedNames = { "title", "gold", "hp", "buy-items", "sell-items", "feedback", "heal-btn", "leave-btn" };
+                foreach (var name in expectedNames)
+                {
+                    var el = root.Q(name);
+                    if (el != null)
+                    {
+                        Debug.Log($"[PASS] Element '{name}' found in Shop.uxml");
+                        passed++;
+                    }
+                    else
+                    {
+                        Debug.LogError($"[FAIL] Element '{name}' NOT found in Shop.uxml");
+                        failed++;
+                    }
+                }
+
+                // Verify heal-btn is a Button
+                var healBtn = root.Q<Button>("heal-btn");
+                if (healBtn != null)
+                {
+                    Debug.Log("[PASS] heal-btn is a Button element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] heal-btn is not a Button element");
+                    failed++;
+                }
+
+                // Verify leave-btn is a Button
+                var leaveBtn = root.Q<Button>("leave-btn");
+                if (leaveBtn != null)
+                {
+                    Debug.Log("[PASS] leave-btn is a Button element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] leave-btn is not a Button element");
+                    failed++;
+                }
+
+                // Verify buy-items is a ScrollView
+                var buyItems = root.Q<ScrollView>("buy-items");
+                if (buyItems != null)
+                {
+                    Debug.Log("[PASS] buy-items is a ScrollView element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] buy-items is not a ScrollView element");
+                    failed++;
+                }
+
+                // Verify sell-items is a ScrollView
+                var sellItems = root.Q<ScrollView>("sell-items");
+                if (sellItems != null)
+                {
+                    Debug.Log("[PASS] sell-items is a ScrollView element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] sell-items is not a ScrollView element");
+                    failed++;
+                }
+
+                // Verify CSS classes are applied
+                var shopRoot = root.Q(className: "shop-screen");
+                if (shopRoot != null)
+                {
+                    Debug.Log("[PASS] .shop-screen class found on root element");
+                    passed++;
+                }
+                else
+                {
+                    Debug.LogError("[FAIL] .shop-screen class not found");
+                    failed++;
+                }
+            }
+
+            Debug.Log($"\n=== Shop UI Toolkit Verification: {passed} passed, {failed} failed ===");
+            if (failed == 0)
+                Debug.Log("All Shop UI Toolkit checks passed!");
+            else
+                Debug.LogWarning($"{failed} check(s) failed. Review errors above.");
+        }
+
         [MenuItem("Spellwright/Tests/Preview Theme Test")]
         public static void PreviewThemeTest()
         {

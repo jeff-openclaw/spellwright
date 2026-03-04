@@ -78,9 +78,8 @@ namespace Spellwright.Editor
             var runEndPanel = CreateRunEndPanel(canvasGO.transform);
 
             // Add CanvasGroup + UIAnimator to each uGUI panel for entrance animations
-            // MainMenuPanel and MapPanel use UI Toolkit (USS handles animations)
+            // MainMenuPanel, MapPanel, and ShopPanel use UI Toolkit (USS handles animations)
             AddPanelAnimator(encounterPanel);
-            AddPanelAnimator(shopPanel);
             AddPanelAnimator(runEndPanel);
 
             // ── Screen Effects Overlay (scanlines + vignette, above panels) ──
@@ -159,10 +158,10 @@ namespace Spellwright.Editor
             var shopMgr = shopPanel.AddComponent<ShopManager>();
             WireShopManager(shopMgr);
 
-            // Wire ShopUI → ShopManager
-            var shopUI = shopPanel.GetComponent<ShopUI>();
-            if (shopUI != null)
-                SetSerializedField(shopUI, "shopManager", shopMgr);
+            // Wire ShopController → ShopManager
+            var shopController = shopPanel.GetComponent<ShopController>();
+            if (shopController != null)
+                SetSerializedField(shopController, "shopManager", shopMgr);
 
             // CRTSettings
             var crtGO = new GameObject("CRTSettings");
@@ -694,117 +693,26 @@ namespace Spellwright.Editor
 
         private static GameObject CreateShopPanel(Transform parent)
         {
-            var panel = CreatePanel(parent, "ShopPanel");
-            AddPanelBorder(panel);
+            // UI Toolkit-based shop screen — root-level GameObject (not under Canvas)
+            var panelGO = new GameObject("ShopPanel");
 
-            // ── Title (decorative, large, amber-green gradient) ──
-            var shopTitle = TerminalUIHelper.CreateDecorativeText(panel.transform, "ShopTitle", "ARCANE SHOP",
-                _theme, _theme != null ? _theme.decorativeHeaderSize + 6 : 42, AmberBright,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.91f), new Vector2(0.9f, 0.99f), applyGlow: true);
-            TerminalUIHelper.ApplyVerticalGradient(shopTitle, AmberBright,
-                new Color(AmberBright.r * 0.7f, AmberBright.g * 0.5f, AmberBright.b * 0.2f));
+            // Create or load PanelSettings asset
+            var panelSettings = EnsurePanelSettings();
 
-            // ── Stats bar (chip layout matching map/encounter) ──
-            var statsBar = CreateContainer(panel.transform, "ShopStatsBar",
-                new Vector2(0.06f, 0.85f), new Vector2(0.94f, 0.92f));
-            var statsHlg = statsBar.AddComponent<HorizontalLayoutGroup>();
-            statsHlg.spacing = 10;
-            statsHlg.padding = new RectOffset(4, 4, 2, 2);
-            statsHlg.childForceExpandWidth = false;
-            statsHlg.childForceExpandHeight = true;
-            statsHlg.childControlWidth = true;
-            statsHlg.childControlHeight = true;
-            statsHlg.childAlignment = TextAnchor.MiddleCenter;
+            // Add UIDocument with UXML and PanelSettings
+            var uiDoc = panelGO.AddComponent<UIDocument>();
+            var uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Screens/Shop.uxml");
+            if (uxml == null)
+                Debug.LogWarning("[GameSceneSetup] Shop.uxml not found at Assets/UI/Screens/Shop.uxml");
 
-            // Gold chip (amber)
-            var goldChip = CreateStatChip(statsBar.transform, "GoldChip", "$ 0g",
-                AmberBright, new Color(AmberBright.r * 0.08f, AmberBright.g * 0.08f, AmberBright.b * 0.08f, 0.7f));
-            var goldText = goldChip.GetComponentInChildren<TextMeshProUGUI>();
+            uiDoc.panelSettings = panelSettings;
+            uiDoc.visualTreeAsset = uxml;
 
-            // HP chip (green, wider with embedded HP bar)
-            var hpChip = CreateEncounterStatChip(statsBar.transform, "HPChip", "HPLabel",
-                "HP 30/30", PhosphorGreen,
-                new Color(PhosphorGreen.r * 0.06f, PhosphorGreen.g * 0.06f, PhosphorGreen.b * 0.06f, 0.7f),
-                flexWidth: 1.5f);
-            var hpText = hpChip.transform.Find("HPLabel")?.GetComponent<TextMeshProUGUI>();
-            // HP bar at bottom of chip
-            var shopHpBarBg = new GameObject("HPBarBg");
-            shopHpBarBg.transform.SetParent(hpChip.transform, false);
-            var shopHpBarBgRT = shopHpBarBg.AddComponent<RectTransform>();
-            shopHpBarBgRT.anchorMin = new Vector2(0.03f, 0.08f);
-            shopHpBarBgRT.anchorMax = new Vector2(0.97f, 0.28f);
-            shopHpBarBgRT.offsetMin = Vector2.zero;
-            shopHpBarBgRT.offsetMax = Vector2.zero;
-            shopHpBarBg.AddComponent<Image>().color = HpBarBg;
-            var shopHpFill = CreateFullscreenImage(shopHpBarBg.transform, "HPBarFill", HpBarFill);
-            var shopHpFillRT = shopHpFill.GetComponent<RectTransform>();
-            shopHpFillRT.anchorMin = Vector2.zero;
-            shopHpFillRT.anchorMax = Vector2.one;
-            shopHpFillRT.offsetMin = Vector2.zero;
-            shopHpFillRT.offsetMax = Vector2.zero;
+            // Add ShopController (ShopManager wired separately below)
+            var controller = panelGO.AddComponent<ShopController>();
+            SetSerializedField(controller, "uiDocument", uiDoc);
 
-            // ── Separator ──
-            TerminalUIHelper.CreateSeparator(panel.transform, "TopSeparator",
-                _theme, PhosphorDim, new Vector2(0.05f, 0.83f), new Vector2(0.95f, 0.85f));
-
-            // ── Buy section header (amber accent) ──
-            CreateText(panel.transform, "BuyHeader", "\u2500\u2500 FOR SALE \u2500\u2500",
-                _theme != null ? _theme.labelSize + 2 : 16, AmberBright,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.78f), new Vector2(0.50f, 0.83f));
-
-            // ── Item container ──
-            var itemContainer = CreateContainer(panel.transform, "ItemContainer",
-                new Vector2(0.05f, 0.42f), new Vector2(0.95f, 0.78f));
-            var vlg1 = itemContainer.AddComponent<VerticalLayoutGroup>();
-            vlg1.spacing = 6;
-            vlg1.padding = new RectOffset(0, 0, 2, 2);
-            vlg1.childAlignment = TextAnchor.UpperLeft;
-            vlg1.childForceExpandWidth = true;
-            vlg1.childForceExpandHeight = false;
-            vlg1.childControlWidth = true;
-            vlg1.childControlHeight = true;
-
-            // ── Separator ──
-            TerminalUIHelper.CreateSeparator(panel.transform, "MidSeparator",
-                _theme, PhosphorDim, new Vector2(0.05f, 0.39f), new Vector2(0.95f, 0.42f));
-
-            // ── Sell section header (magenta accent) ──
-            CreateText(panel.transform, "SellHeader", "\u2500\u2500 YOUR TOMES \u2500\u2500",
-                _theme != null ? _theme.labelSize + 2 : 16, MagentaMagic,
-                TextAlignmentOptions.MidlineLeft, new Vector2(0.05f, 0.35f), new Vector2(0.50f, 0.40f));
-
-            // ── Equipped container ──
-            var equippedContainer = CreateContainer(panel.transform, "EquippedContainer",
-                new Vector2(0.05f, 0.14f), new Vector2(0.95f, 0.35f));
-            var vlg2 = equippedContainer.AddComponent<VerticalLayoutGroup>();
-            vlg2.spacing = 6;
-            vlg2.padding = new RectOffset(0, 0, 2, 2);
-            vlg2.childAlignment = TextAnchor.UpperLeft;
-            vlg2.childForceExpandWidth = true;
-            vlg2.childForceExpandHeight = false;
-            vlg2.childControlWidth = true;
-            vlg2.childControlHeight = true;
-
-            // ── Feedback text ──
-            var feedbackText = CreateText(panel.transform, "FeedbackText", "",
-                _theme != null ? _theme.labelSize : 16, AmberBright,
-                TextAlignmentOptions.Center, new Vector2(0.1f, 0.08f), new Vector2(0.9f, 0.13f));
-
-            // ── Leave button ──
-            var leaveBtn = CreateButton(panel.transform, "LeaveButton", "[ LEAVE SHOP ]", ButtonBg,
-                new Vector2(0.32f, 0.02f), new Vector2(0.68f, 0.08f));
-
-            // ── Wire ShopUI ──
-            var shopUI = panel.AddComponent<ShopUI>();
-            SetSerializedField(shopUI, "itemContainer", itemContainer.transform);
-            SetSerializedField(shopUI, "equippedContainer", equippedContainer.transform);
-            SetSerializedField(shopUI, "goldText", goldText);
-            SetSerializedField(shopUI, "hpText", hpText);
-            SetSerializedField(shopUI, "feedbackText", feedbackText);
-            SetSerializedField(shopUI, "leaveButton", leaveBtn.GetComponent<Button>());
-            SetSerializedField(shopUI, "theme", _theme);
-
-            return panel;
+            return panelGO;
         }
 
         private static GameObject CreateRunEndPanel(Transform parent)
@@ -1005,11 +913,11 @@ namespace Spellwright.Editor
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        // ── ShopUI shopManager wiring (called after ShopManager is added) ──
+        // ── ShopController shopManager wiring (called after ShopManager is added) ──
 
-        public static void WireShopUIToManager(ShopUI shopUI, ShopManager shopMgr)
+        public static void WireShopControllerToManager(ShopController shopController, ShopManager shopMgr)
         {
-            SetSerializedField(shopUI, "shopManager", shopMgr);
+            SetSerializedField(shopController, "shopManager", shopMgr);
         }
 
         // ── UI Factory Methods ──────────────────────────────

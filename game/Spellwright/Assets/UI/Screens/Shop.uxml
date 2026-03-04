@@ -1,0 +1,41 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../Screens/shop.uss" />
+    <ui:VisualElement name="shop-root" class="screen-root shop-screen">
+        <!-- Header: title + stats -->
+        <ui:VisualElement class="shop-screen__header">
+            <ui:Label name="title" text="ARCANE SHOP" class="text-header shop-screen__title" />
+            <ui:VisualElement class="shop-screen__stats">
+                <ui:Label name="gold" text="$ --g" class="text-stat shop-screen__stat shop-screen__stat--gold" />
+                <ui:Label name="hp" text="HP --/--" class="text-stat shop-screen__stat shop-screen__stat--hp" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Separator -->
+        <ui:VisualElement class="divider" />
+
+        <!-- Buy section header -->
+        <ui:Label text="── FOR SALE ──" class="text-label shop-screen__section-header shop-screen__section-header--buy" />
+
+        <!-- Buy items container (populated dynamically by C#) -->
+        <ui:ScrollView name="buy-items" class="shop-screen__items" />
+
+        <!-- Separator -->
+        <ui:VisualElement class="divider" />
+
+        <!-- Sell section header -->
+        <ui:Label text="── YOUR TOMES ──" class="text-label shop-screen__section-header shop-screen__section-header--sell" />
+
+        <!-- Equipped tomes container (populated dynamically by C#) -->
+        <ui:ScrollView name="sell-items" class="shop-screen__sell-items" />
+
+        <!-- Feedback text -->
+        <ui:Label name="feedback" text="" class="text-body shop-screen__feedback" />
+
+        <!-- Footer: heal + leave -->
+        <ui:VisualElement class="shop-screen__footer">
+            <ui:Button name="heal-btn" text="[ HEAL ]" class="btn shop-screen__heal-btn" />
+            <ui:VisualElement class="grow" />
+            <ui:Button name="leave-btn" text="[ LEAVE SHOP ]" class="btn btn-large shop-screen__leave-btn" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
