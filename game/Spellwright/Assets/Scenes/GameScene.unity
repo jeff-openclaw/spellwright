@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &106574993
+--- !u!1 &27543014
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,8 +127,306 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 106574995}
-  - component: {fileID: 106574994}
+  - component: {fileID: 27543017}
+  - component: {fileID: 27543016}
+  - component: {fileID: 27543015}
+  m_Layer: 0
+  m_Name: AmbientDataStream
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &27543015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 27543014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 937b7d8a25b654fb8bee11cadb75649e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.AmbientDataStream
+  theme: {fileID: 11400000, guid: a0973bcb6da2645e99b61db7685f7e2f, type: 2}
+  columnCount: 12
+  charsPerColumn: 25
+  scrollSpeed: 0.18
+  minAlpha: 0.08
+  maxAlpha: 0.28
+  accentChance: 0.08
+--- !u!114 &27543016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 27543014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: f5dd78fb79eda4045884f7d031f43bda, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 0}
+  m_SortingOrder: -100
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &27543017
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 27543014}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &147110132
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 147110134}
+  - component: {fileID: 147110133}
+  m_Layer: 0
+  m_Name: EncounterManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &147110133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 147110132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57bf1f9994f514a548300d3bc6e909df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Encounter.EncounterManager
+  gameConfig: {fileID: 0}
+--- !u!4 &147110134
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 147110132}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &272414084
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 272414086}
+  - component: {fileID: 272414085}
+  m_Layer: 0
+  m_Name: MoodBargainSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &272414085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 272414084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1060dde42afbb44368221d07ab61bb0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Encounter.MoodBargainSystem
+  bargainDurationSeconds: 8
+--- !u!4 &272414086
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 272414084}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &343614773
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 343614776}
+  - component: {fileID: 343614775}
+  - component: {fileID: 343614774}
+  m_Layer: 0
+  m_Name: MainMenuPanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &343614774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343614773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a122dcb5fe8d4a498e070ecc410c3e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.MainMenuController
+  uiDocument: {fileID: 343614775}
+  contentDelay: 200
+  buttonDelay: 1000
+  hintDelay: 1200
+  versionDelay: 1400
+  subtitleDelay: 600
+  typewriterSpeed: 40
+--- !u!114 &343614775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343614773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: f5dd78fb79eda4045884f7d031f43bda, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: b8ac8b32844304c928cb243dae1089af, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &343614776
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 343614773}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &402925699
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 402925701}
+  - component: {fileID: 402925700}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &402925700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 402925699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8267bb54347e74223ac75415422c86e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Audio.AudioManager
+  ambientHumClip: {fileID: 0}
+  ambientHumVolume: 0.07
+  keyPressSounds: []
+  errorSounds: []
+  keyPressVolume: 0.4
+  errorVolume: 0.5
+  bootSound: {fileID: 0}
+  shutdownSound: {fileID: 0}
+  degaussSound: {fileID: 0}
+  transitionVolume: 0.6
+  buttonClickSound: {fileID: 0}
+  buttonHoverSound: {fileID: 0}
+  uiVolume: 0.3
+--- !u!4 &402925701
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 402925699}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &406041918
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 406041920}
+  - component: {fileID: 406041919}
+  - component: {fileID: 406041921}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -136,13 +434,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!108 &106574994
+--- !u!108 &406041919
 Light:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 106574993}
+  m_GameObject: {fileID: 406041918}
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 1
@@ -201,13 +499,13 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
---- !u!4 &106574995
+--- !u!4 &406041920
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 106574993}
+  m_GameObject: {fileID: 406041918}
   serializedVersion: 2
   m_LocalRotation: {x: 0.40821794, y: -0.23456973, z: 0.10938166, w: 0.8754261}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -216,7 +514,36 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &156039054
+--- !u!114 &406041921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 406041918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
+--- !u!1 &522983056
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -224,9 +551,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 156039057}
-  - component: {fileID: 156039056}
-  - component: {fileID: 156039055}
+  - component: {fileID: 522983059}
+  - component: {fileID: 522983058}
+  - component: {fileID: 522983057}
   m_Layer: 0
   m_Name: EncounterPanel
   m_TagString: Untagged
@@ -234,31 +561,31 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &156039055
+--- !u!114 &522983057
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 156039054}
+  m_GameObject: {fileID: 522983056}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dffe9879e72fc460caef7e2b3409a734, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.EncounterController
-  uiDocument: {fileID: 156039056}
+  uiDocument: {fileID: 522983058}
   typewriterSpeedMs: 30
   flashDurationMs: 200
   tileRevealDurationMs: 300
   cascadeDelayMs: 50
   hpBarLerpSpeed: 5
---- !u!114 &156039056
+--- !u!114 &522983058
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 156039054}
+  m_GameObject: {fileID: 522983056}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
@@ -275,13 +602,13 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!4 &156039057
+--- !u!4 &522983059
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 156039054}
+  m_GameObject: {fileID: 522983056}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -290,7 +617,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &174620557
+--- !u!1 &700829711
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -298,10 +625,98 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 174620561}
-  - component: {fileID: 174620560}
-  - component: {fileID: 174620559}
-  - component: {fileID: 174620558}
+  - component: {fileID: 700829713}
+  - component: {fileID: 700829712}
+  m_Layer: 0
+  m_Name: LetterSacrificeSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &700829712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700829711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab7d60107922343808e04d1d6f646310, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Encounter.LetterSacrificeSystem
+--- !u!4 &700829713
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700829711}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &717192299
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 717192301}
+  - component: {fileID: 717192300}
+  m_Layer: 0
+  m_Name: RivalSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &717192300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 717192299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9d65812aacfb46019cd18c89432ecb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Run.RivalSystem
+--- !u!4 &717192301
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 717192299}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &857422131
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 857422135}
+  - component: {fileID: 857422134}
+  - component: {fileID: 857422133}
+  - component: {fileID: 857422132}
   m_Layer: 0
   m_Name: ShopPanel
   m_TagString: Untagged
@@ -309,13 +724,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &174620558
+--- !u!114 &857422132
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 174620557}
+  m_GameObject: {fileID: 857422131}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 13298e47a32b147bb99e4dc5c1d32a1b, type: 3}
@@ -328,28 +743,28 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3081548ef59564596ac5d82e1e314d8a, type: 2}
   - {fileID: 11400000, guid: 05966817b1d814e9994ccaf9dedf367b, type: 2}
   gameConfig: {fileID: 11400000, guid: 74fd963cf98124c2b93655fdbd43740c, type: 2}
---- !u!114 &174620559
+--- !u!114 &857422133
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 174620557}
+  m_GameObject: {fileID: 857422131}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: adf51ee01f7c8425098c158cc1c3a006, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.ShopController
-  uiDocument: {fileID: 174620560}
-  shopManager: {fileID: 174620558}
+  uiDocument: {fileID: 857422134}
+  shopManager: {fileID: 857422132}
   staggerDelayMs: 60
---- !u!114 &174620560
+--- !u!114 &857422134
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 174620557}
+  m_GameObject: {fileID: 857422131}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
@@ -366,13 +781,13 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!4 &174620561
+--- !u!4 &857422135
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 174620557}
+  m_GameObject: {fileID: 857422131}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -381,7 +796,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &182601515
+--- !u!1 &961490080
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -389,34 +804,37 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 182601517}
-  - component: {fileID: 182601516}
+  - component: {fileID: 961490082}
+  - component: {fileID: 961490081}
   m_Layer: 0
-  m_Name: RivalSystem
+  m_Name: LLMManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &182601516
+--- !u!114 &961490081
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 182601515}
+  m_GameObject: {fileID: 961490080}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9d65812aacfb46019cd18c89432ecb6, type: 3}
+  m_Script: {fileID: 11500000, guid: 8dacd34d6b8504d748a3d563f30a3113, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Run.RivalSystem
---- !u!4 &182601517
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.LLM.LLMManager
+  gameConfig: {fileID: 11400000, guid: 74fd963cf98124c2b93655fdbd43740c, type: 2}
+  fallbackCluesAsset: {fileID: 4900000, guid: 3e5993558c4254be49dfa09a60c3d421, type: 3}
+  fallbackCluesAssetRo: {fileID: 4900000, guid: 693d3fe4d1e144da78717420eb2f533b, type: 3}
+--- !u!4 &961490082
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 182601515}
+  m_GameObject: {fileID: 961490080}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -425,7 +843,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &304071046
+--- !u!1 &1225564914
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -433,134 +851,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 304071049}
-  - component: {fileID: 304071048}
-  - component: {fileID: 304071047}
-  m_Layer: 0
-  m_Name: ScreenEffectsOverlay
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &304071047
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 304071046}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ab4576bb0f324c41a1b7c20c2625399, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.ScreenEffectsOverlay
-  theme: {fileID: 11400000, guid: a0973bcb6da2645e99b61db7685f7e2f, type: 2}
---- !u!114 &304071048
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 304071046}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
-  m_PanelSettings: {fileID: 11400000, guid: f5dd78fb79eda4045884f7d031f43bda, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 0}
-  m_SortingOrder: 100
-  m_Position: 0
-  m_WorldSpaceSizeMode: 1
-  m_WorldSpaceWidth: 1920
-  m_WorldSpaceHeight: 1080
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}
---- !u!4 &304071049
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 304071046}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &493292935
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 493292937}
-  - component: {fileID: 493292936}
-  m_Layer: 0
-  m_Name: CRTSettings
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &493292936
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 493292935}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a97a76466af924f61a17223f17ce9e7a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Rendering.CRTSettings
-  crtEnabled: 1
-  scanlineIntensity: 0.25
-  scanlineFrequency: 320
-  barrelDistortion: 0.3
-  chromaticAberration: 0.003
-  noiseIntensity: 0.04
-  noiseSpeed: 8
-  vignetteIntensity: 0.8
-  vignetteRoundness: 0.8
-  phosphorIntensity: 0.08
-  screenCurvature: 1.15
-  borderSoftness: 0.12
-  brightness: 1.12
---- !u!4 &493292937
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 493292935}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &584330848
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 584330850}
-  - component: {fileID: 584330849}
+  - component: {fileID: 1225564916}
+  - component: {fileID: 1225564915}
   m_Layer: 0
   m_Name: WordValidator
   m_TagString: Untagged
@@ -568,26 +860,26 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &584330849
+--- !u!114 &1225564915
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 584330848}
+  m_GameObject: {fileID: 1225564914}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d518aa864ea8462b924669afb9c8090, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Encounter.WordValidator
   gameConfig: {fileID: 11400000, guid: 74fd963cf98124c2b93655fdbd43740c, type: 2}
---- !u!4 &584330850
+--- !u!4 &1225564916
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 584330848}
+  m_GameObject: {fileID: 1225564914}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -596,7 +888,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &601634972
+--- !u!1 &1348473346
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -604,35 +896,67 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 601634974}
-  - component: {fileID: 601634973}
+  - component: {fileID: 1348473348}
+  - component: {fileID: 1348473347}
   m_Layer: 0
-  m_Name: RunManager
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &601634973
+--- !u!114 &1348473347
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 601634972}
+  m_GameObject: {fileID: 1348473346}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8bd53d0813af14fd9ac81c1f0c5fb0e4, type: 3}
+  m_Script: {fileID: 11500000, guid: f287f247415bf4a0d976a9ca968156b6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Run.RunManager
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Run.GameManager
+  mainMenuPanel: {fileID: 343614773}
+  mapPanel: {fileID: 1862204930}
+  encounterPanel: {fileID: 522983056}
+  shopPanel: {fileID: 857422131}
+  runEndPanel: {fileID: 1945182657}
+  bossNPC: {fileID: 11400000, guid: ae548fbd48a1c4c30a9adec351f87621, type: 2}
+  wordPools:
+  - {fileID: 11400000, guid: a2265cfa80bc84a9f94606f940ac6269, type: 2}
+  - {fileID: 11400000, guid: c571e6301e606486d95c2a1684ce3246, type: 2}
+  - {fileID: 11400000, guid: 527a4b7b8ba6f4371b5ede642c87e344, type: 2}
+  - {fileID: 11400000, guid: ebf4a08bdc13449fb8bf88a39835ea00, type: 2}
+  - {fileID: 11400000, guid: 399e83dca678a49aea8f8d2ed9ef6433, type: 2}
+  - {fileID: 11400000, guid: b03b23a889d9f47c992d8542e6371899, type: 2}
+  - {fileID: 11400000, guid: 3a4cc9ec62cdc490b9a076e6f5db96fb, type: 2}
+  - {fileID: 11400000, guid: c2104aaf302fe47f7a317baa988fa3a4, type: 2}
+  - {fileID: 11400000, guid: 4e8af0a46a99b43a39518a8a488ed325, type: 2}
+  wordPoolsRo:
+  - {fileID: 11400000, guid: 8a162d05f25414976be0e79873c55a91, type: 2}
+  - {fileID: 11400000, guid: 31d109e2b2a7e439ab1c1e075c498ade, type: 2}
+  - {fileID: 11400000, guid: d8ec30b515a584b7eb4610eadf7a2149, type: 2}
+  - {fileID: 11400000, guid: 421c4fd6d293d45b8921d03e94420798, type: 2}
+  - {fileID: 11400000, guid: 21a7407fb30d24982bb32192f210f864, type: 2}
+  - {fileID: 11400000, guid: d495e18e7eb4540c2a6f6f1277468e91, type: 2}
+  - {fileID: 11400000, guid: db6970fb129ce4bfca5696ac81470e27, type: 2}
+  - {fileID: 11400000, guid: fe10196a3a4ab4509b5b23971da40a60, type: 2}
+  - {fileID: 11400000, guid: f120ea245efcb44c6ad2616bb555d3be, type: 2}
+  encounterManager: {fileID: 147110133}
   gameConfig: {fileID: 11400000, guid: 74fd963cf98124c2b93655fdbd43740c, type: 2}
---- !u!4 &601634974
+  regularNPCs:
+  - {fileID: 11400000, guid: 61f33d3c0935e4007b957f15e9a8e79a, type: 2}
+  - {fileID: 11400000, guid: e4cf8b6ff1a52495fb7312790154b0fe, type: 2}
+  - {fileID: 11400000, guid: 080addd55fcf84a98a038aa84dd4b0b6, type: 2}
+  - {fileID: 11400000, guid: c01759539435547c0adf510ad3700e64, type: 2}
+--- !u!4 &1348473348
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 601634972}
+  m_GameObject: {fileID: 1348473346}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -641,7 +965,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &613845575
+--- !u!1 &1437362560
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -649,331 +973,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 613845578}
-  - component: {fileID: 613845577}
-  - component: {fileID: 613845576}
-  m_Layer: 0
-  m_Name: RunEndPanel
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &613845576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 613845575}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 87bfd222a561d43f3ad99f7a574d7e6a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.ResultController
-  uiDocument: {fileID: 613845577}
-  statRevealDelayMs: 300
-  buttonRevealDelayMs: 300
---- !u!114 &613845577
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 613845575}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
-  m_PanelSettings: {fileID: 11400000, guid: f5dd78fb79eda4045884f7d031f43bda, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: 38e10b692adb247fa9793e07b63ff421, type: 3}
-  m_SortingOrder: 0
-  m_Position: 0
-  m_WorldSpaceSizeMode: 1
-  m_WorldSpaceWidth: 1920
-  m_WorldSpaceHeight: 1080
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}
---- !u!4 &613845578
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 613845575}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &647295933
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 647295935}
-  - component: {fileID: 647295934}
-  m_Layer: 0
-  m_Name: EncounterManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &647295934
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 647295933}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57bf1f9994f514a548300d3bc6e909df, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Encounter.EncounterManager
-  gameConfig: {fileID: 0}
---- !u!4 &647295935
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 647295933}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &793537648
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 793537650}
-  - component: {fileID: 793537649}
-  m_Layer: 0
-  m_Name: MoodBargainSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &793537649
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 793537648}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1060dde42afbb44368221d07ab61bb0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Encounter.MoodBargainSystem
-  bargainDurationSeconds: 8
---- !u!4 &793537650
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 793537648}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1045898075
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1045898077}
-  - component: {fileID: 1045898076}
-  m_Layer: 0
-  m_Name: TomeManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1045898076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1045898075}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7637cd21f9cc04fa7835f2eeee6fc8d6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Tomes.TomeManager
---- !u!4 &1045898077
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1045898075}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1256922904
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1256922906}
-  - component: {fileID: 1256922905}
-  m_Layer: 0
-  m_Name: LetterSacrificeSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1256922905
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1256922904}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab7d60107922343808e04d1d6f646310, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Encounter.LetterSacrificeSystem
---- !u!4 &1256922906
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1256922904}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1268131555
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1268131558}
-  - component: {fileID: 1268131557}
-  - component: {fileID: 1268131556}
-  m_Layer: 0
-  m_Name: MapPanel
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &1268131556
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1268131555}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 27b1e0662688e432eab58c0b17d741ae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.MapController
-  uiDocument: {fileID: 1268131557}
-  gameConfig: {fileID: 11400000, guid: 74fd963cf98124c2b93655fdbd43740c, type: 2}
-  shopManager: {fileID: 174620558}
-  staggerDelayMs: 60
-  glowIntervalMs: 550
---- !u!114 &1268131557
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1268131555}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
-  m_PanelSettings: {fileID: 11400000, guid: f5dd78fb79eda4045884f7d031f43bda, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: b6b456288e4b44220bd3308f5dbea5b8, type: 3}
-  m_SortingOrder: 0
-  m_Position: 0
-  m_WorldSpaceSizeMode: 1
-  m_WorldSpaceWidth: 1920
-  m_WorldSpaceHeight: 1080
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}
---- !u!4 &1268131558
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1268131555}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1335514183
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1335514186}
-  - component: {fileID: 1335514185}
-  - component: {fileID: 1335514184}
+  - component: {fileID: 1437362563}
+  - component: {fileID: 1437362562}
+  - component: {fileID: 1437362561}
+  - component: {fileID: 1437362564}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -981,21 +984,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &1335514184
+--- !u!81 &1437362561
 AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1335514183}
+  m_GameObject: {fileID: 1437362560}
   m_Enabled: 1
---- !u!20 &1335514185
+--- !u!20 &1437362562
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1335514183}
+  m_GameObject: {fileID: 1437362560}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
@@ -1040,13 +1043,13 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!4 &1335514186
+--- !u!4 &1437362563
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1335514183}
+  m_GameObject: {fileID: 1437362560}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1055,7 +1058,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1472610461
+--- !u!114 &1437362564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1437362560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
+--- !u!1 &1470997146
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1063,47 +1110,47 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1472610463}
-  - component: {fileID: 1472610462}
+  - component: {fileID: 1470997148}
+  - component: {fileID: 1470997147}
   m_Layer: 0
-  m_Name: AudioManager
+  m_Name: CRTSettings
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1472610462
+--- !u!114 &1470997147
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1472610461}
+  m_GameObject: {fileID: 1470997146}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8267bb54347e74223ac75415422c86e5, type: 3}
+  m_Script: {fileID: 11500000, guid: a97a76466af924f61a17223f17ce9e7a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Audio.AudioManager
-  ambientHumClip: {fileID: 0}
-  ambientHumVolume: 0.07
-  keyPressSounds: []
-  errorSounds: []
-  keyPressVolume: 0.4
-  errorVolume: 0.5
-  bootSound: {fileID: 0}
-  shutdownSound: {fileID: 0}
-  degaussSound: {fileID: 0}
-  transitionVolume: 0.6
-  buttonClickSound: {fileID: 0}
-  buttonHoverSound: {fileID: 0}
-  uiVolume: 0.3
---- !u!4 &1472610463
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Rendering.CRTSettings
+  crtEnabled: 1
+  scanlineIntensity: 0.25
+  scanlineFrequency: 320
+  barrelDistortion: 0.3
+  chromaticAberration: 0.003
+  noiseIntensity: 0.04
+  noiseSpeed: 8
+  vignetteIntensity: 0.8
+  vignetteRoundness: 0.8
+  phosphorIntensity: 0.08
+  screenCurvature: 1.15
+  borderSoftness: 0.12
+  brightness: 1.12
+--- !u!4 &1470997148
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1472610461}
+  m_GameObject: {fileID: 1470997146}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1112,7 +1159,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1522431432
+--- !u!1 &1498005923
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1120,67 +1167,79 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1522431434}
-  - component: {fileID: 1522431433}
+  - component: {fileID: 1498005925}
+  - component: {fileID: 1498005924}
   m_Layer: 0
-  m_Name: GameManager
+  m_Name: TomeManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1522431433
+--- !u!114 &1498005924
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1522431432}
+  m_GameObject: {fileID: 1498005923}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f287f247415bf4a0d976a9ca968156b6, type: 3}
+  m_Script: {fileID: 11500000, guid: 7637cd21f9cc04fa7835f2eeee6fc8d6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Run.GameManager
-  mainMenuPanel: {fileID: 1539463524}
-  mapPanel: {fileID: 1268131555}
-  encounterPanel: {fileID: 156039054}
-  shopPanel: {fileID: 174620557}
-  runEndPanel: {fileID: 613845575}
-  bossNPC: {fileID: 11400000, guid: ae548fbd48a1c4c30a9adec351f87621, type: 2}
-  wordPools:
-  - {fileID: 11400000, guid: a2265cfa80bc84a9f94606f940ac6269, type: 2}
-  - {fileID: 11400000, guid: c571e6301e606486d95c2a1684ce3246, type: 2}
-  - {fileID: 11400000, guid: 527a4b7b8ba6f4371b5ede642c87e344, type: 2}
-  - {fileID: 11400000, guid: ebf4a08bdc13449fb8bf88a39835ea00, type: 2}
-  - {fileID: 11400000, guid: 399e83dca678a49aea8f8d2ed9ef6433, type: 2}
-  - {fileID: 11400000, guid: b03b23a889d9f47c992d8542e6371899, type: 2}
-  - {fileID: 11400000, guid: 3a4cc9ec62cdc490b9a076e6f5db96fb, type: 2}
-  - {fileID: 11400000, guid: c2104aaf302fe47f7a317baa988fa3a4, type: 2}
-  - {fileID: 11400000, guid: 4e8af0a46a99b43a39518a8a488ed325, type: 2}
-  wordPoolsRo:
-  - {fileID: 11400000, guid: 8a162d05f25414976be0e79873c55a91, type: 2}
-  - {fileID: 11400000, guid: 31d109e2b2a7e439ab1c1e075c498ade, type: 2}
-  - {fileID: 11400000, guid: d8ec30b515a584b7eb4610eadf7a2149, type: 2}
-  - {fileID: 11400000, guid: 421c4fd6d293d45b8921d03e94420798, type: 2}
-  - {fileID: 11400000, guid: 21a7407fb30d24982bb32192f210f864, type: 2}
-  - {fileID: 11400000, guid: d495e18e7eb4540c2a6f6f1277468e91, type: 2}
-  - {fileID: 11400000, guid: db6970fb129ce4bfca5696ac81470e27, type: 2}
-  - {fileID: 11400000, guid: fe10196a3a4ab4509b5b23971da40a60, type: 2}
-  - {fileID: 11400000, guid: f120ea245efcb44c6ad2616bb555d3be, type: 2}
-  encounterManager: {fileID: 647295934}
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Tomes.TomeManager
+--- !u!4 &1498005925
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1498005923}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1679994943
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1679994945}
+  - component: {fileID: 1679994944}
+  m_Layer: 0
+  m_Name: RunManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1679994944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1679994943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8bd53d0813af14fd9ac81c1f0c5fb0e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Run.RunManager
   gameConfig: {fileID: 11400000, guid: 74fd963cf98124c2b93655fdbd43740c, type: 2}
-  regularNPCs:
-  - {fileID: 11400000, guid: 61f33d3c0935e4007b957f15e9a8e79a, type: 2}
-  - {fileID: 11400000, guid: e4cf8b6ff1a52495fb7312790154b0fe, type: 2}
-  - {fileID: 11400000, guid: 080addd55fcf84a98a038aa84dd4b0b6, type: 2}
-  - {fileID: 11400000, guid: c01759539435547c0adf510ad3700e64, type: 2}
---- !u!4 &1522431434
+--- !u!4 &1679994945
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1522431432}
+  m_GameObject: {fileID: 1679994943}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1189,7 +1248,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1539463524
+--- !u!1 &1862204930
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1197,42 +1256,40 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1539463527}
-  - component: {fileID: 1539463526}
-  - component: {fileID: 1539463525}
+  - component: {fileID: 1862204933}
+  - component: {fileID: 1862204932}
+  - component: {fileID: 1862204931}
   m_Layer: 0
-  m_Name: MainMenuPanel
+  m_Name: MapPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1539463525
+  m_IsActive: 0
+--- !u!114 &1862204931
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1539463524}
+  m_GameObject: {fileID: 1862204930}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a122dcb5fe8d4a498e070ecc410c3e1, type: 3}
+  m_Script: {fileID: 11500000, guid: 27b1e0662688e432eab58c0b17d741ae, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.MainMenuController
-  uiDocument: {fileID: 1539463526}
-  contentDelay: 200
-  buttonDelay: 1000
-  hintDelay: 1200
-  versionDelay: 1400
-  subtitleDelay: 600
-  typewriterSpeed: 40
---- !u!114 &1539463526
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.MapController
+  uiDocument: {fileID: 1862204932}
+  gameConfig: {fileID: 11400000, guid: 74fd963cf98124c2b93655fdbd43740c, type: 2}
+  shopManager: {fileID: 857422132}
+  staggerDelayMs: 60
+  glowIntervalMs: 550
+--- !u!114 &1862204932
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1539463524}
+  m_GameObject: {fileID: 1862204930}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
@@ -1240,7 +1297,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
   m_PanelSettings: {fileID: 11400000, guid: f5dd78fb79eda4045884f7d031f43bda, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: b8ac8b32844304c928cb243dae1089af, type: 3}
+  sourceAsset: {fileID: 9197481963319205126, guid: b6b456288e4b44220bd3308f5dbea5b8, type: 3}
   m_SortingOrder: 0
   m_Position: 0
   m_WorldSpaceSizeMode: 1
@@ -1249,13 +1306,13 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!4 &1539463527
+--- !u!4 &1862204933
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1539463524}
+  m_GameObject: {fileID: 1862204930}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1264,7 +1321,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1666332303
+--- !u!1 &1945182657
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1272,8 +1329,79 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1666332305}
-  - component: {fileID: 1666332304}
+  - component: {fileID: 1945182660}
+  - component: {fileID: 1945182659}
+  - component: {fileID: 1945182658}
+  m_Layer: 0
+  m_Name: RunEndPanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &1945182658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1945182657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87bfd222a561d43f3ad99f7a574d7e6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.ResultController
+  uiDocument: {fileID: 1945182659}
+  statRevealDelayMs: 300
+  buttonRevealDelayMs: 300
+--- !u!114 &1945182659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1945182657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: f5dd78fb79eda4045884f7d031f43bda, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 38e10b692adb247fa9793e07b63ff421, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &1945182660
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1945182657}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2045062451
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2045062453}
+  - component: {fileID: 2045062452}
   m_Layer: 0
   m_Name: TomeCrucible
   m_TagString: Untagged
@@ -1281,25 +1409,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1666332304
+--- !u!114 &2045062452
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1666332303}
+  m_GameObject: {fileID: 2045062451}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 10caec3ab5d9d41ff99b54745bfaf33e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Tomes.TomeCrucible
---- !u!4 &1666332305
+--- !u!4 &2045062453
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1666332303}
+  m_GameObject: {fileID: 2045062451}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1308,7 +1436,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1786199407
+--- !u!1 &2053324986
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1316,99 +1444,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1786199409}
-  - component: {fileID: 1786199408}
-  m_Layer: 0
-  m_Name: AdaptiveDifficultyMod
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1786199408
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1786199407}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac6d4e85dc351466c8ae6b7bb8f620ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Encounter.AdaptiveDifficultyMod
---- !u!4 &1786199409
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1786199407}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1906043257
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1906043259}
-  - component: {fileID: 1906043258}
-  m_Layer: 0
-  m_Name: LLMManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1906043258
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1906043257}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8dacd34d6b8504d748a3d563f30a3113, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.LLM.LLMManager
-  gameConfig: {fileID: 11400000, guid: 74fd963cf98124c2b93655fdbd43740c, type: 2}
-  fallbackCluesAsset: {fileID: 4900000, guid: 3e5993558c4254be49dfa09a60c3d421, type: 3}
-  fallbackCluesAssetRo: {fileID: 4900000, guid: 693d3fe4d1e144da78717420eb2f533b, type: 3}
---- !u!4 &1906043259
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1906043257}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2029448886
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2029448888}
-  - component: {fileID: 2029448887}
+  - component: {fileID: 2053324988}
+  - component: {fileID: 2053324987}
   m_Layer: 0
   m_Name: UltimatumSystem
   m_TagString: Untagged
@@ -1416,26 +1453,26 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2029448887
+--- !u!114 &2053324987
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2029448886}
+  m_GameObject: {fileID: 2053324986}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4eb6601a636aa4122ac8e022649d1550, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Encounter.UltimatumSystem
   countdownSeconds: 15
---- !u!4 &2029448888
+--- !u!4 &2053324988
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2029448886}
+  m_GameObject: {fileID: 2053324986}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1444,7 +1481,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2080482508
+--- !u!1 &2107744849
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1452,42 +1489,80 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2080482511}
-  - component: {fileID: 2080482510}
-  - component: {fileID: 2080482509}
+  - component: {fileID: 2107744851}
+  - component: {fileID: 2107744850}
   m_Layer: 0
-  m_Name: AmbientDataStream
+  m_Name: AdaptiveDifficultyMod
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2080482509
+--- !u!114 &2107744850
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2080482508}
+  m_GameObject: {fileID: 2107744849}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 937b7d8a25b654fb8bee11cadb75649e, type: 3}
+  m_Script: {fileID: 11500000, guid: ac6d4e85dc351466c8ae6b7bb8f620ea, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.AmbientDataStream
-  theme: {fileID: 11400000, guid: a0973bcb6da2645e99b61db7685f7e2f, type: 2}
-  columnCount: 12
-  charsPerColumn: 25
-  scrollSpeed: 0.18
-  minAlpha: 0.08
-  maxAlpha: 0.28
-  accentChance: 0.08
---- !u!114 &2080482510
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.Encounter.AdaptiveDifficultyMod
+--- !u!4 &2107744851
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107744849}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2118341672
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2118341675}
+  - component: {fileID: 2118341674}
+  - component: {fileID: 2118341673}
+  m_Layer: 0
+  m_Name: ScreenEffectsOverlay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2118341673
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2080482508}
+  m_GameObject: {fileID: 2118341672}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ab4576bb0f324c41a1b7c20c2625399, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Spellwright.UI.ScreenEffectsOverlay
+  theme: {fileID: 11400000, guid: a0973bcb6da2645e99b61db7685f7e2f, type: 2}
+--- !u!114 &2118341674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2118341672}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
@@ -1496,7 +1571,7 @@ MonoBehaviour:
   m_PanelSettings: {fileID: 11400000, guid: f5dd78fb79eda4045884f7d031f43bda, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 0}
-  m_SortingOrder: -100
+  m_SortingOrder: 100
   m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
@@ -1504,13 +1579,13 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!4 &2080482511
+--- !u!4 &2118341675
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2080482508}
+  m_GameObject: {fileID: 2118341672}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1523,26 +1598,26 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1335514186}
-  - {fileID: 106574995}
-  - {fileID: 2080482511}
-  - {fileID: 304071049}
-  - {fileID: 1539463527}
-  - {fileID: 1268131558}
-  - {fileID: 156039057}
-  - {fileID: 174620561}
-  - {fileID: 613845578}
-  - {fileID: 601634974}
-  - {fileID: 584330850}
-  - {fileID: 1906043259}
-  - {fileID: 1045898077}
-  - {fileID: 647295935}
-  - {fileID: 1786199409}
-  - {fileID: 2029448888}
-  - {fileID: 182601517}
-  - {fileID: 793537650}
-  - {fileID: 1256922906}
-  - {fileID: 1666332305}
-  - {fileID: 493292937}
-  - {fileID: 1472610463}
-  - {fileID: 1522431434}
+  - {fileID: 1437362563}
+  - {fileID: 406041920}
+  - {fileID: 27543017}
+  - {fileID: 2118341675}
+  - {fileID: 343614776}
+  - {fileID: 1862204933}
+  - {fileID: 522983059}
+  - {fileID: 857422135}
+  - {fileID: 1945182660}
+  - {fileID: 1679994945}
+  - {fileID: 1225564916}
+  - {fileID: 961490082}
+  - {fileID: 1498005925}
+  - {fileID: 147110134}
+  - {fileID: 2107744851}
+  - {fileID: 2053324988}
+  - {fileID: 717192301}
+  - {fileID: 272414086}
+  - {fileID: 700829713}
+  - {fileID: 2045062453}
+  - {fileID: 1470997148}
+  - {fileID: 402925701}
+  - {fileID: 1348473348}
