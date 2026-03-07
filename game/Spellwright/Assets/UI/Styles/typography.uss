@@ -7,7 +7,7 @@
 .text-title {
     font-size: var(--font-size-title);
     color: var(--color-phosphor);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     -unity-text-align: middle-center;
     letter-spacing: 4px;
 }
@@ -15,7 +15,7 @@
 .text-title-decorative {
     font-size: var(--font-size-decorative);
     color: var(--color-phosphor-bright);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     -unity-text-align: middle-center;
     letter-spacing: 6px;
 }
@@ -25,14 +25,14 @@
 .text-header {
     font-size: var(--font-size-xl);
     color: var(--color-phosphor);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     -unity-text-align: middle-left;
 }
 
 .text-subheader {
     font-size: var(--font-size-lg);
     color: var(--color-phosphor);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     -unity-text-align: middle-left;
 }
 
@@ -41,14 +41,14 @@
 .text-body {
     font-size: var(--font-size-md);
     color: var(--color-phosphor);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     -unity-text-align: middle-left;
 }
 
 .text-body-secondary {
     font-size: var(--font-size-md);
     color: var(--color-phosphor);
-    -unity-font-definition: var(--font-secondary);
+    -unity-font: url("project://database/Assets/Fonts/IBMPlexMono-Regular.ttf");
     -unity-text-align: middle-left;
 }
 
@@ -57,14 +57,14 @@
 .text-label {
     font-size: var(--font-size-sm);
     color: var(--color-phosphor-dim);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     -unity-text-align: middle-left;
 }
 
 .text-small {
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
 }
 
 /* ── Stat Display ── */
@@ -72,14 +72,14 @@
 .text-stat {
     font-size: var(--font-size-sm);
     color: var(--color-phosphor);
-    -unity-font-definition: var(--font-secondary);
+    -unity-font: url("project://database/Assets/Fonts/IBMPlexMono-Regular.ttf");
     -unity-text-align: middle-center;
 }
 
 .text-stat-value {
     font-size: var(--font-size-lg);
     color: var(--color-phosphor-bright);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     -unity-text-align: middle-center;
 }
 
@@ -138,9 +138,9 @@
 /* ── Monospace (secondary font) ── */
 
 .mono {
-    -unity-font-definition: var(--font-secondary);
+    -unity-font: url("project://database/Assets/Fonts/IBMPlexMono-Regular.ttf");
 }
 
 .mono-bold {
-    -unity-font-definition: var(--font-secondary-bold);
+    -unity-font: url("project://database/Assets/Fonts/IBMPlexMono-Bold.ttf");
 }

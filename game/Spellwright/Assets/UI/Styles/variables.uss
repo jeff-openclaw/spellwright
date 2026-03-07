@@ -66,9 +66,9 @@
     --color-rarity-legendary:  #FFC726;
 
     /* ── Typography ── */
-    --font-primary:            url("project://database/Assets/Fonts/VT323-Regular SDF.asset");
-    --font-secondary:          url("project://database/Assets/Fonts/IBMPlexMono-Regular SDF.asset");
-    --font-secondary-bold:     url("project://database/Assets/Fonts/IBMPlexMono-Bold SDF.asset");
+    --font-primary:            url("project://database/Assets/Fonts/VT323-Regular.ttf");
+    --font-secondary:          url("project://database/Assets/Fonts/IBMPlexMono-Regular.ttf");
+    --font-secondary-bold:     url("project://database/Assets/Fonts/IBMPlexMono-Bold.ttf");
 
     --font-size-xs:            14px;
     --font-size-sm:            18px;

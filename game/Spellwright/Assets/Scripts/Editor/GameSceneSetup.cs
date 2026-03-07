@@ -272,7 +272,18 @@ namespace Spellwright.Editor
         {
             const string path = "Assets/UI/SpellwrightPanelSettings.asset";
             var existing = AssetDatabase.LoadAssetAtPath<PanelSettings>(path);
-            if (existing != null) return existing;
+            if (existing != null)
+            {
+                // Ensure textSettings is wired even on existing asset
+                if (existing.textSettings == null)
+                {
+                    existing.textSettings = EnsurePanelTextSettings();
+                    EditorUtility.SetDirty(existing);
+                    AssetDatabase.SaveAssets();
+                    Debug.Log("[GameSceneSetup] Wired PanelTextSettings onto existing PanelSettings.");
+                }
+                return existing;
+            }
 
             var ps = ScriptableObject.CreateInstance<PanelSettings>();
 
@@ -285,10 +296,43 @@ namespace Spellwright.Editor
             if (!AssetDatabase.IsValidFolder("Assets/UI"))
                 AssetDatabase.CreateFolder("Assets", "UI");
 
+            ps.textSettings = EnsurePanelTextSettings();
+
             AssetDatabase.CreateAsset(ps, path);
             AssetDatabase.SaveAssets();
             Debug.Log($"[GameSceneSetup] Created PanelSettings at {path}");
             return ps;
+        }
+
+        /// <summary>Creates or loads the PanelTextSettings asset with default font.</summary>
+        private static PanelTextSettings EnsurePanelTextSettings()
+        {
+            const string path = "Assets/UI/SpellwrightTextSettings.asset";
+            var existing = AssetDatabase.LoadAssetAtPath<PanelTextSettings>(path);
+            if (existing != null) return existing;
+
+            var ts = ScriptableObject.CreateInstance<PanelTextSettings>();
+
+            // Set default font to VT323 .ttf (UI Toolkit uses Font, not TMP_FontAsset)
+            var defaultFont = AssetDatabase.LoadAssetAtPath<Font>("Assets/Fonts/VT323-Regular.ttf");
+            if (defaultFont != null)
+            {
+                var prop = typeof(PanelTextSettings).GetProperty("defaultFont",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                if (prop != null)
+                    prop.SetValue(ts, defaultFont);
+                else
+                    Debug.LogWarning("[GameSceneSetup] Could not set defaultFont on PanelTextSettings — check Unity 6 API.");
+            }
+            else
+            {
+                Debug.LogWarning("[GameSceneSetup] VT323-Regular.ttf not found — PanelTextSettings will have no default font.");
+            }
+
+            AssetDatabase.CreateAsset(ts, path);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[GameSceneSetup] Created PanelTextSettings at {path}");
+            return ts;
         }
 
         private static GameObject CreateMapPanel()

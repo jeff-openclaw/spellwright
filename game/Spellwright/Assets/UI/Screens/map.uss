@@ -33,7 +33,7 @@
 }
 
 .map-screen__pane-header {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor);
     -unity-text-align: middle-center;
@@ -44,7 +44,7 @@
 }
 
 .map-screen__pane-divider {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-sm);
     color: var(--color-phosphor-dim);
     min-width: 12px;
@@ -61,7 +61,7 @@
 /* ── Right Pane Sections ── */
 
 .map-screen__section-header {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-cyan);
     padding: var(--space-xs) var(--space-sm);
@@ -75,7 +75,7 @@
 
 /* Run log entry */
 .map-screen__log-entry {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
     margin-bottom: 1px;
@@ -97,21 +97,21 @@
 }
 
 .map-screen__tome-slot {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
     min-width: 20px;
 }
 
 .map-screen__tome-name {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor);
     flex-grow: 1;
 }
 
 .map-screen__tome-status {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-cyan);
 }
@@ -123,20 +123,20 @@
 
 /* Boss wiretap */
 .map-screen__wiretap-bar {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
 }
 
 .map-screen__wiretap-progress {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-amber-dim);
     margin-top: 2px;
 }
 
 .map-screen__wiretap-fragment {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-amber);
     margin-top: 1px;
@@ -154,7 +154,7 @@
 }
 
 .map-screen__crucible-desc {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
     margin-bottom: 2px;
@@ -165,7 +165,7 @@
 }
 
 .map-screen__crucible-btn {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor);
     background-color: transparent;
@@ -187,7 +187,7 @@
 }
 
 .map-screen__crucible-result {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-magenta);
     margin-top: var(--space-xs);
@@ -237,7 +237,7 @@
 }
 
 .map-screen__dungeon-pipe {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-sm);
     color: var(--color-phosphor-dim);
     min-width: 12px;
@@ -255,7 +255,7 @@
 
 /* Node indicator */
 .map-screen__node-indicator {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-sm);
     min-width: 28px;
     -unity-text-align: middle-center;
@@ -270,7 +270,7 @@
 
 /* Node file permissions */
 .map-screen__node-perms {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
     min-width: 30px;
@@ -279,7 +279,7 @@
 
 /* Node signal waveform oscilloscope */
 .map-screen__node-signal {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
     min-width: 48px;
@@ -320,7 +320,7 @@
 }
 
 .map-screen__connector-pipe {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-sm);
     color: var(--color-phosphor-dim);
     min-width: 12px;
@@ -432,7 +432,7 @@
 }
 
 .map-screen__dossier-line {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
     margin-bottom: 1px;
@@ -455,7 +455,7 @@
 }
 
 .map-screen__dossier-sep {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
     margin-top: var(--space-xs);
@@ -482,7 +482,7 @@
 }
 
 .map-screen__intel-text {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     flex-grow: 1;
 }
@@ -497,7 +497,7 @@
 }
 
 .map-screen__intel-btn {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-amber);
     background-color: transparent;
@@ -545,7 +545,7 @@
 }
 
 .map-screen__wager-btn {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-amber);
     background-color: transparent;
@@ -654,7 +654,7 @@
 }
 
 .map-screen__intercept-title {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-sm);
     color: var(--color-cyan);
     -unity-text-align: middle-center;
@@ -662,14 +662,14 @@
 }
 
 .map-screen__intercept-line {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor-dim);
     margin-bottom: 1px;
 }
 
 .map-screen__intercept-payload {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor);
     white-space: normal;
@@ -694,7 +694,7 @@
 /* ── Ghost Input Echo ── */
 
 .map-screen__ghost-letter {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-lg);
     color: var(--color-phosphor-dim);
     opacity: 0;
@@ -749,7 +749,7 @@
 }
 
 .map-screen__shop-title {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-sm);
     color: var(--color-amber);
     -unity-text-align: middle-center;
@@ -757,7 +757,7 @@
 }
 
 .map-screen__shop-border-bottom {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-sm);
     color: var(--color-amber);
     -unity-text-align: middle-center;
@@ -770,7 +770,7 @@
 }
 
 .map-screen__shop-section-header {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-amber);
     padding: var(--space-xs) 0;
@@ -800,7 +800,7 @@
 }
 
 .map-screen__shop-item-name {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor);
     flex-grow: 1;
@@ -827,7 +827,7 @@
 }
 
 .map-screen__shop-item-price {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-amber);
     min-width: 40px;
@@ -835,7 +835,7 @@
 }
 
 .map-screen__shop-item-action {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-amber-dim);
     margin-left: var(--space-xs);
@@ -856,14 +856,14 @@
 }
 
 .map-screen__shop-sell-name {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor);
     flex-grow: 1;
 }
 
 .map-screen__shop-sell-price {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor);
     min-width: 40px;
@@ -871,7 +871,7 @@
 }
 
 .map-screen__shop-heal-btn {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor);
     background-color: transparent;
@@ -905,13 +905,13 @@
 }
 
 .map-screen__shop-gold {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-amber);
 }
 
 .map-screen__shop-feedback {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     color: var(--color-phosphor);
     flex-grow: 1;

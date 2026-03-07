@@ -8,7 +8,7 @@
     padding: 0;
     border-width: 0;
     border-radius: 0;
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     color: var(--color-phosphor);
 }
 
@@ -29,7 +29,7 @@
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
     color: var(--color-phosphor);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
 }
 
 .unity-label {
