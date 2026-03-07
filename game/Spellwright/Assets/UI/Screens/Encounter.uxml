@@ -1,33 +1,32 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="../Screens/encounter.uss" />
     <ui:VisualElement name="encounter-root" class="screen-root encounter-screen">
-        <!-- Board frame (WoF-style bordered area) -->
-        <ui:VisualElement name="board-frame" class="encounter-screen__board-frame">
-            <ui:VisualElement name="tile-grid" class="encounter-screen__tile-grid" />
-        </ui:VisualElement>
-
-        <!-- Category banner -->
-        <ui:VisualElement class="encounter-screen__category-banner">
-            <ui:Label name="category" text="..." class="text-stat encounter-screen__category-text" />
-        </ui:VisualElement>
-
-        <!-- NPC dialog card -->
-        <ui:VisualElement class="encounter-screen__dialog">
-            <!-- Portrait + Name row -->
-            <ui:VisualElement class="encounter-screen__dialog-header">
-                <ui:Label name="npc-portrait" text="" class="encounter-screen__portrait" />
-                <ui:VisualElement class="encounter-screen__npc-info">
-                    <ui:Label name="npc-name" text="NPC Name" class="text-header encounter-screen__npc-name" />
-                </ui:VisualElement>
+        <!-- Board area wrapper: board + overlaid dialog -->
+        <ui:VisualElement class="encounter-screen__board-area">
+            <ui:VisualElement name="board-frame" class="encounter-screen__board-frame">
+                <ui:VisualElement name="tile-grid" class="encounter-screen__tile-grid" />
             </ui:VisualElement>
-            <ui:VisualElement class="divider" />
-            <!-- Clue display -->
-            <ui:VisualElement class="encounter-screen__clue-area">
-                <ui:VisualElement class="encounter-screen__clue-header">
-                    <ui:Label name="clue-number" text="" class="text-stat encounter-screen__clue-number" />
-                    <ui:Label name="signal-status" text="" class="text-stat encounter-screen__signal-status" />
+            <!-- Dialog strip overlays bottom of board area -->
+            <ui:VisualElement class="encounter-screen__dialog-strip">
+                <ui:VisualElement class="encounter-screen__category-banner">
+                    <ui:Label name="category" text="..." class="text-stat encounter-screen__category-text" />
                 </ui:VisualElement>
-                <ui:Label name="clue-text" text="Waiting for clue..." class="text-body encounter-screen__clue-text" />
+                <ui:VisualElement class="encounter-screen__dialog">
+                    <!-- Portrait (left column) -->
+                    <ui:Label name="npc-portrait" text="" class="encounter-screen__portrait" />
+                    <!-- Dialog content (right column) -->
+                    <ui:VisualElement class="encounter-screen__dialog-content">
+                        <ui:Label name="npc-name" text="NPC Name" class="text-header encounter-screen__npc-name" />
+                        <ui:VisualElement class="divider" />
+                        <ui:VisualElement class="encounter-screen__clue-area">
+                            <ui:VisualElement class="encounter-screen__clue-header">
+                                <ui:Label name="clue-number" text="" class="text-stat encounter-screen__clue-number" />
+                                <ui:Label name="signal-status" text="" class="text-stat encounter-screen__signal-status" />
+                            </ui:VisualElement>
+                            <ui:Label name="clue-text" text="Waiting for clue..." class="text-body encounter-screen__clue-text" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -53,6 +52,12 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- Tome row (compact single line) -->
+        <ui:VisualElement class="encounter-screen__tome-row">
+            <ui:Label name="tome-info" text="No tomes equipped"
+                      class="text-small encounter-screen__tome-row-text" />
+        </ui:VisualElement>
+
         <!-- Input area -->
         <ui:VisualElement class="encounter-screen__input-area">
             <ui:Label name="terminal-prompt" text=">_" class="encounter-screen__prompt" />
@@ -65,20 +70,12 @@
             <ui:Button name="sacrifice-btn" text="[ SACRIFICE: OFF ]" class="btn encounter-screen__sacrifice-btn" />
         </ui:VisualElement>
 
-        <!-- History + Tomes split -->
-        <ui:VisualElement class="encounter-screen__bottom-panels">
-            <ui:VisualElement class="encounter-screen__bottom-panel">
-                <ui:Label text="── History ──" class="text-label encounter-screen__section-header" />
-                <ui:ScrollView name="history-scroll" class="encounter-screen__history-scroll">
-                    <ui:Label name="history-text" text="" class="text-small encounter-screen__history-text" />
-                </ui:ScrollView>
-            </ui:VisualElement>
-            <ui:VisualElement class="encounter-screen__bottom-panel encounter-screen__bottom-panel--tomes">
-                <ui:Label text="── Tomes ──" class="text-label encounter-screen__section-header encounter-screen__section-header--tomes" />
-                <ui:ScrollView name="tomes-scroll" class="encounter-screen__tomes-scroll">
-                    <ui:Label name="tome-info" text="" class="text-small encounter-screen__tome-text" />
-                </ui:ScrollView>
-            </ui:VisualElement>
+        <!-- History (compact scrollable) -->
+        <ui:VisualElement class="encounter-screen__history-compact">
+            <ui:ScrollView name="history-scroll" class="encounter-screen__history-scroll-compact">
+                <ui:Label name="history-text" text=""
+                          class="text-small encounter-screen__history-text" />
+            </ui:ScrollView>
         </ui:VisualElement>
 
         <!-- Bargain overlay -->
@@ -112,7 +109,7 @@
             <ui:Button name="continue-btn" text="[ CONTINUE ]" class="btn btn-large encounter-screen__continue-btn stagger-item" />
         </ui:VisualElement>
 
-        <!-- Flash overlay -->
-        <ui:VisualElement name="flash-overlay" class="encounter-screen__flash-overlay" />
+        <!-- Flash overlay (picking-mode Ignore so it doesn't block input) -->
+        <ui:VisualElement name="flash-overlay" class="encounter-screen__flash-overlay" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

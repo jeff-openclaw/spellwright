@@ -6,23 +6,39 @@
 .encounter-screen {
     flex-direction: column;
     flex-grow: 1;
-    padding: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
+}
+
+/* ── Board Area (wrapper for board + dialog overlay) ── */
+
+.encounter-screen__board-area {
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    margin-bottom: var(--space-xs);
+}
+
+/* ── Dialog Strip (absolute overlay at bottom of board area) ── */
+
+.encounter-screen__dialog-strip {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 /* ── Board Frame ── */
 
 .encounter-screen__board-frame {
-    flex-grow: 3;
+    flex-grow: 1;
+    flex-shrink: 1;
     background-color: rgba(5, 15, 8, 0.85);
     border-width: var(--border-width);
     border-color: rgba(30, 255, 115, 0.8);
-    margin-left: var(--space-sm);
-    margin-right: var(--space-sm);
-    margin-bottom: 0;
     padding: var(--space-sm);
+    padding-bottom: 90px;
     justify-content: center;
     align-items: center;
-    min-height: 160px;
 }
 
 .encounter-screen__tile-grid {
@@ -31,7 +47,8 @@
     justify-content: center;
     align-items: center;
     align-content: center;
-    flex-grow: 1;
+    flex-grow: 0;
+    flex-shrink: 0;
     width: 100%;
 }
 
@@ -58,7 +75,7 @@
 
 .encounter-tile--revealed .encounter-tile__letter {
     color: rgba(20, 31, 20, 1);
-    -unity-font-definition: var(--font-secondary-bold);
+    -unity-font: url("project://database/Assets/Fonts/IBMPlexMono-Bold.ttf");
 }
 
 .encounter-tile--revealed .encounter-tile__pattern {
@@ -77,7 +94,7 @@
 }
 
 .encounter-tile__letter {
-    -unity-font-definition: var(--font-secondary-bold);
+    -unity-font: url("project://database/Assets/Fonts/IBMPlexMono-Bold.ttf");
     font-size: var(--font-size-lg);
     color: rgba(20, 31, 20, 1);
     -unity-text-align: middle-center;
@@ -94,7 +111,7 @@
 }
 
 .encounter-tile__pattern {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-md);
     color: rgba(15, 107, 46, 0.7);
     -unity-text-align: middle-center;
@@ -125,13 +142,11 @@
 /* ── Category Banner ── */
 
 .encounter-screen__category-banner {
-    background-color: rgba(5, 15, 8, 0.80);
+    background-color: rgba(5, 15, 8, 0.90);
     border-width: var(--border-width);
     border-color: rgba(255, 199, 38, 0.5);
-    margin-left: var(--space-sm);
-    margin-right: var(--space-sm);
-    margin-top: 0;
     padding: var(--space-xs) var(--space-md);
+    flex-shrink: 0;
 }
 
 .encounter-screen__category-text {
@@ -141,34 +156,34 @@
     font-size: var(--font-size-md);
 }
 
-/* ── NPC Dialog Card ── */
+/* ── NPC Dialog Card (two-column: portrait | content) ── */
 
 .encounter-screen__dialog {
-    background-color: rgba(5, 15, 10, 0.7);
+    background-color: rgba(5, 15, 8, 0.95);
     border-width: var(--border-width);
-    border-color: rgba(13, 140, 64, 0.35);
-    margin: 0 var(--space-sm);
+    border-color: rgba(13, 140, 64, 0.6);
     padding: var(--space-sm) var(--space-md);
-}
-
-.encounter-screen__dialog-header {
+    flex-shrink: 0;
+    overflow: hidden;
     flex-direction: row;
-    align-items: center;
-    margin-bottom: var(--space-xs);
+    align-items: flex-start;
 }
 
 .encounter-screen__portrait {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: 11px;
     color: var(--color-phosphor);
     white-space: nowrap;
     margin-right: var(--space-md);
     min-width: 80px;
+    align-self: flex-start;
+    flex-shrink: 0;
 }
 
-.encounter-screen__npc-info {
-    flex-direction: column;
+.encounter-screen__dialog-content {
     flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
 }
 
 .encounter-screen__npc-name {
@@ -186,6 +201,8 @@
 
 .encounter-screen__clue-area {
     margin-top: var(--space-xs);
+    flex-shrink: 1;
+    overflow: hidden;
 }
 
 .encounter-screen__clue-header {
@@ -231,8 +248,9 @@
 
 .encounter-screen__stats-bar {
     flex-direction: row;
-    margin: 0 var(--space-sm);
+    margin-bottom: var(--space-xs);
     padding: var(--space-xs) 0;
+    flex-shrink: 0;
 }
 
 .encounter-screen__stat-chip {
@@ -298,17 +316,17 @@
 .encounter-screen__input-area {
     flex-direction: row;
     align-items: center;
-    margin: 0 var(--space-sm);
-    padding: var(--space-sm);
-    background-color: rgba(5, 10, 5, 0.5);
+    padding: var(--space-sm) var(--space-md);
+    background-color: rgba(5, 10, 5, 0.6);
     border-width: var(--border-width);
-    border-color: rgba(13, 140, 64, 0.25);
+    border-color: rgba(13, 140, 64, 0.35);
+    flex-shrink: 0;
 }
 
 .encounter-screen__prompt {
     color: var(--color-phosphor);
     font-size: var(--font-size-md);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     margin-right: var(--space-sm);
     min-width: 24px;
 }
@@ -323,7 +341,7 @@
     border-width: var(--border-width);
     border-color: var(--color-phosphor-dim);
     color: var(--color-input-text);
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-md);
     padding: var(--space-xs) var(--space-sm);
 }
@@ -345,7 +363,8 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin: 0 var(--space-sm);
+    margin-bottom: var(--space-xs);
+    flex-shrink: 0;
 }
 
 .encounter-screen__input-mode {
@@ -391,50 +410,33 @@
     transition: scale 300ms ease-in, opacity 300ms ease-in;
 }
 
-/* ── Bottom Panels (History + Tomes) ── */
+/* ── Tome Row (compact single line under stats) ── */
 
-.encounter-screen__bottom-panels {
-    flex-direction: row;
-    flex-grow: 1;
-    margin: 0 var(--space-sm);
-    min-height: 80px;
+.encounter-screen__tome-row {
+    flex-shrink: 0;
+    padding: 2px 8px;
 }
 
-.encounter-screen__bottom-panel {
-    flex-grow: 1;
-    flex-basis: 0;
-    margin-right: var(--space-xs);
-}
-
-.encounter-screen__bottom-panel--tomes {
-    margin-right: 0;
-    margin-left: var(--space-xs);
-}
-
-.encounter-screen__section-header {
-    color: var(--color-phosphor-dim);
-    -unity-text-align: middle-center;
-    font-size: var(--font-size-xs);
-    margin-bottom: var(--space-xs);
-}
-
-.encounter-screen__section-header--tomes {
+.encounter-screen__tome-row-text {
     color: var(--color-magenta);
+    font-size: var(--font-size-xs);
+    white-space: nowrap;
+    overflow: hidden;
 }
 
-.encounter-screen__history-scroll,
-.encounter-screen__tomes-scroll {
+/* ── History Compact (scrollable below input controls) ── */
+
+.encounter-screen__history-compact {
+    max-height: 50px;
+    flex-shrink: 0;
+}
+
+.encounter-screen__history-scroll-compact {
     flex-grow: 1;
 }
 
 .encounter-screen__history-text {
     color: rgba(30, 255, 115, 0.65);
-    font-size: var(--font-size-xs);
-    white-space: normal;
-}
-
-.encounter-screen__tome-text {
-    color: var(--color-magenta);
     font-size: var(--font-size-xs);
     white-space: normal;
 }
@@ -445,14 +447,14 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    margin: var(--space-xs) var(--space-sm);
+    margin: var(--space-xs) 0;
     display: none;
 }
 
 .encounter-letter {
     width: 20px;
     height: 22px;
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: var(--font-size-xs);
     -unity-text-align: middle-center;
     margin: 1px;
@@ -533,7 +535,7 @@
 }
 
 .encounter-screen__result-banner {
-    -unity-font-definition: var(--font-primary);
+    -unity-font: url("project://database/Assets/Fonts/VT323-Regular.ttf");
     font-size: 12px;
     color: var(--color-phosphor);
     -unity-text-align: upper-center;
@@ -604,7 +606,6 @@
     background-color: rgba(5, 15, 8, 0.9);
     border-width: var(--border-width);
     border-color: var(--color-amber-dim);
-    margin: 0 var(--space-sm);
     padding: var(--space-sm) var(--space-md);
     display: none;
     opacity: 0;
